@@ -1,0 +1,391 @@
+/* AMR Research Dashboard — Dark theme */
+
+:root {
+    --bg-primary: #0f1117;
+    --bg-secondary: #1a1c25;
+    --bg-card: #21232d;
+    --text-primary: #e8eaed;
+    --text-secondary: #9aa0a6;
+    --accent: #4fc3f7;
+    --accent-dim: #1a3a4a;
+    --danger: #ef5350;
+    --danger-dim: #4a1a1a;
+    --warning: #ffb74d;
+    --success: #66bb6a;
+    --border: #2d2f3a;
+    --font-mono: "JetBrains Mono", "Fira Code", monospace;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+}
+
+.app-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 1.2rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.header-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+}
+
+.header-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.15rem;
+}
+
+.nav-bar {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--text-primary);
+    background: var(--accent-dim);
+}
+
+/* Main content */
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Cards */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+}
+
+.card-subtitle {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+/* Stats row */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+
+.stat-value.accent { color: var(--accent); }
+.stat-value.danger { color: var(--danger); }
+.stat-value.warning { color: var(--warning); }
+.stat-value.success { color: var(--success); }
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Chart grid */
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.chart-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Data table */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.data-table th {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+}
+
+.data-table td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+}
+
+.data-table tr:hover td {
+    background: var(--accent-dim);
+}
+
+/* Source tag */
+.source-tag {
+    display: inline-block;
+    background: var(--accent-dim);
+    color: var(--accent);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+}
+
+/* Footer */
+.footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+    padding: 1rem 2rem;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
+
+/* Chart source citations */
+.chart-sources {
+    margin-top: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: var(--bg-secondary);
+    border-radius: 6px;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+.chart-sources a {
+    color: var(--accent);
+    text-decoration: none;
+    margin-right: 0.3rem;
+}
+.chart-sources a:hover {
+    text-decoration: underline;
+}
+.chart-sources .source-label {
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-right: 0.3rem;
+}
+
+/* Help section */
+.help-section {
+    background: var(--accent-dim);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+.help-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+.help-toggle:hover {
+    background: rgba(79, 195, 247, 0.08);
+}
+.help-content {
+    padding: 0 1.2rem 1rem;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+.help-content p {
+    margin-bottom: 0.5rem;
+}
+
+/* Chart info tooltip */
+.chart-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+.chart-info-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: help;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+    position: relative;
+}
+.chart-info-btn:hover .chart-tooltip {
+    display: block;
+}
+.chart-tooltip {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    width: 280px;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    white-space: normal;
+    text-align: left;
+}
+
+/* Documentation page */
+.docs-content {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+}
+.docs-content h1, .docs-content h2, .docs-content h3 {
+    color: var(--accent);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+.docs-content h1 { font-size: 1.3rem; }
+.docs-content h2 { font-size: 1.1rem; }
+.docs-content h3 { font-size: 0.95rem; }
+.docs-content code {
+    background: var(--bg-secondary);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+.docs-content pre {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+.docs-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+.docs-content th, .docs-content td {
+    padding: 0.5rem 0.8rem;
+    border: 1px solid var(--border);
+    text-align: left;
+}
+.docs-content th {
+    background: var(--bg-secondary);
+    color: var(--accent);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+}
+.docs-content a {
+    color: var(--accent);
+}
+.docs-tabs .tab {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+.docs-content-wrapper {
+    margin-top: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .main-content {
+        padding: 1rem;
+    }
+    .chart-grid-2 {
+        grid-template-columns: 1fr;
+    }
+}

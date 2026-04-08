@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:plotly.com)",
+      "WebFetch(domain:observablehq.com)",
+      "WebFetch(domain:echarts.apache.org)",
+      "WebFetch(domain:dash.plotly.com)",
+      "WebFetch(domain:streamlit.io)",
+      "Bash(pip3 --version)",
+      "Bash(python3 -c \"import dash; print\\('dash', dash.__version__\\)\")",
+      "Bash(python3 -c \"import plotly; print\\('plotly', plotly.__version__\\)\")",
+      "Bash(python3 -c \"import numpy; print\\('numpy', numpy.__version__\\)\")",
+      "Bash(python3 -c \"import pandas; print\\('pandas', pandas.__version__\\)\")",
+      "Bash(pip3 install:*)",
+      "Bash(fuser -k 8050/tcp)",
+      "Bash(git add:*)"
+    ]
+  }
+}
