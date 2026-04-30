@@ -3,8 +3,9 @@ Export Studio page — Preview and export charts with different color themes.
 """
 
 import dash
-from dash import html, dcc, callback, Input, Output
+from dash import html, dcc, callback, Input, Output, State, no_update
 import plotly.graph_objects as go
+import plotly.io as pio
 import numpy as np
 
 import sys
@@ -41,9 +42,8 @@ CHART_OPTIONS = [
 ]
 
 FORMAT_OPTIONS = [
-    {"label": "SVG", "value": "svg"},
-    {"label": "PNG", "value": "png"},
-    {"label": "PDF", "value": "pdf"},
+    {"label": "SVG (vectorial — recommended for publications)", "value": "svg"},
+    {"label": "PNG (raster — presentations & web)", "value": "png"},
 ]
 
 SCALE_OPTIONS = [
@@ -442,7 +442,7 @@ layout = html.Div([
                     options=CHART_OPTIONS,
                     value="main_curve",
                     clearable=False,
-                    style={"backgroundColor": "#2d2f3a", "color": "#e8eaed"},
+                    style={"backgroundColor": "#2d2f3a", "color": "#e8eaed", "minWidth": "180px"},
                 ),
             ], style={"flex": "1", "minWidth": "220px"}),
 
@@ -454,7 +454,7 @@ layout = html.Div([
                     options=COLOR_SCHEME_OPTIONS,
                     value="dark",
                     clearable=False,
-                    style={"backgroundColor": "#2d2f3a", "color": "#e8eaed"},
+                    style={"backgroundColor": "#2d2f3a", "color": "#e8eaed", "minWidth": "180px"},
                 ),
             ], style={"flex": "1", "minWidth": "180px"}),
 
@@ -467,7 +467,7 @@ layout = html.Div([
                     value="svg",
                     inline=True,
                     inputStyle={"marginRight": "4px"},
-                    labelStyle={"marginRight": "14px", "cursor": "pointer"},
+                    labelStyle={"marginRight": "14px", "cursor": "pointer", "color": "#e8eaed"},
                 ),
             ], style={"flex": "0 0 auto"}),
 
@@ -480,7 +480,7 @@ layout = html.Div([
                     value=2,
                     inline=True,
                     inputStyle={"marginRight": "4px"},
-                    labelStyle={"marginRight": "14px", "cursor": "pointer"},
+                    labelStyle={"marginRight": "14px", "cursor": "pointer", "color": "#e8eaed"},
                 ),
             ], style={"flex": "0 0 auto"}),
         ], style={
@@ -496,16 +496,42 @@ layout = html.Div([
     html.Div([
         chart_title_with_info(
             "Preview",
-            "Live preview of the selected chart with your chosen color scheme and settings. The Plotly modebar (top-right) provides the download button.",
-            "The chart below reflects your selected color scheme. Use the camera icon in the Plotly modebar (top-right of chart) to download.",
+            "Live preview of the selected chart with your chosen color scheme and settings. Click the Download Chart button below to export.",
+            "The chart below reflects your selected color scheme. Use the Download Chart button to save the chart in your chosen format and resolution.",
         ),
         dcc.Graph(
             id="export-preview",
             config={
-                "toImageButtonOptions": {"format": "svg", "scale": 2},
                 "displayModeBar": True,
+                "toImageButtonOptions": {"format": "svg", "scale": 2},
             },
         ),
+
+        # Download button
+        html.Div([
+            html.Button(
+                "Download Chart",
+                id="btn-download-chart",
+                style={
+                    "background": "linear-gradient(135deg, #4fc3f7, #0288d1)",
+                    "color": "white",
+                    "border": "none",
+                    "borderRadius": "8px",
+                    "padding": "0.75rem 2rem",
+                    "fontSize": "1rem",
+                    "fontWeight": "700",
+                    "cursor": "pointer",
+                    "letterSpacing": "0.03em",
+                    "boxShadow": "0 2px 8px rgba(79, 195, 247, 0.3)",
+                    "transition": "all 0.2s ease",
+                },
+            ),
+            html.Span(
+                id="download-status",
+                style={"marginLeft": "1rem", "fontSize": "0.88rem", "color": "#9aa0a6"},
+            ),
+        ], style={"marginTop": "1rem", "display": "flex", "alignItems": "center"}),
+
     ], className="card"),
 
     # Export instructions card
@@ -515,22 +541,32 @@ layout = html.Div([
             html.Ol([
                 html.Li("Select the chart, color scheme, format, and resolution above."),
                 html.Li([
-                    "In the chart preview, click the ",
-                    html.Strong("camera icon"),
-                    " in the modebar (top-right corner of the chart).",
-                ]),
-                html.Li("The chart will be downloaded in the selected format and resolution."),
-                html.Li([
-                    "For PDF output, export as SVG first, then convert with a tool such as ",
-                    html.Code("inkscape"), " or ", html.Code("cairosvg"),
-                    ". Browser-native PDF export from Plotly is not supported in all environments.",
+                    "Click the ",
+                    html.Strong("Download Chart"),
+                    " button to save. You can also use the camera icon in the chart toolbar.",
                 ]),
                 html.Li([
-                    "For publication use, choose ",
+                    html.Strong("SVG (recommended for publications): "),
+                    "Vectorial, infinite resolution, editable in Illustrator/Inkscape. Accepted by all major journals (Lancet, Nature, PLOS).",
+                ]),
+                html.Li([
+                    html.Strong("PNG: "),
+                    "Raster image. Use 3x scale for print-quality 300 dpi. Good for presentations and web.",
+                ]),
+                html.Li([
+                    html.Strong("Need PDF? "),
+                    "Export as SVG, then convert: open in Inkscape → File → Save as PDF. Or use ",
+                    html.Code("cairosvg input.svg -o output.pdf"),
+                    " from the command line.",
+                ]),
+                html.Li([
+                    "For publication, choose ",
                     html.Strong("Publication Light"),
                     " or ",
                     html.Strong("Print B&W"),
-                    " with 3x resolution for 300 dpi quality.",
+                    " theme with ",
+                    html.Strong("3x resolution"),
+                    ".",
                 ]),
             ], style={"color": "#9aa0a6", "fontSize": "0.88rem", "lineHeight": "1.7"}),
         ]),
@@ -544,24 +580,13 @@ layout = html.Div([
 
 @callback(
     Output("export-preview", "figure"),
-    Output("export-preview", "config"),
     Input("export-chart-select", "value"),
     Input("export-color-scheme", "value"),
-    Input("export-format", "value"),
-    Input("export-scale", "value"),
 )
-def update_preview(chart_name, color_scheme, fmt, scale):
+def update_preview(chart_name, color_scheme):
     theme = THEMES.get(color_scheme, THEMES["dark"])
     builder = CHART_BUILDERS.get(chart_name, build_main_curve)
     fig = builder(theme)
+    return fig
 
-    config = {
-        "toImageButtonOptions": {
-            "format": fmt,
-            "scale": scale,
-            "filename": f"amr_{chart_name}_{color_scheme}",
-        },
-        "displayModeBar": True,
-    }
 
-    return fig, config

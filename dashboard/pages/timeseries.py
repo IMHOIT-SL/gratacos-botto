@@ -193,11 +193,7 @@ layout = html.Div([
                     options=[{"label": p, "value": p} for p in PATHOGEN_CHOICES],
                     value="MRSA",
                     clearable=False,
-                    style={
-                        "backgroundColor": "#2d2f3a",
-                        "color": "#e8eaed",
-                        "minWidth": "220px",
-                    },
+                    style={"backgroundColor": "#2d2f3a", "color": "#e8eaed", "minWidth": "220px"},
                 ),
             ], style={"marginRight": "2rem"}),
             html.Div([
@@ -283,6 +279,7 @@ layout = html.Div([
 def update_timeseries(pathogen, horizon):
     df = MONTHLY_DATA[pathogen].copy()
     series = df.set_index("date")["resistance_rate"]
+    series.index = pd.DatetimeIndex(series.index, freq="MS")
     color = PATHOGEN_COLORS.get(pathogen, "#4fc3f7")
 
     # Fit SARIMA
@@ -296,45 +293,65 @@ def update_timeseries(pathogen, horizon):
         freq="MS",
     )
 
+    # --- Compute x-axis zoom range based on horizon ---
+    # Show enough history to give context but keep forecast visually prominent
+    history_months_map = {6: 24, 12: 36, 24: 48, 36: 60}
+    history_months = history_months_map.get(horizon, horizon * 2)
+    x_range_start = last_date - pd.DateOffset(months=history_months)
+    x_range_end = forecast_dates[-1] + pd.DateOffset(months=1)
+
     # --- Main chart ---
     fig_main = go.Figure()
 
-    # Confidence band
+    # Confidence band (more opaque fill)
     fig_main.add_trace(go.Scatter(
         x=list(forecast_dates) + list(forecast_dates[::-1]),
         y=list(result["upper"]) + list(result["lower"][::-1]),
         fill="toself",
-        fillcolor=f"rgba({_hex_to_rgb(color)}, 0.15)",
+        fillcolor=f"rgba({_hex_to_rgb(color)}, 0.35)",
         line=dict(width=0),
         name="95% CI",
         hoverinfo="skip",
     ))
 
-    # Historical
+    # Historical (thinner line so forecast stands out)
     fig_main.add_trace(go.Scatter(
         x=series.index,
         y=series.values,
         mode="lines",
-        line=dict(color=color, width=2),
+        line=dict(color=color, width=1.5),
         name="Historical",
         hovertemplate="%{x|%b %Y}<br>%{y:.1f}%<extra>Historical</extra>",
     ))
 
-    # Forecast mean
+    # Forecast mean (thicker line for emphasis)
     fig_main.add_trace(go.Scatter(
         x=forecast_dates,
         y=result["mean"],
         mode="lines",
-        line=dict(color=color, width=2.5, dash="dash"),
+        line=dict(color=color, width=3, dash="dash"),
         name="Forecast",
         hovertemplate="%{x|%b %Y}<br>%{y:.1f}%<extra>Forecast</extra>",
     ))
+
+    # Vertical line at forecast start (use add_shape + add_annotation to avoid Plotly sum() bug)
+    last_date_str = last_date.isoformat() if hasattr(last_date, "isoformat") else str(last_date)
+    fig_main.add_shape(
+        type="line", x0=last_date_str, x1=last_date_str, y0=0, y1=1,
+        yref="paper", line=dict(dash="dot", color="#9aa0a6", width=1.5),
+    )
+    fig_main.add_annotation(
+        x=last_date_str, y=1, yref="paper",
+        text="Forecast start", showarrow=False,
+        font=dict(size=11, color="#9aa0a6"), xanchor="left", yanchor="bottom",
+    )
 
     fig_main.update_layout(
         **CHART_LAYOUT,
         title=dict(text=f"{pathogen} — Resistance Rate Forecast", font=dict(size=15)),
         xaxis_title="Date",
         yaxis_title="% Resistant Isolates",
+        xaxis_range=[x_range_start, x_range_end],
         height=420,
         margin=dict(l=60, r=30, t=55, b=50),
         hovermode="x unified",
@@ -414,11 +431,23 @@ def update_timeseries(pathogen, horizon):
         hovertemplate="%{x|%b %Y}<br>%{y:.1f}%<extra>Intervention</extra>",
     ))
 
+    # Vertical line at forecast start for scenario chart
+    fig_scenario.add_shape(
+        type="line", x0=last_date_str, x1=last_date_str, y0=0, y1=1,
+        yref="paper", line=dict(dash="dot", color="#9aa0a6", width=1.5),
+    )
+    fig_scenario.add_annotation(
+        x=last_date_str, y=1, yref="paper",
+        text="Forecast start", showarrow=False,
+        font=dict(size=11, color="#9aa0a6"), xanchor="left", yanchor="bottom",
+    )
+
     fig_scenario.update_layout(
         **CHART_LAYOUT,
         title=dict(text=f"{pathogen} — BAU vs Intervention Scenario", font=dict(size=15)),
         xaxis_title="Date",
         yaxis_title="% Resistant Isolates",
+        xaxis_range=[x_range_start, x_range_end],
         height=400,
         margin=dict(l=60, r=30, t=55, b=50),
         hovermode="x unified",

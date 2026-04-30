@@ -4,7 +4,7 @@ AMR Resistance Modeling & Forecasting Platform
 """
 
 import dash
-from dash import Dash, html, dcc
+from dash import Dash, html, dcc, callback, Input, Output, State
 
 app = Dash(
     __name__,
@@ -16,32 +16,29 @@ app = Dash(
 
 app.layout = html.Div(
     [
+        dcc.Location(id="url", refresh=False),
         # Header
         html.Header(
             [
-                html.Div(
-                    [
-                        html.H1(
-                            "THE TWILIGHT OF ANTIBIOTICS",
-                            className="header-title",
-                        ),
-                        html.P(
-                            "Antimicrobial Resistance — Research Dashboard",
-                            className="header-subtitle",
-                        ),
-                    ],
-                    className="header-text",
+                dcc.Link(
+                    html.Div(
+                        [
+                            html.H1(
+                                "THE TWILIGHT OF ANTIBIOTICS",
+                                className="header-title",
+                            ),
+                            html.P(
+                                "Antimicrobial Resistance — Research Dashboard",
+                                className="header-subtitle",
+                            ),
+                        ],
+                        className="header-text",
+                    ),
+                    href="/",
+                    style={"textDecoration": "none"},
                 ),
                 html.Nav(
-                    [
-                        dcc.Link("Overview", href="/", className="nav-link"),
-                        dcc.Link("Pathogens", href="/pathogens", className="nav-link"),
-                        dcc.Link("Time Series", href="/timeseries", className="nav-link"),
-                        dcc.Link("Data Sources", href="/datasources", className="nav-link"),
-                        dcc.Link("Export", href="/export", className="nav-link"),
-                        dcc.Link("Docs", href="/docs", className="nav-link"),
-                        dcc.Link("Tutorial", href="/tutorial", className="nav-link"),
-                    ],
+                    id="nav-bar",
                     className="nav-bar",
                 ),
             ],
@@ -54,12 +51,44 @@ app.layout = html.Div(
         ),
         # Footer
         html.Footer(
-            html.P("Gratacos-Botto Research Lab — Data sources: Lancet GBD, O'Neill Review, GRAM, CIDRAP, WHO GLASS"),
+            html.P([
+                html.Span("Paper v.A-29 · ",
+                          style={"color": "var(--accent)", "fontWeight": "600",
+                                 "fontFamily": "var(--font-mono)"}),
+                "E. Prieto Gratacós, J.A. Botto · ",
+                "Data sources: Lancet GBD, O'Neill Review, GRAM/CIDRAP, "
+                "Tai 2025 IJAA, Magiorakos 2012, WHO GLASS",
+            ]),
             className="footer",
         ),
     ],
     className="app-container",
 )
+
+NAV_ITEMS = [
+    ("Overview", "/"),
+    ("Pathogens", "/pathogens"),
+    ("Time Series", "/timeseries"),
+    ("Industry", "/industry"),
+    ("Metabolic", "/metabolic"),
+    ("Data Sources", "/datasources"),
+    ("References", "/references"),
+    ("Export", "/export"),
+    ("Docs", "/docs"),
+    ("Tutorial", "/tutorial"),
+]
+
+
+@callback(Output("nav-bar", "children"), Input("url", "pathname"))
+def update_nav(pathname):
+    """Highlight the active page in the navigation bar."""
+    links = []
+    for label, href in NAV_ITEMS:
+        is_active = (pathname == href) or (pathname and href != "/" and pathname.startswith(href))
+        cls = "nav-link active" if is_active else "nav-link"
+        links.append(dcc.Link(label, href=href, className=cls))
+    return links
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8050)

@@ -76,10 +76,16 @@ body {
     transition: all 0.2s;
 }
 
-.nav-link:hover,
-.nav-link.active {
+.nav-link:hover {
     color: var(--text-primary);
     background: var(--accent-dim);
+}
+
+.nav-link.active {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-bottom: 2px solid var(--accent);
+    font-weight: 600;
 }
 
 /* Main content */
@@ -316,6 +322,107 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     white-space: normal;
     text-align: left;
+}
+
+/* Dash form controls — high contrast on dark theme */
+
+/* Dropdowns — dark theme with readable text */
+.Select-control,
+.dash-dropdown .Select-control,
+.dash-dropdown [class*="control"] {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border) !important;
+}
+.Select-value-label,
+.dash-dropdown .Select-value-label,
+.Select-value .Select-value-label,
+.dash-dropdown [class*="singleValue"],
+#export-chart-select [class*="singleValue"],
+#export-color-scheme [class*="singleValue"],
+#ts-pathogen-dropdown [class*="singleValue"],
+#export-chart-select .Select-value-label,
+#export-color-scheme .Select-value-label,
+#ts-pathogen-dropdown .Select-value-label {
+    color: #111111 !important;
+}
+.Select-placeholder,
+.dash-dropdown .Select-placeholder,
+.dash-dropdown [class*="placeholder"],
+#export-chart-select [class*="placeholder"],
+#export-color-scheme [class*="placeholder"],
+#ts-pathogen-dropdown [class*="placeholder"] {
+    color: #666666 !important;
+}
+/* Dropdown MENU (the opened list) */
+.Select-menu-outer,
+.dash-dropdown .Select-menu-outer,
+.dash-dropdown [class*="menu"] {
+    background-color: var(--bg-secondary) !important;
+    border: 1px solid var(--border) !important;
+}
+.VirtualizedSelectOption,
+.Select-option,
+.dash-dropdown [class*="option"] {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-secondary) !important;
+}
+.VirtualizedSelectFocusedOption,
+.Select-option.is-focused,
+.dash-dropdown [class*="option"]:hover,
+.dash-dropdown [class*="option"][class*="focused"] {
+    background-color: var(--accent-dim) !important;
+    color: var(--text-primary) !important;
+}
+.Select-input > input {
+    color: var(--text-primary) !important;
+}
+.dash-dropdown [class*="indicatorSeparator"] {
+    background-color: var(--border) !important;
+}
+.dash-dropdown [class*="dropdownIndicator"] svg {
+    fill: var(--text-secondary) !important;
+}
+
+/* Radio buttons and checkboxes */
+.dash-radio label,
+.dash-checklist label,
+[class*="RadioItems"] label {
+    color: var(--text-primary) !important;
+    font-size: 0.85rem;
+}
+
+/* Slider track and marks */
+.rc-slider-track {
+    background-color: var(--accent) !important;
+}
+.rc-slider-rail {
+    background-color: var(--border) !important;
+}
+.rc-slider-handle {
+    border-color: var(--accent) !important;
+    background-color: var(--accent) !important;
+}
+.rc-slider-dot {
+    border-color: var(--border) !important;
+    background-color: var(--bg-card) !important;
+}
+.rc-slider-mark-text {
+    color: var(--text-secondary) !important;
+}
+.rc-slider-mark-text-active {
+    color: var(--text-primary) !important;
+}
+
+/* Tabs (documentation page) */
+.dash-tabs .tab {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-secondary) !important;
+    border-color: var(--border) !important;
+}
+.dash-tabs .tab--selected {
+    background-color: var(--bg-card) !important;
+    color: var(--accent) !important;
+    border-bottom-color: var(--accent) !important;
 }
 
 /* Documentation page */

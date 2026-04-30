@@ -29,7 +29,7 @@ def generate_monthly_amr_data():
     mrsa = trend_mrsa + seasonal_mrsa + noise_mrsa
     mrsa = np.clip(mrsa, 5, 65)
 
-    data["MRSA"] = pd.DataFrame({"date": months, "resistance_rate": mrsa})
+    data["MRSA"] = pd.DataFrame({"date": months, "resistance_rate": mrsa}).set_index("date").asfreq("MS").reset_index()
 
     # --- 3GC-R E. coli ---
     # Steady upward trend
@@ -39,7 +39,7 @@ def generate_monthly_amr_data():
     ecoli = trend_ecoli + seasonal_ecoli + noise_ecoli
     ecoli = np.clip(ecoli, 2, 50)
 
-    data["3GC-R E. coli"] = pd.DataFrame({"date": months, "resistance_rate": ecoli})
+    data["3GC-R E. coli"] = pd.DataFrame({"date": months, "resistance_rate": ecoli}).set_index("date").asfreq("MS").reset_index()
 
     # --- CRE K. pneumoniae ---
     # Low baseline, accelerating increase (exponential-ish)
@@ -49,7 +49,7 @@ def generate_monthly_amr_data():
     cre = trend_cre + seasonal_cre + noise_cre
     cre = np.clip(cre, 0.5, 55)
 
-    data["CRE K. pneumoniae"] = pd.DataFrame({"date": months, "resistance_rate": cre})
+    data["CRE K. pneumoniae"] = pd.DataFrame({"date": months, "resistance_rate": cre}).set_index("date").asfreq("MS").reset_index()
 
     return data
 

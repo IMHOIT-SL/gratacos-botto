@@ -1,18 +1,18 @@
 """
-Pathogens page — Heatmap, regional comparison, and temporal trends.
+Pathogens page — ESKAPEE heatmap, regional comparison, temporal trends,
+MDR/XDR/PDR phenotype badges, and a transient Sensitivity Analysis panel.
 """
 
 import dash
-from dash import html, dcc, callback, Input, Output
+from dash import html, dcc, callback, Input, Output, State, ALL, ctx
 import plotly.graph_objects as go
-import plotly.express as px
 import numpy as np
 
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from data.pathogen_data import (
     PATHOGENS, ANTIBIOTIC_CLASSES, RESISTANCE_MATRIX,
-    WHO_PRIORITY, REGIONAL_DATA, TEMPORAL_TRENDS,
+    WHO_PRIORITY, MDR_XDR_PDR, REGIONAL_DATA, TEMPORAL_TRENDS,
 )
 from components import help_section, chart_title_with_info
 
@@ -31,32 +31,65 @@ PRIORITY_COLORS = {
     "Special": "#ce93d8",
 }
 
+# MDR/XDR/PDR badge colors — distinct from WHO Priority palette so the two
+# classifications coexist visually without clashing.
+PHENOTYPE_COLORS = {
+    "MDR": "#ffb74d",
+    "XDR": "#ff7043",
+    "PDR": "#ef5350",
+}
 
-def build_heatmap():
-    """Pathogen vs antibiotic resistance heatmap."""
-    # Custom text for hover showing NaN as "N/A (intrinsic)"
+
+def _apply_overrides(matrix, overrides):
+    """Return a copy of matrix with sensitivity overrides applied. Deterministic."""
+    out = matrix.copy()
+    if not overrides:
+        return out
+    for key, val in overrides.items():
+        # key format: "p_idx,a_idx"
+        try:
+            p, a = (int(x) for x in key.split(","))
+        except (ValueError, AttributeError):
+            continue
+        if 0 <= p < out.shape[0] and 0 <= a < out.shape[1]:
+            out[p, a] = float(val)
+    return out
+
+
+def build_heatmap(overrides=None):
+    """Pathogen × antibiotic resistance heatmap. overrides: dict {'p,a': value}."""
+    matrix = _apply_overrides(RESISTANCE_MATRIX, overrides or {})
+
     hover_text = []
     display_text = []
     for i, pathogen in enumerate(PATHOGENS):
         hover_row = []
         display_row = []
         for j, abx in enumerate(ANTIBIOTIC_CLASSES):
-            val = RESISTANCE_MATRIX[i, j]
+            val = matrix[i, j]
             abx_clean = abx.replace("\n", " ")
+            modified = (overrides or {}).get(f"{i},{j}") is not None
+            tag = "  ⚙ modified" if modified else ""
             if np.isnan(val):
                 hover_row.append(f"{pathogen}<br>{abx_clean}<br>N/A (intrinsic R or not tested)")
                 display_row.append("—")
             else:
-                hover_row.append(f"{pathogen}<br>{abx_clean}<br><b>{val:.0f}%</b> resistant")
+                hover_row.append(
+                    f"{pathogen}<br>{abx_clean}<br><b>{val:.0f}%</b> resistant{tag}"
+                )
                 display_row.append(f"{val:.0f}")
         hover_text.append(hover_row)
         display_text.append(display_row)
 
-    # Priority labels for y-axis
-    y_labels = [f"{p}  [{WHO_PRIORITY[p]}]" for p in PATHOGENS]
+    # Y labels: WHO priority + Magiorakos phenotype badge
+    y_labels = []
+    for p in PATHOGENS:
+        prio = WHO_PRIORITY[p]
+        pheno = MDR_XDR_PDR.get(p, "")
+        y_labels.append(f"{p}  [{prio} · {pheno}]")
 
     fig = go.Figure(data=go.Heatmap(
-        z=RESISTANCE_MATRIX,
+        z=matrix,
         x=ANTIBIOTIC_CLASSES,
         y=y_labels,
         text=display_text,
@@ -65,11 +98,11 @@ def build_heatmap():
         hovertext=hover_text,
         hovertemplate="%{hovertext}<extra></extra>",
         colorscale=[
-            [0, "#1a3a4a"],      # 0% — dark teal
-            [0.3, "#4fc3f7"],    # 30% — blue
-            [0.5, "#ffb74d"],    # 50% — amber
-            [0.7, "#ff7043"],    # 70% — orange
-            [1.0, "#ef5350"],    # 100% — red
+            [0, "#1a3a4a"],
+            [0.3, "#4fc3f7"],
+            [0.5, "#ffb74d"],
+            [0.7, "#ff7043"],
+            [1.0, "#ef5350"],
         ],
         zmin=0,
         zmax=100,
@@ -84,18 +117,17 @@ def build_heatmap():
 
     fig.update_layout(
         **CHART_LAYOUT,
-        title=dict(text="Resistance Profile: Pathogen × Antibiotic Class", font=dict(size=15)),
+        title=dict(text="ESKAPEE Resistance Profile: Pathogen × Antibiotic Class", font=dict(size=15)),
         xaxis=dict(side="bottom", tickangle=-35, tickfont=dict(size=10)),
         yaxis=dict(autorange="reversed", tickfont=dict(size=10)),
-        height=550,
-        margin=dict(l=220, r=80, t=60, b=100),
+        height=580,
+        margin=dict(l=260, r=80, t=60, b=100),
     )
 
     return fig
 
 
 def build_regional_chart():
-    """Regional resistance comparison (grouped bar)."""
     fig = go.Figure()
 
     pathogens_in_data = REGIONAL_DATA["pathogen"].unique()
@@ -128,7 +160,6 @@ def build_regional_chart():
 
 
 def build_trends_chart():
-    """Temporal trends of key resistance phenotypes."""
     fig = go.Figure()
 
     colors = {"MRSA": "#ffb74d", "3GC-R E. coli": "#4fc3f7", "CRE K. pneumoniae": "#ef5350"}
@@ -161,7 +192,6 @@ def build_trends_chart():
 
 
 def build_priority_summary():
-    """WHO priority classification summary cards."""
     counts = {}
     for p, priority in WHO_PRIORITY.items():
         counts.setdefault(priority, []).append(p)
@@ -189,34 +219,206 @@ def build_priority_summary():
     return html.Div(cards, className="stats-row")
 
 
+def build_phenotype_legend():
+    """Inline legend explaining MDR/XDR/PDR badges (Magiorakos 2012)."""
+    badges = []
+    for code, color in PHENOTYPE_COLORS.items():
+        badges.append(html.Span(
+            code,
+            style={
+                "background": color,
+                "color": "#21232d",
+                "padding": "0.15rem 0.55rem",
+                "borderRadius": "4px",
+                "fontSize": "0.7rem",
+                "fontFamily": "JetBrains Mono, monospace",
+                "fontWeight": "700",
+                "marginRight": "0.4rem",
+            },
+        ))
+    return html.Div(
+        [
+            html.Span("Phenotype legend (Magiorakos 2012, isolate-level): ",
+                      className="source-label"),
+            *badges,
+            html.Span(
+                "MDR = ≥1 agent in ≥3 classes · XDR = susceptible to ≤2 classes · "
+                "PDR = resistant to all tested agents",
+                style={"color": "#9aa0a6"},
+            ),
+        ],
+        className="chart-sources",
+    )
+
+
 SVG_CONFIG = {
     "toImageButtonOptions": {"format": "svg", "scale": 3},
     "displayModeBar": True,
 }
 
+
+# ---------------------------------------------------------------------------
+# Sensitivity Analysis panel — transient overrides (per-session, not persisted)
+# ---------------------------------------------------------------------------
+def build_sensitivity_panel():
+    pathogen_options = [{"label": p, "value": i} for i, p in enumerate(PATHOGENS)]
+    abx_options = [{"label": a.replace("\n", " "), "value": j}
+                   for j, a in enumerate(ANTIBIOTIC_CLASSES)]
+
+    return html.Div([
+        chart_title_with_info(
+            "Sensitivity Analysis (what-if mode)",
+            "Override individual pathogen × antibiotic resistance values for sensitivity analysis. Defaults are anchored to peer-reviewed surveillance data; overrides are transient (reset on page reload) to preserve reproducibility.",
+            "Transient cell-level overrides — peer-reviewed defaults preserved on reload",
+        ),
+
+        html.Div([
+            html.Div([
+                html.Label("Pathogen", style={"fontSize": "0.78rem", "color": "#9aa0a6", "display": "block", "marginBottom": "0.25rem"}),
+                dcc.Dropdown(
+                    id="sens-pathogen",
+                    options=pathogen_options,
+                    value=0,
+                    clearable=False,
+                    style={"width": "240px"},
+                ),
+            ], style={"flex": "0 0 auto"}),
+
+            html.Div([
+                html.Label("Antibiotic class", style={"fontSize": "0.78rem", "color": "#9aa0a6", "display": "block", "marginBottom": "0.25rem"}),
+                dcc.Dropdown(
+                    id="sens-antibiotic",
+                    options=abx_options,
+                    value=2,  # carbapenems by default
+                    clearable=False,
+                    style={"width": "240px"},
+                ),
+            ], style={"flex": "0 0 auto"}),
+
+            html.Div([
+                html.Label("% Resistant override (0–100)",
+                           style={"fontSize": "0.78rem", "color": "#9aa0a6", "display": "block", "marginBottom": "0.25rem"}),
+                dcc.Slider(
+                    id="sens-value",
+                    min=0, max=100, step=1, value=50,
+                    marks={0: "0", 25: "25", 50: "50", 75: "75", 100: "100"},
+                    tooltip={"placement": "top", "always_visible": False},
+                ),
+            ], style={"flex": "1 1 320px", "minWidth": "260px"}),
+
+            html.Div([
+                html.Button("Apply override", id="sens-apply", n_clicks=0,
+                            style={
+                                "background": "var(--accent-dim)",
+                                "color": "var(--accent)",
+                                "border": "1px solid var(--border)",
+                                "padding": "0.5rem 1rem",
+                                "borderRadius": "6px",
+                                "fontSize": "0.82rem",
+                                "fontWeight": "600",
+                                "cursor": "pointer",
+                                "marginRight": "0.5rem",
+                            }),
+                html.Button("Reset all", id="sens-reset", n_clicks=0,
+                            style={
+                                "background": "transparent",
+                                "color": "var(--text-secondary)",
+                                "border": "1px solid var(--border)",
+                                "padding": "0.5rem 1rem",
+                                "borderRadius": "6px",
+                                "fontSize": "0.82rem",
+                                "fontWeight": "600",
+                                "cursor": "pointer",
+                            }),
+            ], style={"flex": "0 0 auto", "alignSelf": "flex-end"}),
+
+        ], style={
+            "display": "flex",
+            "flexWrap": "wrap",
+            "gap": "1rem",
+            "alignItems": "flex-end",
+            "marginTop": "0.5rem",
+            "marginBottom": "0.75rem",
+        }),
+
+        html.Div(id="sens-status",
+                 style={"fontSize": "0.78rem", "color": "#9aa0a6", "marginTop": "0.25rem"}),
+
+        # Transient store (memory) — wiped on page reload by design
+        dcc.Store(id="sens-overrides", storage_type="memory", data={}),
+
+    ], className="card")
+
+
+# ---------------------------------------------------------------------------
+# Callbacks
+# ---------------------------------------------------------------------------
+@callback(
+    Output("sens-overrides", "data"),
+    Input("sens-apply", "n_clicks"),
+    Input("sens-reset", "n_clicks"),
+    State("sens-pathogen", "value"),
+    State("sens-antibiotic", "value"),
+    State("sens-value", "value"),
+    State("sens-overrides", "data"),
+    prevent_initial_call=True,
+)
+def update_overrides(_apply, _reset, p_idx, a_idx, val, overrides):
+    overrides = dict(overrides or {})
+    triggered = ctx.triggered_id
+    if triggered == "sens-reset":
+        return {}
+    if triggered == "sens-apply" and p_idx is not None and a_idx is not None:
+        # Refuse to override intrinsic-R cells (NaN) — preserves biological correctness
+        if np.isnan(RESISTANCE_MATRIX[p_idx, a_idx]):
+            return overrides
+        overrides[f"{p_idx},{a_idx}"] = float(val)
+    return overrides
+
+
+@callback(
+    Output("pathogen-heatmap", "figure"),
+    Output("sens-status", "children"),
+    Input("sens-overrides", "data"),
+)
+def render_heatmap(overrides):
+    overrides = overrides or {}
+    fig = build_heatmap(overrides)
+    if not overrides:
+        status = "Defaults active — 0 cells modified."
+    else:
+        status = (
+            f"⚙ {len(overrides)} cell(s) modified vs literature defaults. "
+            "Overrides reset on page reload (preserves reproducibility)."
+        )
+    return fig, status
+
+
 layout = html.Div([
-    # Help section
     help_section("Pathogens", [
-        "ESKAPE PATHOGENS: The ESKAPE group -- Enterococcus faecium, Staphylococcus aureus, Klebsiella pneumoniae, Acinetobacter baumannii, Pseudomonas aeruginosa, and Enterobacter species -- are the leading causes of nosocomial (hospital-acquired) infections worldwide. They are named 'ESKAPE' because they effectively 'escape' the effects of most available antibiotics through multiple resistance mechanisms. Together, these organisms account for the majority of multidrug-resistant infections in intensive care units and are responsible for a disproportionate share of AMR-attributable mortality globally.",
-        "READING THE HEATMAP: Each row represents a pathogen and each column represents an antibiotic class (e.g., carbapenems, fluoroquinolones, aminoglycosides). The cell value shows the approximate percentage of clinical isolates that are resistant to that drug class, based on global surveillance medians from WHO GLASS, ECDC EARS-Net, and CDC reports. Colors encode severity: dark teal/blue indicates low resistance (0-30%), amber indicates moderate resistance (30-50%), orange indicates high resistance (50-70%), and red indicates very high resistance (70-100%). Higher-resistance cells represent pathogen-drug combinations where empiric therapy is increasingly unreliable.",
-        "WHO PRIORITY CLASSIFICATION: The World Health Organization classifies resistant bacteria into three priority tiers to guide research and development investment. 'Critical' priority (red) includes carbapenem-resistant Acinetobacter, Pseudomonas, and Enterobacterales -- these represent the most urgent public health threat due to extremely limited remaining treatment options. 'High' priority (amber) includes vancomycin-resistant Enterococcus, MRSA, and others where resistance is widespread but some treatment alternatives exist. 'Medium' priority (blue) includes organisms like penicillin-non-susceptible Streptococcus pneumoniae where resistance is concerning but manageable. These classifications directly inform which pathogens receive priority funding for new antibiotic and diagnostic development.",
-        "INTRINSIC RESISTANCE (GREY CELLS): Cells displayed as a dash ('--') on a grey background indicate 'intrinsic resistance' -- the organism is naturally resistant to that antibiotic class due to its fundamental biology, not through acquired resistance mechanisms. For example, Gram-negative bacteria are intrinsically resistant to vancomycin because the drug cannot penetrate their outer membrane. These cells are excluded from the color scale because the resistance is not clinically meaningful in the same way as acquired resistance; clinicians would never prescribe these combinations. Some grey cells may also indicate insufficient surveillance data for that pathogen-drug pair.",
-        "REGIONAL VARIATION: The grouped bar chart shows resistance rates across six WHO regions (Africa, Americas, Eastern Mediterranean, Europe, South-East Asia, Western Pacific) for four key pathogens. Geographic differences are driven by several factors: antibiotic access patterns (over-the-counter availability without prescription in many low- and middle-income countries), antimicrobial stewardship program maturity (strongest in Northern Europe, weakest in regions with limited healthcare infrastructure), infection prevention and control practices (hand hygiene, sanitation, hospital water systems), and surveillance capacity (regions with less surveillance may underreport resistance). Higher resistance rates in Africa, South-East Asia, and the Eastern Mediterranean reflect both genuine higher burden and differential access to healthcare resources.",
-        "TEMPORAL TRENDS: The trend chart tracks three key resistance phenotypes over 25 years (2000-2025). MRSA (methicillin-resistant S. aureus) shows a declining trend in many regions, representing one of AMR's success stories -- this decline is attributed to targeted screening programs, improved hand hygiene, and decolonization protocols implemented particularly in European and North American hospitals. In contrast, third-generation cephalosporin-resistant (3GC-R) E. coli and carbapenem-resistant Enterobacterales (CRE) K. pneumoniae show concerning upward trends, driven by the spread of extended-spectrum beta-lactamases (ESBLs) and carbapenemase-producing genes (KPC, NDM, OXA-48) through plasmid-mediated horizontal gene transfer. The divergent trajectories demonstrate that targeted interventions can work (MRSA) but must be sustained and adapted for each pathogen.",
-        "CLINICAL IMPLICATIONS: When resistance exceeds 10-20% for a pathogen-drug combination, clinical guidelines typically recommend against using that drug for empiric therapy. Cells showing 50%+ resistance indicate that the antibiotic class is unreliable for more than half of infections caused by that organism -- clinicians must rely on culture results before selecting therapy, which can take 48-72 hours during which patients receive suboptimal treatment. For critical-priority pathogens with high resistance across multiple drug classes (e.g., carbapenem-resistant A. baumannii), therapeutic options narrow to last-resort agents such as colistin, which carry significant toxicity risks.",
+        "ESKAPEE PATHOGENS: The ESKAPEE group — Enterococcus faecium, Staphylococcus aureus, Klebsiella pneumoniae, Acinetobacter baumannii, Pseudomonas aeruginosa, Enterobacter species, and Escherichia coli — are the leading causes of nosocomial (hospital-acquired) infections worldwide. The acronym was originally ESKAPE (paper UPDATE v.A-29 párr. 11 makes E. coli explicit, hence ESKAPEE). They 'escape' the effects of most available antibiotics through multiple resistance mechanisms. Together, these organisms account for the majority of multidrug-resistant infections in intensive care units and a disproportionate share of AMR-attributable mortality globally.",
+        "STENOTROPHOMONAS MALTOPHILIA: Added to the heatmap per paper párr. 65 (PDR-Sm bloodstream infections, J Hosp Infect 2020). S. maltophilia is intrinsically resistant to most β-lactams (penicillins, 3rd-gen cephalosporins, carbapenems) due to its L1 metallo-β-lactamase and L2 cephalosporinase, and to aminoglycosides, vancomycin, and macrolides. It is therefore shown with many grey ('—') cells: those reflect biology, not missing data. The few treatable classes — TMP/SMX (~15% R), fluoroquinolones (~35% R), tetracyclines (~25% R) — are themselves losing efficacy in resistant isolates.",
+        "WHO PRIORITY CLASSIFICATION: 'Critical' priority (red) includes carbapenem-resistant Acinetobacter, Pseudomonas, and Enterobacterales. 'High' priority (amber) includes vancomycin-resistant Enterococcus, MRSA, and others where resistance is widespread but some treatment alternatives exist. 'Medium' priority (blue) includes organisms like penicillin-non-susceptible Streptococcus pneumoniae. 'Special' priority (lavender) covers M. tuberculosis and S. maltophilia, which require their own surveillance frameworks.",
+        "MDR / XDR / PDR PHENOTYPE BADGES (Magiorakos 2012): Each row is also labelled with the strongest documented isolate-level phenotype reported in peer-reviewed literature. MDR = non-susceptible to ≥1 agent in ≥3 antibiotic classes. XDR = susceptible to agents in ≤2 classes. PDR = resistant to all tested agents. CRITICAL: these classifications are isolate-level, not species-level — saying 'A. baumannii is PDR' is shorthand for 'PDR strains of A. baumannii are documented in the literature'. Most clinical isolates of any species are still susceptible to at least some drugs.",
+        "INTRINSIC RESISTANCE (GREY CELLS): Cells displayed as a dash ('—') indicate intrinsic resistance — the organism is naturally resistant due to fundamental biology, not acquired mechanisms. Gram-negative bacteria are intrinsically resistant to vancomycin (drug cannot penetrate the outer membrane). S. maltophilia carries metallo-β-lactamases that hydrolyze every carbapenem. These cells are excluded from the colour scale because the resistance is not clinically meaningful in the same way as acquired resistance.",
+        "SENSITIVITY ANALYSIS PANEL (research-mode what-if): Below the heatmap, a transient panel lets you override individual cell values to explore 'what if resistance for this pathogen-drug pair were X% instead?'. Defaults are anchored to peer-reviewed surveillance medians and are restored on every page reload — overrides are not persisted, by design, to preserve reproducibility for publication. The panel refuses to override intrinsic-R (NaN) cells: those reflect biology, not surveillance data, and forcing a number on them would be misleading.",
+        "REGIONAL VARIATION: The grouped bar chart shows resistance rates across six WHO regions for four key pathogens. Geographic differences are driven by antibiotic access patterns (over-the-counter availability without prescription in many low- and middle-income countries), antimicrobial stewardship maturity, infection prevention practices, and surveillance capacity. Higher rates in Africa, South-East Asia, and the Eastern Mediterranean reflect both genuine higher burden and differential access to healthcare.",
+        "TEMPORAL TRENDS: MRSA shows a declining trend in many regions (targeted screening, hand hygiene, decolonization protocols). 3GC-R E. coli and CRE K. pneumoniae show concerning upward trends, driven by ESBL and carbapenemase-producing genes (KPC, NDM, OXA-48) spreading via plasmid-mediated horizontal transfer. The divergent trajectories demonstrate that targeted interventions can work but must be sustained and adapted per pathogen.",
+        "CLINICAL IMPLICATIONS: When resistance exceeds 10–20% for a pathogen-drug combination, guidelines typically recommend against using that drug for empiric therapy. Cells at 50%+ indicate the antibiotic class is unreliable for more than half of infections — clinicians must wait 48–72 h for culture results, during which patients receive suboptimal treatment. For Critical-priority pathogens with documented PDR phenotypes (A. baumannii, P. aeruginosa, K. pneumoniae, S. maltophilia), therapeutic options narrow to last-resort agents such as colistin (significant nephrotoxicity) or salvage combinations.",
     ]),
 
     # WHO Priority summary
     build_priority_summary(),
 
-    # Main heatmap
+    # Heatmap (now reactive to overrides)
     html.Div([
         chart_title_with_info(
             "Resistance Heatmap",
-            "Resistance percentage for each pathogen-antibiotic pair. Values are approximate global medians from WHO GLASS, ECDC EARS-Net, and CDC surveillance reports. Pathogens are labeled with their WHO priority classification.",
-            "Global median % resistant isolates \u2014 ESKAPE pathogens + WHO priority list. Grey cells = intrinsic resistance or insufficient data.",
+            "Resistance percentage for each pathogen × antibiotic pair. Values are approximate global medians from WHO GLASS, ECDC EARS-Net, and CDC. Y-labels include WHO priority and Magiorakos isolate-level phenotype badge.",
+            "Global median % resistant isolates — ESKAPEE + S. maltophilia + reference pathogens. Grey cells = intrinsic R or insufficient data.",
         ),
         dcc.Graph(id="pathogen-heatmap", figure=build_heatmap(), config=SVG_CONFIG),
+        build_phenotype_legend(),
         html.Div([
             html.Span("Sources: ", className="source-label"),
             html.A("WHO GLASS Report 2022", href="https://www.who.int/publications/i/item/9789240062702", target="_blank"),
@@ -226,15 +428,20 @@ layout = html.Div([
             html.A("CDC AR Threats Report 2019", href="https://www.cdc.gov/antimicrobial-resistance/data-research/threats/index.html", target="_blank"),
             " · ",
             html.A("Murray et al., Lancet 2022", href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)02724-0/fulltext", target="_blank"),
+            " · ",
+            html.A("Magiorakos et al., Clin Microbiol Infect 2012", href="https://www.clinicalmicrobiologyandinfection.com/article/S1198-743X(14)61632-3/fulltext", target="_blank"),
         ], className="chart-sources"),
     ], className="card"),
+
+    # Sensitivity panel
+    build_sensitivity_panel(),
 
     # Regional + Trends side by side
     html.Div([
         html.Div([
             chart_title_with_info(
                 "Regional Variation",
-                "Comparison of resistance rates across 6 WHO regions for 4 key pathogens. Shows geographic disparities in AMR burden \u2014 higher rates in Africa, SE Asia, and E. Mediterranean regions.",
+                "Comparison of resistance rates across 6 WHO regions for 4 key pathogens. Higher rates in Africa, SE Asia, and E. Mediterranean.",
                 "Resistance rates by WHO region (GLASS 2022)",
             ),
             dcc.Graph(id="regional-chart", figure=build_regional_chart(), config=SVG_CONFIG),
@@ -246,7 +453,7 @@ layout = html.Div([
         html.Div([
             chart_title_with_info(
                 "Temporal Trends",
-                "25-year resistance trajectories: MRSA shows declining trend (successful interventions), while 3rd-gen cephalosporin-resistant E. coli and carbapenem-resistant K. pneumoniae show concerning upward trends.",
+                "25-year resistance trajectories: MRSA shows decline (successful interventions); 3GC-R E. coli and CRE K. pneumoniae show concerning upward trends.",
                 "25-year trajectory of key resistance phenotypes",
             ),
             dcc.Graph(id="trends-chart", figure=build_trends_chart(), config=SVG_CONFIG),
@@ -266,16 +473,19 @@ layout = html.Div([
         html.H3("Data Sources", className="card-title"),
         html.Div([
             html.P([
-                html.Span("WHO GLASS", className="source-tag"), " Global Antimicrobial Resistance Surveillance System (2022/2023 reports) ",
+                html.A("WHO GLASS", href="https://www.who.int/publications/i/item/9789240062702", className="source-tag", target="_blank"), " Global Antimicrobial Resistance Surveillance System (2022/2023 reports)",
             ], style={"marginBottom": "0.4rem"}),
             html.P([
-                html.Span("EARS-Net", className="source-tag"), " European Antimicrobial Resistance Surveillance Network ",
+                html.A("EARS-Net", href="https://www.ecdc.europa.eu/en/antimicrobial-resistance/surveillance-and-disease-data/data-ecdc", className="source-tag", target="_blank"), " European Antimicrobial Resistance Surveillance Network",
             ], style={"marginBottom": "0.4rem"}),
             html.P([
-                html.Span("Murray et al.", className="source-tag"), " Lancet 2022 — Global burden of bacterial AMR in 2019 ",
+                html.A("Murray et al.", href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)02724-0/fulltext", className="source-tag", target="_blank"), " Lancet 2022 — Global burden of bacterial AMR in 2019",
             ], style={"marginBottom": "0.4rem"}),
             html.P([
-                html.Span("CDC", className="source-tag"), " Antibiotic Resistance Threats in the United States (2019/2022) ",
+                html.A("Magiorakos 2012", href="https://www.clinicalmicrobiologyandinfection.com/article/S1198-743X(14)61632-3/fulltext", className="source-tag", target="_blank"), " MDR/XDR/PDR isolate-level definitions",
+            ], style={"marginBottom": "0.4rem"}),
+            html.P([
+                html.A("CDC", href="https://www.cdc.gov/antimicrobial-resistance/data-research/threats/index.html", className="source-tag", target="_blank"), " Antibiotic Resistance Threats in the United States (2019/2022)",
             ]),
         ], style={"fontSize": "0.82rem", "color": "#9aa0a6"}),
     ], className="card"),
