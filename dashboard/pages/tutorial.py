@@ -1,5 +1,5 @@
 """
-Tutorial page — Interactive guide to Plotly chart controls.
+Tutorial page — Interactive guide to Plotly chart controls + chart map.
 """
 
 import dash
@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from components import help_section, chart_title_with_info
+from data.amr_data import compute_super_exponential_curve
 
 dash.register_page(__name__, path="/tutorial", name="Tutorial")
 
@@ -30,18 +31,15 @@ CHART_TEMPLATE = dict(
 
 
 def build_demo_chart():
-    """Build an interactive demo chart with sample AMR data for practicing controls."""
-    years = list(range(1990, 2061))
-    # Sigmoid curve for resistance index
-    resistance = [100 / (1 + 80 * (0.92 ** (y - 1990))) for y in years]
+    """Demo chart using the same super-exponential model as the Overview page."""
+    curve = compute_super_exponential_curve(1990, 2060)
 
     fig = go.Figure()
 
     # Observed segment
-    obs_years = [y for y in years if y <= 2025]
-    obs_vals = resistance[:len(obs_years)]
+    obs = curve[curve["year"] <= 2025]
     fig.add_trace(go.Scatter(
-        x=obs_years, y=obs_vals,
+        x=obs["year"], y=obs["resistance_index"],
         mode="lines+markers",
         line=dict(color="#4fc3f7", width=3),
         marker=dict(size=5, color="#4fc3f7"),
@@ -50,10 +48,9 @@ def build_demo_chart():
     ))
 
     # Forecast segment
-    fcast_years = [y for y in years if y >= 2025]
-    fcast_vals = resistance[years.index(2025):]
+    fcast = curve[curve["year"] >= 2025]
     fig.add_trace(go.Scatter(
-        x=fcast_years, y=fcast_vals,
+        x=fcast["year"], y=fcast["resistance_index"],
         mode="lines+markers",
         line=dict(color="#ef5350", width=3, dash="dash"),
         marker=dict(size=5, color="#ef5350"),
@@ -61,17 +58,21 @@ def build_demo_chart():
         hovertemplate="<b>%{x}</b><br>Resistance Index: %{y:.1f} (projected)<extra></extra>",
     ))
 
-    # Key data points with labels
-    key_years = [1990, 2000, 2010, 2019, 2025, 2035, 2045, 2060]
-    key_vals = [100 / (1 + 80 * (0.92 ** (y - 1990))) for y in key_years]
+    # Key milestones aligned with the paper UPDATE v.A-29 párr. 19
+    key_years = [1990, 2000, 2010, 2019, 2025, 2032, 2040, 2047, 2060]
+    key_vals = [
+        float(curve.loc[curve["year"] == y, "resistance_index"].iloc[0])
+        for y in key_years
+    ]
     key_labels = [
         "Baseline era",
         "MRSA/ESBL era",
         "GBD benchmark",
-        "1.27M deaths/yr",
-        "Current (2025)",
-        "Accelerating",
-        "Critical point",
+        "1.27M deaths/yr (Murray)",
+        "Current (2025) ~70",
+        "~80 (paper milestone)",
+        "~90 (paper milestone)",
+        "Critical Point ~96",
         "Near-total resistance",
     ]
     fig.add_trace(go.Scatter(
@@ -92,12 +93,12 @@ def build_demo_chart():
         annotation_font=dict(color="#ef5350", size=11),
     )
 
-    # Critical point zone
+    # Critical point zone (paper UPDATE v.A-29 párr. 19: 2040–2047)
     fig.add_vrect(
-        x0=2040, x1=2045,
+        x0=2040, x1=2047,
         fillcolor="rgba(239, 83, 80, 0.1)",
         line_width=0,
-        annotation_text="Critical Zone",
+        annotation_text="Critical Zone (2040–2047)",
         annotation_position="top",
         annotation_font=dict(color="#ef5350", size=11),
     )
@@ -158,6 +159,8 @@ layout = html.Div([
     # Help section
     help_section("Tutorial", [
         "This page teaches you how to use the interactive chart controls available on every chart in the dashboard.",
+        "DASHBOARD MAP: The current build has 10 pages with 11 distinct charts in total (plus auxiliary panels). The Plotly toolbar described below works identically on every chart — once you learn the controls here, they apply everywhere. The 'Where to find each chart' section at the bottom of this page lists which page hosts which chart.",
+        "PUBLICATION-QUALITY EXPORT: Every chart can be exported as SVG (3x scale) directly via the camera icon on its modebar. For more control (light/B&W themes, drug-class panel, etc.), use the dedicated Export Studio page (`/export`) — it surfaces all 11 charts with theme switching.",
     ]),
 
     # Demo chart
@@ -429,4 +432,70 @@ layout = html.Div([
             ], className="data-table", style={"width": "100%"}),
         ], className="card"),
     ], className="chart-grid-2"),
+
+    # Chart map — where to find each chart
+    html.H2("Where to find each chart", style={
+        "color": "#e8eaed", "marginTop": "2rem", "marginBottom": "1rem",
+        "borderBottom": "1px solid #2d2f3a", "paddingBottom": "0.5rem",
+    }),
+    html.Div([
+        html.Table([
+            html.Thead(html.Tr([
+                html.Th("Chart"),
+                html.Th("Page"),
+                html.Th("What it shows"),
+            ])),
+            html.Tbody([
+                html.Tr([html.Td("Resistance Pressure Trajectory"),
+                         html.Td(dcc.Link("Overview", href="/", style={"color": "var(--accent)"})),
+                         html.Td("Super-exponential curve + reference logistic + ±3 yr band + critical 2040-2047 zone")]),
+                html.Tr([html.Td("Mortality Projections"),
+                         html.Td(dcc.Link("Overview", href="/", style={"color": "var(--accent)"})),
+                         html.Td("Murray/GRAM/O'Neill stack + Tai 2025 (~1.91M @ 2040) overlay")]),
+                html.Tr([html.Td("Carbapenem 2035 Spotlight"),
+                         html.Td(dcc.Link("Overview", href="/", style={"color": "var(--accent)"})),
+                         html.Td("Stacked CRE + CRAB + CRPA mortality through 2035 (Tai 2025 párr. 9)")]),
+                html.Tr([html.Td("ESKAPEE Resistance Heatmap"),
+                         html.Td(dcc.Link("Pathogens", href="/pathogens", style={"color": "var(--accent)"})),
+                         html.Td("11×10 matrix with WHO priority + Magiorakos MDR/XDR/PDR badges")]),
+                html.Tr([html.Td("Sensitivity Analysis (companion)"),
+                         html.Td(dcc.Link("Pathogens", href="/pathogens", style={"color": "var(--accent)"})),
+                         html.Td("What-if cell overrides (transient, reset on reload)")]),
+                html.Tr([html.Td("Regional Variation"),
+                         html.Td(dcc.Link("Pathogens", href="/pathogens", style={"color": "var(--accent)"})),
+                         html.Td("Resistance rates across 6 WHO regions for 4 key pathogens")]),
+                html.Tr([html.Td("Temporal Trends"),
+                         html.Td(dcc.Link("Pathogens", href="/pathogens", style={"color": "var(--accent)"})),
+                         html.Td("MRSA / 3GC-R E. coli / CRE K. pneumoniae 25-year trajectory")]),
+                html.Tr([html.Td("SARIMA Forecast"),
+                         html.Td(dcc.Link("Time Series", href="/timeseries", style={"color": "var(--accent)"})),
+                         html.Td("Monthly resistance forecast with 95% CI + scenario comparison + diagnostics")]),
+                html.Tr([html.Td("PubMed Scientometric"),
+                         html.Td(dcc.Link("Industry", href="/industry", style={"color": "var(--accent)"})),
+                         html.Td("~253K cumulative publications 1990-2025")]),
+                html.Tr([html.Td("Market Growth (CAGR 5.4%)"),
+                         html.Td(dcc.Link("Industry", href="/industry", style={"color": "var(--accent)"})),
+                         html.Td("Univdatos 2024-2032 projection ($5.5B → $8.83B)")]),
+                html.Tr([html.Td("Drug Class Breakdown"),
+                         html.Td(dcc.Link("Industry", href="/industry", style={"color": "var(--accent)"})),
+                         html.Td("Oxazolidinones / Lipoglycopeptides / Tetracyclines / Others — 2023 vs 2032")]),
+                html.Tr([html.Td("Awareness vs Effectiveness divergence"),
+                         html.Td(dcc.Link("Industry", href="/industry", style={"color": "var(--accent)"})),
+                         html.Td("Log-scale 1990=1 — awareness 500× vs effectiveness 0.34× (paper párr. 25)")]),
+                html.Tr([html.Td("Paradigm Comparison"),
+                         html.Td(dcc.Link("Metabolic", href="/metabolic", style={"color": "var(--accent)"})),
+                         html.Td("Classical (data-driven) + qualitative antimetabolic envelope (working hypothesis)")]),
+                html.Tr([html.Td("Data Coverage Timeline"),
+                         html.Td(dcc.Link("Data Sources", href="/datasources", style={"color": "var(--accent)"})),
+                         html.Td("Gantt-style temporal coverage of every data source")]),
+            ]),
+        ], className="data-table", style={"width": "100%"}),
+        html.P([
+            "All 11 charts are also available in the ",
+            dcc.Link("Export Studio", href="/export", style={"color": "var(--accent)"}),
+            " with three publication-ready themes (Dashboard Dark, Publication Light, Print B&W). For the full bibliography of every source cited in any chart, see the ",
+            dcc.Link("References", href="/references", style={"color": "var(--accent)"}),
+            " page.",
+        ], style={"color": "#9aa0a6", "marginTop": "1rem", "fontSize": "0.85rem"}),
+    ], className="card"),
 ])

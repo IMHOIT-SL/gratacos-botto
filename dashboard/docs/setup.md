@@ -33,10 +33,20 @@ venv\Scripts\activate
 
 ## Installing Dependencies
 
+The project ships a pinned `requirements.txt` at the repository root.
+
 With the virtual environment activated:
 
 ```bash
-pip install dash plotly statsmodels numpy pandas matplotlib
+pip install -r requirements.txt
+```
+
+This installs the runtime dependencies (Dash, Plotly, statsmodels, numpy, pandas, Flask, gunicorn) at the exact versions used in development.
+
+If you only want to develop locally without gunicorn:
+
+```bash
+pip install dash plotly statsmodels numpy pandas
 ```
 
 ### Package Details
@@ -106,11 +116,16 @@ Once the dashboard is running at `http://localhost:8050`:
 
 | Page         | URL                              | Description                                    |
 |--------------|----------------------------------|------------------------------------------------|
-| Overview     | http://localhost:8050/            | Main resistance curve, mortality projections   |
-| Pathogens    | http://localhost:8050/pathogens   | Resistance heatmap, regional data, trends      |
+| Overview     | http://localhost:8050/            | Super-exp curve + mortality + Carbapenem 2035 spotlight |
+| Pathogens    | http://localhost:8050/pathogens   | ESKAPEE heatmap + Sensitivity Analysis + regional + trends |
 | Time Series  | http://localhost:8050/timeseries  | SARIMA forecasting with interactive controls   |
+| Industry     | http://localhost:8050/industry    | PubMed scientometric + market CAGR + drug class + divergence |
+| Metabolic    | http://localhost:8050/metabolic   | Antimetabolic solution scaffold (working hypothesis) |
 | Data Sources | http://localhost:8050/datasources | Data source catalog and coverage timeline      |
-| Export       | http://localhost:8050/export      | Export Studio with theme selection             |
+| References   | http://localhost:8050/references  | 60 peer-reviewed citations grouped by paper section |
+| Export       | http://localhost:8050/export      | Export Studio (11 charts × 3 themes)           |
+| Docs         | http://localhost:8050/docs        | This documentation viewer                      |
+| Tutorial     | http://localhost:8050/tutorial    | Interactive guide for Plotly chart controls    |
 
 Use the navigation links in the top header bar to switch between pages. Navigation uses client-side routing (no full page reload).
 
@@ -172,3 +187,58 @@ This is a browser caching issue. Hard-refresh the page (Ctrl+Shift+R / Cmd+Shift
 
 ### Dropdown menus are hard to read (dark text on dark background)
 Dash dropdowns use browser-native styling. The dashboard sets background colors via inline styles, but some browsers may override them. Chrome and Firefox provide the best rendering.
+
+---
+
+## Deployment
+
+The repository ships with deployment artifacts at the project root: `requirements.txt` and `Procfile`. Three options are documented; pick whichever matches your operational preference.
+
+### Option 1 — Cloudflare Tunnel (local + public URL, zero deploy)
+
+Run the dashboard on your own machine and expose it through a Cloudflare tunnel. Best for paper revision / pre-publication when you only need occasional public access:
+
+```bash
+# In one terminal:
+source venv/bin/activate
+python dashboard/app.py        # serves on :8050
+
+# In another terminal:
+cloudflared tunnel --url http://localhost:8050
+```
+
+`cloudflared` prints a public HTTPS URL you can share. Stop the tunnel when done.
+
+For named (stable) tunnels with auth via Cloudflare Access, see Cloudflare's tunnel documentation. Zero infrastructure cost; depends on your machine being on.
+
+### Option 2 — DigitalOcean App Platform (managed PaaS)
+
+Push the repo to GitHub, then create an App on DigitalOcean App Platform pointing at the repo. The platform autodetects:
+
+- `requirements.txt` → installs Python dependencies
+- `Procfile` → uses the `web:` line to run gunicorn
+
+The Procfile ships with:
+
+```
+web: gunicorn --chdir dashboard --bind 0.0.0.0:${PORT:-8050} --workers 2 --timeout 120 app:app.server
+```
+
+This serves the Dash app via the Flask WSGI object exposed by Dash (`app.server`). DigitalOcean injects `$PORT` automatically.
+
+Alternatives that read the same artifacts: Render.com, Fly.io (with a Dockerfile), Railway, Heroku.
+
+### Option 3 — DigitalOcean Droplet + nginx + systemd
+
+For full control on a VPS, run gunicorn under systemd and proxy through nginx for HTTPS. Outline (production hardening omitted):
+
+```bash
+# On the droplet, after cloning the repo and installing requirements:
+gunicorn --chdir dashboard --bind 127.0.0.1:8050 --workers 2 app:app.server
+```
+
+Front with nginx (reverse proxy, TLS via certbot) and run gunicorn as a systemd service. This option is the most flexible but requires the most setup.
+
+### Note: Cloudflare Pages is NOT compatible
+
+Cloudflare Pages hosts only static assets and Workers (JS/TS). Dash needs a persistent Python process to run callbacks; it cannot be deployed there directly. Use one of the options above.

@@ -27,23 +27,43 @@ Gratacos-Botto/
     │                            #   defines the shell layout (header, nav, footer),
     │                            #   and serves as the WSGI target.
     ├── assets/
-    │   └── style.css            # Global stylesheet — dark theme via CSS variables.
-    │                            #   Automatically loaded by Dash from the assets/ folder.
+    │   ├── style.css            # Global stylesheet — dark theme via CSS variables.
+    │   │                        #   Automatically loaded by Dash from the assets/ folder.
+    │   └── export_download.js   # Pure-JS handler for Plotly.downloadImage (avoids
+    │                            #   the multi-page incompatibility with clientside_callback).
+    ├── components.py            # Reusable UI: help_section(), chart_title_with_info()
     ├── data/
     │   ├── __init__.py          # Empty package marker
-    │   ├── amr_data.py          # Observed + forecast resistance index DataFrames,
-    │   │                        #   mortality projection data, sigmoid curve generator.
-    │   ├── pathogen_data.py     # ESKAPE pathogen resistance matrix, WHO priority
-    │   │                        #   classifications, regional variation data, temporal trends.
-    │   └── timeseries_data.py   # Synthetic monthly resistance series generator for
-    │                            #   MRSA, 3GC-R E. coli, and CRE K. pneumoniae.
+    │   ├── amr_data.py          # Super-exponential resistance model (Gratacós-Botto),
+    │   │                        #   reference logistic, FORECAST_DATA, MORTALITY_DATA
+    │   │                        #   (with Tai 2025 column), CARBAPENEM_PROJECTION.
+    │   ├── pathogen_data.py     # ESKAPEE pathogens + S. maltophilia, antibiotic classes,
+    │   │                        #   resistance matrix, WHO priority, MDR/XDR/PDR badges
+    │   │                        #   (Magiorakos 2012), regional + temporal data.
+    │   ├── timeseries_data.py   # Synthetic monthly resistance series for MRSA,
+    │   │                        #   3GC-R E. coli, CRE K. pneumoniae (seed=42, fixed).
+    │   ├── bibliometrics_data.py # PubMed annual counts (closed-form exp), market
+    │   │                        #   CAGR 5.4%, drug-class shares, awareness vs
+    │   │                        #   effectiveness divergence series.
+    │   └── references_data.py   # 60 peer-reviewed citations from paper UPDATE v.A-29,
+    │                            #   grouped by paper section.
     ├── pages/
     │   ├── __init__.py          # Empty package marker
-    │   ├── overview.py          # "/" — Main resistance curve, mortality chart, data table
-    │   ├── pathogens.py         # "/pathogens" — Heatmap, regional bars, temporal trends
+    │   ├── overview.py          # "/" — Super-exp curve + reference logistic +
+    │   │                        #   mortality (3-methodology) + Carbapenem 2035 spotlight
+    │   ├── pathogens.py         # "/pathogens" — ESKAPEE heatmap + Sensitivity Analysis
+    │   │                        #   panel (transient overrides) + regional + temporal
     │   ├── timeseries.py        # "/timeseries" — SARIMA forecasting with diagnostics
-    │   ├── datasources.py       # "/datasources" — Data source catalog and timeline
-    │   └── export.py            # "/export" — Export Studio with theme switching
+    │   ├── bibliometrics.py     # "/industry" — PubMed scientometric, market growth,
+    │   │                        #   drug-class breakdown, awareness/effectiveness divergence
+    │   ├── antimetabolic.py     # "/metabolic" — paper's metabolic-solution scaffold:
+    │   │                        #   WORKING HYPOTHESIS banner, paradigm comparison
+    │   ├── datasources.py       # "/datasources" — Data source catalog + Gantt timeline
+    │   ├── references.py        # "/references" — 60 peer-reviewed citations grouped
+    │   │                        #   by paper section
+    │   ├── export.py            # "/export" — Export Studio (11 charts × 3 themes)
+    │   ├── documentation.py     # "/docs" — In-app markdown viewer for these docs
+    │   └── tutorial.py          # "/tutorial" — Interactive guide for chart controls
     └── docs/                    # This documentation folder
 ```
 
@@ -68,13 +88,18 @@ The dashboard uses **Dash Pages**, the built-in multi-page routing system. The m
 
 ### Registered Pages
 
-| Module             | Path            | Nav Label    |
-|--------------------|-----------------|--------------|
-| `pages/overview.py`    | `/`             | Overview     |
-| `pages/pathogens.py`   | `/pathogens`    | Pathogens    |
-| `pages/timeseries.py`  | `/timeseries`   | Time Series  |
-| `pages/datasources.py` | `/datasources`  | Data Sources |
-| `pages/export.py`      | `/export`       | Export       |
+| Module                   | Path            | Nav Label    |
+|--------------------------|-----------------|--------------|
+| `pages/overview.py`      | `/`             | Overview     |
+| `pages/pathogens.py`     | `/pathogens`    | Pathogens    |
+| `pages/timeseries.py`    | `/timeseries`   | Time Series  |
+| `pages/bibliometrics.py` | `/industry`     | Industry     |
+| `pages/antimetabolic.py` | `/metabolic`    | Metabolic    |
+| `pages/datasources.py`   | `/datasources`  | Data Sources |
+| `pages/references.py`    | `/references`   | References   |
+| `pages/export.py`        | `/export`       | Export       |
+| `pages/documentation.py` | `/docs`         | Docs         |
+| `pages/tutorial.py`      | `/tutorial`     | Tutorial     |
 
 ## Data Flow
 
@@ -98,19 +123,25 @@ Browser (Plotly.js renders interactive charts with modebar)
 
 ### Data Modules
 
-- **`amr_data.py`** — Exports `OBSERVED_DATA`, `FORECAST_DATA`, `MORTALITY_DATA` (all `pd.DataFrame`) and `compute_sigmoid_curve()` which interpolates between observed and forecast points to produce a continuous yearly series with confidence bounds.
+- **`amr_data.py`** — Primary model: `compute_super_exponential_curve()` returns a closed-form generalized logistic with a time-quadratic term `K/(1+A·exp(-rτ-bτ²))` (Gratacós-Botto thesis). `compute_reference_logistic_curve()` is the constant-r reference for visual contrast. `compute_sigmoid_curve()` is kept as legacy for backward compatibility. Exports `OBSERVED_DATA`, `FORECAST_DATA` (recalibrated to paper milestones), `MORTALITY_DATA` (with `tai_2025_deaths_k` column), `CARBAPENEM_PROJECTION` (CRE/CRAB/CRPA → 2035). All coefficients hardcoded — no fitting, no random.
 
-- **`pathogen_data.py`** — Exports `PATHOGENS` (list), `ANTIBIOTIC_CLASSES` (list), `RESISTANCE_MATRIX` (10x10 numpy array), `WHO_PRIORITY` (dict), `REGIONAL_DATA` (DataFrame), and `TEMPORAL_TRENDS` (DataFrame).
+- **`pathogen_data.py`** — Exports `PATHOGENS` (11 entries — ESKAPEE + S. maltophilia + reference pathogens), `ANTIBIOTIC_CLASSES` (10), `RESISTANCE_MATRIX` (11x10 numpy array with NaN for intrinsic R), `WHO_PRIORITY` dict, `MDR_XDR_PDR` dict (Magiorakos 2012 isolate-level phenotype documented per species), `REGIONAL_DATA` and `TEMPORAL_TRENDS` DataFrames.
 
-- **`timeseries_data.py`** — Exports `MONTHLY_DATA` (dict of DataFrames, keyed by pathogen name) and `PATHOGEN_CHOICES` (list). Data is generated deterministically at import time using `np.random.default_rng(seed=42)`.
+- **`timeseries_data.py`** — Exports `MONTHLY_DATA` (dict of DataFrames keyed by pathogen) and `PATHOGEN_CHOICES`. Data generated deterministically at import time using `np.random.default_rng(seed=42)`.
+
+- **`bibliometrics_data.py`** — Closed-form `count(y) = round(500·exp(0.115·(y-1990)))` reproduces ~253K cumulative PubMed results matching the paper's image. Market `MARKET_GROWTH` is CAGR 5.4% from a $5.5B 2023 base. `DRUG_CLASS_SHARE` from Univdatos figure. `AWARENESS_EFFECTIVENESS` series indexes both to 1990=1.0 for the divergence chart.
+
+- **`references_data.py`** — `REFERENCES` list of 60 dicts with `n`, `section`, `citation`, `url`. Helpers: `references_by_section()`, `total_count()`, `section_counts()`. `SECTION_ORDER` controls display order.
 
 ### Callbacks
 
-Most pages build their charts at import time (static figures). The **Time Series** and **Export** pages use Dash callbacks for interactivity:
+Most pages build their charts at import time (static figures). Three pages use Dash callbacks for interactivity:
 
 - **`timeseries.py`** — A single callback driven by the pathogen dropdown and horizon slider. It fits a SARIMA model on the fly, generates forecasts, computes residuals, and builds all six chart outputs (main forecast, scenario comparison, residuals, ACF, PACF) plus diagnostic statistics.
 
-- **`export.py`** — A callback driven by chart selector, color scheme, format, and scale inputs. It rebuilds the selected chart using the chosen theme and updates the Plotly modebar download configuration.
+- **`pathogens.py`** — Three callbacks for the **Sensitivity Analysis** panel: (1) `update_overrides` consumes Apply/Reset clicks and writes to a `dcc.Store(storage_type="memory")`; (2) `render_heatmap` rebuilds the figure with the override dict applied (refusing intrinsic-R cells); (3) `render_preview` updates the live selection-preview line as dropdowns/slider change. The `memory` storage type ensures overrides reset on page reload, preserving reproducibility.
+
+- **`export.py`** — A callback driven by chart selector and color scheme. It dispatches via `CHART_BUILDERS` (11 builders) using the selected theme and rebuilds the selected chart. Format/scale options apply at download time via the Plotly modebar.
 
 ## CSS Theming Approach
 
