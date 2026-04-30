@@ -341,8 +341,23 @@ def build_sensitivity_panel():
             "marginBottom": "0.75rem",
         }),
 
+        # Live selection preview — updates as dropdowns/slider change
+        html.Div(id="sens-preview",
+                 style={
+                     "fontSize": "0.82rem",
+                     "color": "var(--text-primary)",
+                     "marginTop": "0.25rem",
+                     "padding": "0.5rem 0.75rem",
+                     "background": "var(--bg-secondary)",
+                     "border": "1px solid var(--border)",
+                     "borderRadius": "6px",
+                     "fontFamily": "var(--font-mono)",
+                 }),
+
+        # Status line — updates after Apply / Reset
         html.Div(id="sens-status",
-                 style={"fontSize": "0.78rem", "color": "#9aa0a6", "marginTop": "0.25rem"}),
+                 style={"fontSize": "0.78rem", "color": "#9aa0a6",
+                        "marginTop": "0.5rem"}),
 
         # Transient store (memory) — wiped on page reload by design
         dcc.Store(id="sens-overrides", storage_type="memory", data={}),
@@ -392,6 +407,61 @@ def render_heatmap(overrides):
             "Overrides reset on page reload (preserves reproducibility)."
         )
     return fig, status
+
+
+@callback(
+    Output("sens-preview", "children"),
+    Input("sens-pathogen", "value"),
+    Input("sens-antibiotic", "value"),
+    Input("sens-value", "value"),
+    Input("sens-overrides", "data"),
+)
+def render_preview(p_idx, a_idx, target_val, overrides):
+    """Live preview of the cell currently selected by the dropdowns + slider.
+    Updates immediately on any input change — independent of the Apply button."""
+    if p_idx is None or a_idx is None:
+        return "Select a pathogen and an antibiotic class to preview the override."
+
+    pathogen = PATHOGENS[p_idx]
+    abx = ANTIBIOTIC_CLASSES[a_idx].replace("\n", " ")
+    default_val = RESISTANCE_MATRIX[p_idx, a_idx]
+    overrides = overrides or {}
+    key = f"{p_idx},{a_idx}"
+
+    # Intrinsic R — override blocked
+    if np.isnan(default_val):
+        return [
+            html.Span("⚠ ", style={"color": "var(--warning)"}),
+            html.Span(f"{pathogen} × {abx} — "),
+            html.Span("intrinsic resistance",
+                      style={"color": "var(--warning)", "fontWeight": "700"}),
+            html.Span(" · override blocked (biological correctness preserved)."),
+        ]
+
+    # Cell is already overridden
+    if key in overrides:
+        current = float(overrides[key])
+        return [
+            html.Span(f"{pathogen} × {abx} — current: "),
+            html.Span(f"{current:.0f}%",
+                      style={"color": "var(--accent)", "fontWeight": "700"}),
+            html.Span(" (modified) · default: "),
+            html.Span(f"{default_val:.0f}%",
+                      style={"color": "var(--text-secondary)"}),
+            html.Span("  →  Apply will set to: "),
+            html.Span(f"{target_val:.0f}%",
+                      style={"color": "var(--warning)", "fontWeight": "700"}),
+        ]
+
+    # Cell at literature default
+    return [
+        html.Span(f"{pathogen} × {abx} — current: "),
+        html.Span(f"{default_val:.0f}%",
+                  style={"color": "var(--accent)", "fontWeight": "700"}),
+        html.Span(" (literature default)  →  Apply will set to: "),
+        html.Span(f"{target_val:.0f}%",
+                  style={"color": "var(--warning)", "fontWeight": "700"}),
+    ]
 
 
 layout = html.Div([

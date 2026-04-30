@@ -340,9 +340,13 @@ body {
 #export-chart-select [class*="singleValue"],
 #export-color-scheme [class*="singleValue"],
 #ts-pathogen-dropdown [class*="singleValue"],
+#sens-pathogen [class*="singleValue"],
+#sens-antibiotic [class*="singleValue"],
 #export-chart-select .Select-value-label,
 #export-color-scheme .Select-value-label,
-#ts-pathogen-dropdown .Select-value-label {
+#ts-pathogen-dropdown .Select-value-label,
+#sens-pathogen .Select-value-label,
+#sens-antibiotic .Select-value-label {
     color: #111111 !important;
 }
 .Select-placeholder,
