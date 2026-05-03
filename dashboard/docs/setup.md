@@ -79,17 +79,17 @@ python dashboard/app.py
 
 The application starts a development server with these defaults:
 - **Host:** `0.0.0.0` (accessible from any network interface)
-- **Port:** `8050`
+- **Port:** `8082`
 - **Debug mode:** enabled (auto-reload on code changes, error overlays)
 
-Open your browser to: **http://localhost:8050**
+Open your browser to: **http://localhost:8082**
 
 ### Custom Host/Port
 
 To change the host or port, edit the last line of `dashboard/app.py`:
 
 ```python
-app.run(debug=True, host="0.0.0.0", port=8050)
+app.run(debug=True, host="0.0.0.0", port=8082)
 ```
 
 Or set environment variables before running:
@@ -112,20 +112,20 @@ This opens a matplotlib window showing the logistic resistance curve. It does no
 
 ## Accessing Each Page
 
-Once the dashboard is running at `http://localhost:8050`:
+Once the dashboard is running at `http://localhost:8082`:
 
 | Page         | URL                              | Description                                    |
 |--------------|----------------------------------|------------------------------------------------|
-| Overview     | http://localhost:8050/            | Super-exp curve + mortality + Carbapenem 2035 spotlight |
-| Pathogens    | http://localhost:8050/pathogens   | ESKAPEE heatmap + Sensitivity Analysis + regional + trends |
-| Time Series  | http://localhost:8050/timeseries  | SARIMA forecasting with interactive controls   |
-| Industry     | http://localhost:8050/industry    | PubMed scientometric + market CAGR + drug class + divergence |
-| Metabolic    | http://localhost:8050/metabolic   | Antimetabolic solution scaffold (working hypothesis) |
-| Data Sources | http://localhost:8050/datasources | Data source catalog and coverage timeline      |
-| References   | http://localhost:8050/references  | 60 peer-reviewed citations grouped by paper section |
-| Export       | http://localhost:8050/export      | Export Studio (11 charts × 3 themes)           |
-| Docs         | http://localhost:8050/docs        | This documentation viewer                      |
-| Tutorial     | http://localhost:8050/tutorial    | Interactive guide for Plotly chart controls    |
+| Overview     | http://localhost:8082/            | Super-exp curve + mortality + Carbapenem 2035 spotlight |
+| Pathogens    | http://localhost:8082/pathogens   | ESKAPEE heatmap + Sensitivity Analysis + regional + trends |
+| Time Series  | http://localhost:8082/timeseries  | SARIMA forecasting with interactive controls   |
+| Industry     | http://localhost:8082/industry    | PubMed scientometric + market CAGR + drug class + divergence |
+| Metabolic    | http://localhost:8082/metabolic   | Antimetabolic solution scaffold (working hypothesis) |
+| Data Sources | http://localhost:8082/datasources | Data source catalog and coverage timeline      |
+| References   | http://localhost:8082/references  | 60 peer-reviewed citations grouped by paper section |
+| Export       | http://localhost:8082/export      | Export Studio (11 charts × 3 themes)           |
+| Docs         | http://localhost:8082/docs        | This documentation viewer                      |
+| Tutorial     | http://localhost:8082/tutorial    | Interactive guide for Plotly chart controls    |
 
 Use the navigation links in the top header bar to switch between pages. Navigation uses client-side routing (no full page reload).
 
@@ -176,8 +176,8 @@ convert -trim input.png output.png
 ### "ModuleNotFoundError: No module named 'dash'"
 Ensure the virtual environment is activated (`source venv/bin/activate`) and all dependencies are installed.
 
-### "Address already in use" on port 8050
-Another process is using port 8050. Either stop it or change the port in `app.py`.
+### "Address already in use" on port 8082
+Another process is using port 8082. Either stop it or change the port in `app.py`.
 
 ### Time Series page shows "Linear extrapolation (fallback)"
 This means `statsmodels` is not installed or the SARIMAX fit failed. Install it with `pip install statsmodels`.
@@ -201,10 +201,10 @@ Run the dashboard on your own machine and expose it through a Cloudflare tunnel.
 ```bash
 # In one terminal:
 source venv/bin/activate
-python dashboard/app.py        # serves on :8050
+python dashboard/app.py        # serves on :8082
 
 # In another terminal:
-cloudflared tunnel --url http://localhost:8050
+cloudflared tunnel --url http://localhost:8082
 ```
 
 `cloudflared` prints a public HTTPS URL you can share. Stop the tunnel when done.
@@ -221,7 +221,7 @@ Push the repo to GitHub, then create an App on DigitalOcean App Platform pointin
 The Procfile ships with:
 
 ```
-web: gunicorn --chdir dashboard --bind 0.0.0.0:${PORT:-8050} --workers 2 --timeout 120 app:app.server
+web: gunicorn --chdir dashboard --bind 0.0.0.0:${PORT:-8082} --workers 2 --timeout 120 app:app.server
 ```
 
 This serves the Dash app via the Flask WSGI object exposed by Dash (`app.server`). DigitalOcean injects `$PORT` automatically.
@@ -234,7 +234,7 @@ For full control on a VPS, run gunicorn under systemd and proxy through nginx fo
 
 ```bash
 # On the droplet, after cloning the repo and installing requirements:
-gunicorn --chdir dashboard --bind 127.0.0.1:8050 --workers 2 app:app.server
+gunicorn --chdir dashboard --bind 127.0.0.1:8082 --workers 2 app:app.server
 ```
 
 Front with nginx (reverse proxy, TLS via certbot) and run gunicorn as a systemd service. This option is the most flexible but requires the most setup.
