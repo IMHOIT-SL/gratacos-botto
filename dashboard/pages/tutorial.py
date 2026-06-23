@@ -88,7 +88,7 @@ def build_demo_chart():
     # Critical threshold line
     fig.add_hline(
         y=95, line_dash="dot", line_color="#ef5350", line_width=1,
-        annotation_text="Critical threshold (~95)",
+        annotation_text="Critical inefficacy threshold (~95)",
         annotation_position="top left",
         annotation_font=dict(color="#ef5350", size=11),
     )
@@ -372,7 +372,7 @@ layout = html.Div([
             "Read the axis values where the spike lines intersect the axis labels.",
             "Click the crosshair icon again to disable spike lines.",
         ],
-        example="Enable spike lines, then hover over the year 2040 to see exactly where the resistance index stands relative to the critical threshold of 95. The horizontal spike line makes it easy to compare values across different years.",
+        example="Enable spike lines, then hover over the year 2040 to see exactly where the resistance index stands relative to the critical inefficacy threshold of 95. The horizontal spike line makes it easy to compare values across different years.",
         tips=[
             "Essential for comparing data points at different positions along the timeline.",
             "Spike lines work with all other modes (zoom, pan, select) simultaneously.",

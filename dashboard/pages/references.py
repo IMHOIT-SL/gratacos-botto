@@ -4,7 +4,7 @@ section, with clickable links (DOI when known, journal/PubMed otherwise).
 """
 
 import dash
-from dash import html, dcc, callback, Input, Output
+from dash import html, dcc
 
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))

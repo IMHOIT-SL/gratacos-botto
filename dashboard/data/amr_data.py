@@ -2,17 +2,17 @@
 AMR data sources and computations.
 Anchored to 10+ published sources (Lancet GBD, O'Neill, GRAM, CIDRAP, Tai 2025).
 
-Two deterministic models are exposed:
-  * compute_sigmoid_curve()           — interpolated piecewise (legacy reference)
+Deterministic models exposed:
   * compute_super_exponential_curve() — closed-form analytic curve, primary
                                         model of the Gratacós-Botto thesis
                                         (paper UPDATE v.A-29 párr. 22):
                                         "the rate of increasing resistance is
                                         itself growing".
+  * compute_reference_logistic_curve() — constant-rate logistic, for contrast.
 
 The super-exponential form has a time-quadratic term in the exponent
 (-r·τ - b·τ²) so the effective rate r_eff(τ) = r + 2·b·τ grows linearly
-with τ, advancing the critical-ineffectiveness point relative to a
+with τ, advancing the critical inefficacy threshold relative to a
 constant-rate logistic.
 
 All coefficients are hardcoded (no fitting, no random sampling). 100% reproducible.
@@ -174,30 +174,3 @@ CARBAPENEM_PROJECTION = pd.DataFrame({
     "CRAB":   [20,   30,   45,   50,    65,   90,  115],   # A. baumannii
     "CRPA":   [15,   22,   30,   35,    45,   62,   80],   # P. aeruginosa
 })
-
-
-def compute_sigmoid_curve(start=1990, end=2060):
-    """Legacy piecewise interpolation — kept for backward compatibility."""
-    years = np.arange(start, end + 1)
-    n = len(years)
-
-    resistance = np.zeros(n)
-    lower = np.zeros(n)
-    upper = np.zeros(n)
-
-    for i, y in enumerate(years):
-        if y <= 2025:
-            resistance[i] = np.interp(y, OBSERVED_DATA["year"], OBSERVED_DATA["resistance_index"])
-            lower[i] = np.interp(y, OBSERVED_DATA["year"], OBSERVED_DATA["lower_bound"])
-            upper[i] = np.interp(y, OBSERVED_DATA["year"], OBSERVED_DATA["upper_bound"])
-        else:
-            resistance[i] = np.interp(y, FORECAST_DATA["year"], FORECAST_DATA["resistance_index"])
-            lower[i] = np.interp(y, FORECAST_DATA["year"], FORECAST_DATA["lower_bound"])
-            upper[i] = np.interp(y, FORECAST_DATA["year"], FORECAST_DATA["upper_bound"])
-
-    return pd.DataFrame({
-        "year": years,
-        "resistance_index": resistance,
-        "lower_bound": lower,
-        "upper_bound": upper,
-    })

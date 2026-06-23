@@ -3,6 +3,8 @@ THE TWILIGHT OF ANTIBIOTICS — Research Dashboard
 AMR Resistance Modeling & Forecasting Platform
 """
 
+import os
+
 import dash
 from dash import Dash, html, dcc, callback, Input, Output, State
 
@@ -91,4 +93,8 @@ def update_nav(pathname):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=8082)
+    app.run(
+        debug=os.environ.get("DEBUG", "true").lower() == "true",
+        host=os.environ.get("HOST", "0.0.0.0"),
+        port=int(os.environ.get("PORT", "8082")),
+    )

@@ -204,7 +204,7 @@ def build_main_curve(theme):
         x=ref["year"], y=ref["resistance_index"],
         mode="lines",
         line=dict(color=theme["muted"], width=1.5, dash="dot"),
-        name="Reference logistic (constant r)",
+        name="Constant-rate logistic (limit of V=S·(1+r)ᵀ)",
         opacity=0.7,
     ))
 
@@ -237,7 +237,7 @@ def build_main_curve(theme):
 
     fig.add_hline(
         y=95, line_dash="dot", line_color=theme["annotation_color"], line_width=1,
-        annotation_text="Critical threshold (~95)",
+        annotation_text="Critical inefficacy threshold (~95)",
         annotation_position="top left",
         annotation_font=dict(color=theme["annotation_color"], size=11),
     )

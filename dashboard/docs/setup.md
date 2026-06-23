@@ -86,19 +86,13 @@ Open your browser to: **http://localhost:8082**
 
 ### Custom Host/Port
 
-To change the host or port, edit the last line of `dashboard/app.py`:
-
-```python
-app.run(debug=True, host="0.0.0.0", port=8082)
-```
-
-Or set environment variables before running:
+Set environment variables before running (read by `app.py` via `os.environ`):
 
 ```bash
-HOST=127.0.0.1 PORT=8080 python dashboard/app.py
+HOST=127.0.0.1 PORT=8080 DEBUG=false python dashboard/app.py
 ```
 
-(This requires modifying `app.py` to read from `os.environ`.)
+Defaults are `HOST=0.0.0.0`, `PORT=8082`, `DEBUG=true`.
 
 ## Running the Standalone Visualization
 

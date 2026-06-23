@@ -30,7 +30,7 @@ The resistance matrix values are approximate global medians compiled from multip
 
 **What we extract:**
 - Projection of 10 million AMR deaths per year by 2050 (used as the 2050 endpoint in `MORTALITY_DATA`)
-- Forecast trajectory anchor: resistance index 93 at 2040, used in `FORECAST_DATA`
+- Forecast trajectory anchor: resistance index 90 at 2040, used in `FORECAST_DATA`
 - The 2045 mortality interpolation point (7,200K deaths) bridges between GRAM and O'Neill estimates
 
 **Data quality:** Projection. The 10 million figure is a widely cited but contested projection based on extrapolation from limited regional data. It serves as an upper-bound scenario rather than a precise forecast.
@@ -47,7 +47,7 @@ The resistance matrix values are approximate global medians compiled from multip
 
 **What we extract:**
 - Resistance index projection for 2025: 70 (from `OBSERVED_DATA`, sourced as "CIDRAP/GRAM projection")
-- Forecast data points for 2030 (80) and 2035 (88) in `FORECAST_DATA`
+- Forecast data points for 2032 (80) and 2040 (90) in `FORECAST_DATA`
 - Mortality projections for 2025 (1,500K) and 2030 (2,100K) in `MORTALITY_DATA`
 - GRAM coverage timeline (1990-2021, 204 countries) in the Data Sources page catalog
 
