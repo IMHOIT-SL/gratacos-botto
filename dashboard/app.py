@@ -16,6 +16,10 @@ app = Dash(
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
 )
 
+# WSGI entry point for gunicorn (production): reference as `app:server`.
+# (gunicorn 23+ rejects the dotted `app:app.server` spec.)
+server = app.server
+
 app.layout = html.Div(
     [
         dcc.Location(id="url", refresh=False),
@@ -75,8 +79,8 @@ NAV_ITEMS = [
     ("Metabolic", "/metabolic"),
     ("Data Sources", "/datasources"),
     ("References", "/references"),
-    ("Export", "/export"),
-    ("Docs", "/docs"),
+    ("Export Studio", "/export"),
+    ("Documentation", "/docs"),
     ("Tutorial", "/tutorial"),
 ]
 

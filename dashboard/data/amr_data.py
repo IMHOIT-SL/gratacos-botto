@@ -174,3 +174,70 @@ CARBAPENEM_PROJECTION = pd.DataFrame({
     "CRAB":   [20,   30,   45,   50,    65,   90,  115],   # A. baumannii
     "CRPA":   [15,   22,   30,   35,    45,   62,   80],   # P. aeruginosa
 })
+
+
+# ---------------------------------------------------------------------------
+# Historical back-validation (out-of-sample) — deterministic, NO fitting
+# ---------------------------------------------------------------------------
+# Answers reviewer BJMHR-13-000038 §3: "No validation of the predictive model
+# against historical datasets is presented."
+#
+# Method (closed-form, no least-squares, no random sampling): we re-derive the
+# two free coefficients (r, b) of the SAME generalized-logistic form using ONLY
+# the pre-2016 observed anchors, then evaluate that curve at the post-2015
+# observed points that were held OUT of the calibration. The ceiling K=100 and
+# A=88/12 (which fixes y(1990)=12) are unchanged from the primary model.
+#
+# (r, b) are fixed by two exact anchors, r·τ + b·τ² = ln(A / (K/y − 1)):
+#   (2010, 35) and (2015, 45)  →  a 2×2 linear system solved analytically.
+# This is interpolation from exact anchor points, not statistical fitting.
+BACKVALIDATION_TRAIN_END = 2015
+BACKVALIDATION_ANCHORS = [(2010, 35.0), (2015, 45.0)]   # both ≤ train_end
+BACKVALIDATION_HOLDOUT_YEARS = [2019, 2021, 2025]        # all > train_end
+
+
+def _derive_backvalidation_params():
+    """Closed-form derivation of (r, b) from two pre-2016 anchors. No fitting."""
+    K = 100.0
+    A = 88.0 / 12.0        # fixed by y(1990)=12, same as the primary model
+    t0 = 1990
+    (yr1, v1), (yr2, v2) = BACKVALIDATION_ANCHORS
+    t1, t2 = yr1 - t0, yr2 - t0
+    # r·t + b·t² = ln(A / (K/v − 1))  at each anchor
+    c1 = np.log(A / (K / v1 - 1.0))
+    c2 = np.log(A / (K / v2 - 1.0))
+    det = t1 * t2 * t2 - t2 * t1 * t1          # = t1·t2·(t2−t1)
+    r = (c1 * t2 * t2 - c2 * t1 * t1) / det
+    b = (t1 * c2 - t2 * c1) / det
+    return dict(K=K, A=A, r=r, b=b, t0=t0)
+
+
+BACKVALIDATION_PARAMS = _derive_backvalidation_params()
+
+
+def compute_backvalidation_curve(start=1990, end=2025):
+    """
+    Out-of-sample historical validation curve.
+    Coefficients derived in closed form from pre-2016 anchors only, then
+    evaluated across 1990–2025 so the held-out points can be compared.
+    Deterministic — no fitting, no randomness.
+    """
+    years = np.arange(start, end + 1)
+    y = _generalized_logistic(years, **BACKVALIDATION_PARAMS)
+    return pd.DataFrame({"year": years, "resistance_index": y})
+
+
+def backvalidation_residuals():
+    """Held-out observed vs. predicted at the post-2015 anchors (deterministic)."""
+    obs = OBSERVED_DATA.set_index("year")["resistance_index"]
+    rows = []
+    for yr in BACKVALIDATION_HOLDOUT_YEARS:
+        pred = float(_generalized_logistic(np.array([yr]), **BACKVALIDATION_PARAMS)[0])
+        actual = float(obs.loc[yr])
+        rows.append({
+            "year": yr,
+            "observed": actual,
+            "predicted": pred,
+            "residual": pred - actual,
+        })
+    return pd.DataFrame(rows)

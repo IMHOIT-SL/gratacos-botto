@@ -188,24 +188,25 @@ layout = html.Div([
         html.Div([
             html.Div([
                 html.Label("Pathogen", style={"fontWeight": "600", "marginBottom": "0.3rem", "display": "block"}),
-                dcc.Dropdown(
+                dcc.RadioItems(
                     id="ts-pathogen-dropdown",
                     options=[{"label": p, "value": p} for p in PATHOGEN_CHOICES],
                     value="MRSA",
-                    clearable=False,
-                    style={"backgroundColor": "#2d2f3a", "color": "#e8eaed", "minWidth": "220px"},
+                    className="seg-radio",
                 ),
             ], style={"marginRight": "2rem"}),
             html.Div([
                 html.Label("Forecast horizon (months)", style={"fontWeight": "600", "marginBottom": "0.3rem", "display": "block"}),
-                dcc.Slider(
+                dcc.RadioItems(
                     id="ts-horizon-slider",
-                    min=6,
-                    max=36,
-                    step=None,
-                    marks={6: "6", 12: "12", 24: "24", 36: "36"},
+                    options=[
+                        {"label": "6 m", "value": 6},
+                        {"label": "12 m", "value": 12},
+                        {"label": "24 m", "value": 24},
+                        {"label": "36 m", "value": 36},
+                    ],
                     value=12,
-                    tooltip={"placement": "bottom"},
+                    className="seg-radio",
                 ),
             ], style={"minWidth": "260px"}),
         ], style={"display": "flex", "alignItems": "flex-end", "flexWrap": "wrap", "gap": "1rem"}),

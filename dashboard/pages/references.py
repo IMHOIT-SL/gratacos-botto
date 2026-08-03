@@ -137,6 +137,38 @@ layout = html.Div([
         "USE IN DRAFTING: Use this page as a single source-of-truth bibliography while drafting the paper. The Magiorakos 2012 link, in particular, is the canonical source for the MDR / XDR / PDR isolate-level definitions used elsewhere in this dashboard (Pathogens page badges).",
     ]),
 
+    # How to cite the companion (mirrors the paper's "Citation of the companion"
+    # section + Force11 Software Citation Principles / FAIR4RS).
+    html.Div([
+        html.H3("Cite this open computational companion", className="card-title"),
+        html.P(
+            "Prieto Gratacós, E. & Botto, J. A. (2026). The Twilight of Antibiotics "
+            "— open computational companion [Software]. Zenodo. "
+            "DOI: [to be assigned at publication]. Available at "
+            "https://resistome.imhoit.com",
+            style={
+                "fontFamily": "var(--font-mono)",
+                "fontSize": "0.8rem",
+                "color": "var(--text-primary)",
+                "background": "var(--bg-secondary)",
+                "border": "1px solid var(--border)",
+                "borderRadius": "6px",
+                "padding": "0.7rem 0.9rem",
+                "lineHeight": "1.55",
+            },
+        ),
+        html.P([
+            "Following the ",
+            html.A("Force11 Software Citation Principles", href="https://doi.org/10.7717/peerj-cs.86", target="_blank"),
+            " and the ",
+            html.A("FAIR Principles for Research Software (FAIR4RS)", href="https://doi.org/10.1038/s41597-022-01710-x", target="_blank"),
+            ", any reuse of the model coefficients, anchor tables or visualizations "
+            "should cite the deposited release rather than the paper alone. The source "
+            "is released under an open-source license and will be deposited in Zenodo "
+            "with a citable DOI at the time of publication.",
+        ], style={"fontSize": "0.82rem", "color": "var(--text-secondary)", "marginTop": "0.6rem"}),
+    ], className="card", style={"borderLeft": "3px solid var(--accent)"}),
+
     stats_row(),
 
     # One card per section, full-width

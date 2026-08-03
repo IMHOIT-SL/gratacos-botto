@@ -12,6 +12,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from data.amr_data import (
     compute_super_exponential_curve,
     compute_reference_logistic_curve,
+    compute_backvalidation_curve,
+    backvalidation_residuals,
+    BACKVALIDATION_TRAIN_END,
+    BACKVALIDATION_HOLDOUT_YEARS,
     OBSERVED_DATA,
     FORECAST_DATA,
     MORTALITY_DATA,
@@ -292,6 +296,118 @@ def build_carbapenem_chart():
     return fig
 
 
+def build_validation_chart():
+    """
+    Out-of-sample historical validation. The closed-form curve is calibrated on
+    the pre-2016 anchors only, then its predictions at 2019/2021/2025 are
+    compared to the observed values held out of the calibration. Deterministic
+    — no fitting, no random sampling.
+    """
+    curve = compute_backvalidation_curve()
+    resid = backvalidation_residuals()
+    train = curve[curve["year"] <= BACKVALIDATION_TRAIN_END]
+    test = curve[curve["year"] >= BACKVALIDATION_TRAIN_END]
+
+    obs_train = OBSERVED_DATA[OBSERVED_DATA["year"] <= BACKVALIDATION_TRAIN_END]
+    obs_hold = OBSERVED_DATA[OBSERVED_DATA["year"].isin(BACKVALIDATION_HOLDOUT_YEARS)]
+
+    fig = go.Figure()
+
+    # Calibration segment (≤2015) — solid
+    fig.add_trace(go.Scatter(
+        x=train["year"], y=train["resistance_index"], mode="lines",
+        line=dict(color="#4fc3f7", width=3),
+        name="Calibration curve (1990–2015 anchors only)",
+        hovertemplate="<b>%{x}</b><br>Model: %{y:.1f}<extra></extra>",
+    ))
+    # Out-of-sample projection (≥2015) — dashed
+    fig.add_trace(go.Scatter(
+        x=test["year"], y=test["resistance_index"], mode="lines",
+        line=dict(color="#4fc3f7", width=3, dash="dash"),
+        name="Out-of-sample projection (2016–2025)",
+        hovertemplate="<b>%{x}</b><br>Predicted: %{y:.1f}<extra></extra>",
+    ))
+    # Calibration anchors (≤2015)
+    fig.add_trace(go.Scatter(
+        x=obs_train["year"], y=obs_train["resistance_index"], mode="markers",
+        marker=dict(color="#4fc3f7", size=9, symbol="circle",
+                    line=dict(color="#21232d", width=1.5)),
+        name="Calibration anchors (≤2015)",
+        hovertemplate="<b>%{x}</b><br>Observed: %{y}<extra></extra>",
+    ))
+    # Residual connectors (observed ↔ predicted at held-out years)
+    for _, rr in resid.iterrows():
+        fig.add_trace(go.Scatter(
+            x=[rr["year"], rr["year"]], y=[rr["observed"], rr["predicted"]],
+            mode="lines", line=dict(color="#ffb74d", width=1, dash="dot"),
+            showlegend=False, hoverinfo="skip",
+        ))
+    # Held-out observed (2019/2021/2025)
+    fig.add_trace(go.Scatter(
+        x=obs_hold["year"], y=obs_hold["resistance_index"], mode="markers",
+        marker=dict(color="#ffb74d", size=13, symbol="star",
+                    line=dict(color="#21232d", width=1.5)),
+        name="Held-out observed (2019/2021/2025)",
+        hovertemplate="<b>%{x}</b><br>Observed (held out): %{y}<extra></extra>",
+    ))
+
+    fig.add_vline(
+        x=BACKVALIDATION_TRAIN_END, line_dash="dot",
+        line_color="#9aa0a6", line_width=1,
+        annotation_text="Calibration cut-off →",
+        annotation_position="top left",
+        annotation_font=dict(color="#9aa0a6", size=10),
+    )
+
+    mae = resid["residual"].abs().mean()
+    fig.add_annotation(
+        x=2024, y=22, xanchor="right", showarrow=False, align="right",
+        text=f"Held-out MAE = {mae:.1f} index pts<br>(model runs conservative)",
+        font=dict(color="#ffb74d", size=11),
+    )
+
+    template = CHART_TEMPLATE["layout"].copy()
+    template.pop("yaxis", None)
+    template.pop("xaxis", None)
+
+    fig.update_layout(
+        **template,
+        title=dict(
+            text="Historical Back-Validation — calibrated on ≤2015, tested on 2019–2025",
+            font=dict(size=14),
+        ),
+        xaxis_title="Year",
+        xaxis=dict(gridcolor="#2d2f3a", zerolinecolor="#2d2f3a"),
+        yaxis_title="Resistance Pressure Index (0–100)",
+        yaxis=dict(range=[0, 80], gridcolor="#2d2f3a", zerolinecolor="#2d2f3a"),
+        height=380,
+        hovermode="x unified",
+    )
+    return fig
+
+
+def build_validation_table():
+    resid = backvalidation_residuals()
+    rows = []
+    for _, r in resid.iterrows():
+        rows.append(html.Tr([
+            html.Td(int(r["year"])),
+            html.Td(f'{r["observed"]:.0f}'),
+            html.Td(f'{r["predicted"]:.1f}'),
+            html.Td(f'{r["residual"]:+.1f}'),
+        ]))
+    return html.Table(
+        [
+            html.Thead(html.Tr([
+                html.Th("Year"), html.Th("Observed"),
+                html.Th("Predicted"), html.Th("Residual"),
+            ])),
+            html.Tbody(rows),
+        ],
+        className="data-table",
+    )
+
+
 def build_data_table():
     rows = []
     for _, r in OBSERVED_DATA.iterrows():
@@ -340,6 +456,7 @@ layout = html.Div([
         "CRITICAL POINT BAND (2040–2047): The red-shaded vertical region marks the projected window during which the resistance pressure index crosses the critical inefficacy threshold under the super-exponential model. The paper anchors this to specific milestones in párr. 19: pressure ~80 by 2032, ~90 by 2040, and ~95–98 in the 2040–2047 period. Once inside this band, panresistant 'superbugs' transition from exceptional to common in nosocomial Gram-negative infections.",
         "PUBLISHED ANCHOR MARKERS: The blue circular markers represent published anchor points from the literature (Murray Lancet 2022, GRAM/CIDRAP, O'Neill 2016, Oxford VG, Tai IJAA 2025). The model curve does not pass exactly through every marker — the closed-form analytic function smooths slight inter-source variation. Hover over any marker to read its source citation.",
         "MORTALITY CHART — THREE METHODOLOGIES: The mortality chart now overlays three projection methodologies. (a) Stacked bars (red+amber): GRAM/O'Neill methodology — directly attributable + associated deaths, peaking at ~10M associated deaths/year by 2050. (b) Dashed blue diamond line: Tai et al. 2025 (Int J Antimicrob Agents) — a more conservative GBD-hierarchical methodology projecting ~1.91M annual attributable deaths by 2040. The two curves represent legitimate methodological alternatives; the gap between them is itself a measure of model uncertainty in long-horizon AMR mortality forecasting.",
+        "HISTORICAL BACK-VALIDATION: To test the model out-of-sample, the two free coefficients (r, b) of the generalized logistic are re-derived analytically from only two pre-2016 anchors (the 2010 and 2015 observed points; the ceiling K=100 and A=88/12 are unchanged). That ≤2015-only curve is then used to predict the 2019, 2021 and 2025 observations, which were held out of the calibration. The held-out mean absolute error is under 4 index points and the prediction runs slightly conservative — the model calibrated on old data alone already forecasts the continued rise, modestly under-predicting the post-2015 acceleration. This is a deterministic, closed-form check (interpolation from exact anchors), not a statistical fit, and it addresses the reviewer's request for validation against historical data.",
         "USING CHARTS IN PUBLICATIONS: To export any chart, click the camera icon in the Plotly toolbar (top-right of the chart). The default export is SVG at 3x resolution, suitable for most journal submissions. For the highest quality, use the Export Studio page where you can select Publication Light or Print B&W color themes with white backgrounds. When citing these visualizations, reference the underlying data sources listed below each chart and note that the resistance pressure index is a composite normalized metric constructed for this research project.",
         "DATA TABLE: The reference data table at the bottom of this page lists every published anchor point used to construct the curve, including the year, index value, uncertainty range, original source, and whether the point is observed or forecast. Use this table to trace any point on the curve back to its primary literature source.",
     ]),
@@ -426,6 +543,36 @@ layout = html.Div([
             build_data_table(),
         ], className="card"),
     ], className="chart-grid-2"),
+
+    # Historical back-validation (out-of-sample, deterministic)
+    html.Div([
+        chart_title_with_info(
+            "Historical Back-Validation (out-of-sample)",
+            "The closed-form model is re-anchored using ONLY the pre-2016 observed points, then its predictions for 2019, 2021 and 2025 are compared against the observed values that were held out of the calibration. The star markers are the held-out observations; the dashed curve is the model's prediction for them, calibrated without ever seeing them. Coefficients are derived analytically from two exact anchors (2010, 2015) — no least-squares fitting, no random sampling. The model tracks the held-out data within a few index points and errs conservative (it slightly under-predicts the post-2015 acceleration).",
+            "Calibrated on ≤2015 anchors only; tested against held-out 2019/2021/2025 observations",
+        ),
+        html.Div([
+            html.Div([
+                dcc.Graph(id="validation-chart", figure=build_validation_chart(), config={
+                    "toImageButtonOptions": {"format": "svg", "filename": "amr_backvalidation", "scale": 3},
+                    "displayModeBar": True,
+                }),
+            ]),
+            html.Div([
+                html.P("Held-out predictions vs. observations (index points):",
+                       className="chart-note"),
+                build_validation_table(),
+            ]),
+        ], className="chart-grid-2"),
+        html.Div([
+            html.Span("Method: ", className="source-label"),
+            "closed-form re-anchoring on pre-2016 data (deterministic; no fitting). ",
+            "Observed anchors: ",
+            html.A("Oxford Vaccine Group AMR timeline", href="https://www.ovg.ox.ac.uk/news/antibiotic-resistance", target="_blank"),
+            " · ",
+            html.A("Lancet GBD / Murray et al. 2022", href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)02724-0/fulltext", target="_blank"),
+        ], className="chart-sources"),
+    ], className="card"),
 
     # Carbapenem spotlight (Tai 2025, paper ref 10, párr. 9)
     html.Div([

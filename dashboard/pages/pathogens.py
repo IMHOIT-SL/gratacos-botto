@@ -275,25 +275,23 @@ def build_sensitivity_panel():
         html.Div([
             html.Div([
                 html.Label("Pathogen", style={"fontSize": "0.78rem", "color": "#9aa0a6", "display": "block", "marginBottom": "0.25rem"}),
-                dcc.Dropdown(
+                dcc.RadioItems(
                     id="sens-pathogen",
                     options=pathogen_options,
                     value=0,
-                    clearable=False,
-                    style={"width": "240px"},
+                    className="seg-radio",
                 ),
-            ], style={"flex": "0 0 auto"}),
+            ], style={"flex": "1 1 auto"}),
 
             html.Div([
                 html.Label("Antibiotic class", style={"fontSize": "0.78rem", "color": "#9aa0a6", "display": "block", "marginBottom": "0.25rem"}),
-                dcc.Dropdown(
+                dcc.RadioItems(
                     id="sens-antibiotic",
                     options=abx_options,
                     value=2,  # carbapenems by default
-                    clearable=False,
-                    style={"width": "240px"},
+                    className="seg-radio",
                 ),
-            ], style={"flex": "0 0 auto"}),
+            ], style={"flex": "1 1 auto"}),
 
             html.Div([
                 html.Label("% Resistant override (0–100)",
@@ -302,7 +300,12 @@ def build_sensitivity_panel():
                     id="sens-value",
                     min=0, max=100, step=1, value=50,
                     marks={0: "0", 25: "25", 50: "50", 75: "75", 100: "100"},
-                    tooltip={"placement": "top", "always_visible": False},
+                    tooltip={
+                        "placement": "top",
+                        "always_visible": False,
+                        "style": {"color": "#000000", "opacity": "1",
+                                  "fontWeight": "700", "fontSize": "0.8rem"},
+                    },
                 ),
             ], style={"flex": "1 1 320px", "minWidth": "260px"}),
 

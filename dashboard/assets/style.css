@@ -395,6 +395,54 @@ body {
     font-size: 0.85rem;
 }
 
+/* Segmented radio buttons — dropdown replacement (friendly one-click controls) */
+.seg-radio {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+.seg-radio label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin: 0 !important;
+    padding: 0.44rem 0.8rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    color: var(--text-secondary) !important;
+    font-size: 0.82rem !important;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.seg-radio label:hover {
+    border-color: var(--text-secondary);
+    color: var(--text-primary) !important;
+}
+.seg-radio label:has(input:checked) {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent) !important;
+    font-weight: 600;
+}
+.seg-radio label:focus-within {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+.seg-radio input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    position: absolute;
+    width: 0;
+    height: 0;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+    .seg-radio label { transition: none; }
+}
+
 /* Slider track and marks */
 .rc-slider-track {
     background-color: var(--accent) !important;
@@ -409,6 +457,48 @@ body {
 .rc-slider-dot {
     border-color: var(--border) !important;
     background-color: var(--bg-card) !important;
+}
+/* Slider value tooltip (Dash 4.x uses .dash-slider-tooltip, NOT rc-slider).
+   Dash colours the number via CSS-in-JS design tokens (--Dash-Text-*, a navy
+   at reduced opacity → faint grey on the white bubble). Redefining those tokens
+   to solid black inside the tooltip beats the injected rules whatever token the
+   number uses, and opacity:1 removes the fade. */
+.dash-slider-tooltip {
+    --Dash-Text-Primary: #000000;
+    --Dash-Text-Strong: #000000;
+    --Dash-Text-Weak: #000000;
+    --Dash-Text-Disabled: #000000;
+    background-color: #ffffff !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 5px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45) !important;
+    padding: 1px 7px !important;
+}
+.dash-slider-tooltip,
+.dash-slider-tooltip * {
+    color: #000000 !important;
+    opacity: 1 !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Dash 4.x renders an editable numeric <input> beside the slider (the persistent
+   white value box). Its glyphs use a faint --Dash-Text token → unreadable on the
+   white field. Force solid black on the INPUT ONLY (not the container, or the
+   slider marks would turn black and vanish on the dark background). */
+input.dash-range-slider-input,
+#sens-value input[type="number"] {
+    --Dash-Text-Primary: #000000;
+    --Dash-Text-Weak: #000000;
+    --Dash-Text-Disabled: #000000;
+    --Dash-Text-Strong: #000000;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    opacity: 1 !important;
+    background-color: #ffffff !important;
+    border: 1px solid var(--border) !important;
+    font-weight: 600 !important;
+    text-align: center;
 }
 .rc-slider-mark-text {
     color: var(--text-secondary) !important;
