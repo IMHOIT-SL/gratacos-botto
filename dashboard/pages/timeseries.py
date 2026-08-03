@@ -219,7 +219,7 @@ layout = html.Div([
             "Historical monthly resistance rates with SARIMAX(1,1,1)(1,1,0,12) forecast. The shaded band shows the 95% confidence interval \u2014 wider bands indicate greater uncertainty in predictions.",
         ),
         html.P(id="ts-model-label", className="card-subtitle"),
-        dcc.Graph(id="ts-main-chart", config=SVG_CONFIG),
+        dcc.Loading(dcc.Graph(id="ts-main-chart", config=SVG_CONFIG), type="default", color="#4fc3f7"),
         html.Div([
             html.Span("Sources: ", className="source-label"),
             "Synthetic data generated from published AMR trends. Model: SARIMAX(1,1,1)(1,1,0,12). Based on methodology from: ",
@@ -236,7 +236,7 @@ layout = html.Div([
             "Overlay of two forecasts: baseline 'business as usual' (red) and an intervention scenario (green) assuming 30% reduction in resistance trend, simulating the effect of stewardship programs.",
             "Business as usual vs. intervention (30% trend reduction)",
         ),
-        dcc.Graph(id="ts-scenario-chart", config=SVG_CONFIG),
+        dcc.Loading(dcc.Graph(id="ts-scenario-chart", config=SVG_CONFIG), type="default", color="#4fc3f7"),
     ], className="card"),
 
     # Diagnostics row
@@ -266,6 +266,13 @@ layout = html.Div([
 # Callbacks
 # ---------------------------------------------------------------------------
 
+# Deterministic model (fixed seed) -> the SARIMA fits are identical every time,
+# so cache per (pathogen, horizon): compute once, then serve instantly. This is
+# what makes the page slow on first load (statsmodels MLE fit); everything else
+# on the site is precomputed.
+_TS_CACHE = {}
+
+
 @callback(
     Output("ts-main-chart", "figure"),
     Output("ts-model-label", "children"),
@@ -278,6 +285,16 @@ layout = html.Div([
     Input("ts-horizon-slider", "value"),
 )
 def update_timeseries(pathogen, horizon):
+    key = (pathogen, horizon)
+    cached = _TS_CACHE.get(key)
+    if cached is not None:
+        return cached
+    result = _compute_timeseries(pathogen, horizon)
+    _TS_CACHE[key] = result
+    return result
+
+
+def _compute_timeseries(pathogen, horizon):
     df = MONTHLY_DATA[pathogen].copy()
     series = df.set_index("date")["resistance_rate"]
     series.index = pd.DatetimeIndex(series.index, freq="MS")
@@ -514,3 +531,20 @@ def _hex_to_rgb(hex_color):
     hex_color = hex_color.lstrip("#")
     r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
     return f"{r}, {g}, {b}"
+
+
+# Warm the default view (MRSA, 12-month horizon) in the background at import, so
+# the first visit to /timeseries is instant instead of ~10s. Daemon thread ->
+# does not block gunicorn startup or the DO health check; the cache fills a few
+# seconds after boot.
+import threading as _threading
+
+
+def _warm_default_ts_cache():
+    try:
+        _TS_CACHE[("MRSA", 12)] = _compute_timeseries("MRSA", 12)
+    except Exception:
+        pass
+
+
+_threading.Thread(target=_warm_default_ts_cache, daemon=True).start()
