@@ -1,0 +1,40 @@
+# DigitalOcean App Platform spec — resistome (Twilight of Antibiotics companion)
+#
+# The app is a self-contained Dash/gunicorn service: no database, no external
+# API at run-time, all data embedded in the source -> fully stateless, no env
+# vars needed. Same code that runs today; nothing to refactor.
+#
+# Deploy either way:
+#   A) doctl apps create --spec .do/app.yaml
+#   B) DO panel -> Create App -> GitHub (authorize the IMHOIT-SL org once)
+#      -> it auto-detects Python + the Procfile -> Create.
+#
+name: resistome
+region: fra                       # Frankfurt (closest EU region). Also: ams, lon, nyc, ...
+services:
+  - name: dashboard
+    github:
+      repo: IMHOIT-SL/gratacos-botto
+      branch: main
+      deploy_on_push: true        # from now on, publishing = `git push` to main
+    environment_slug: python      # Python buildpack (installs requirements.txt)
+    # 1 worker + threads to fit 512 MB (2 workers each load pandas/statsmodels
+    # -> would exceed 512 MB). Plenty for a low-traffic research companion.
+    run_command: gunicorn --chdir dashboard --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 app:server
+    http_port: 8080               # DO injects $PORT=8080; gunicorn binds to it
+    instance_count: 1
+    instance_size_slug: basic-xxs # 512 MB RAM (~$5/mo). If it OOMs, bump to basic-xs (1 GB, ~$10).
+    routes:
+      - path: /
+    health_check:
+      http_path: /
+
+# ---------------------------------------------------------------------------
+# Custom domain — ADD THIS ONLY AFTER the app works on its *.ondigitalocean.app
+# URL. When ready, uncomment, redeploy, then repoint Cloudflare DNS:
+#   resistome.imhoit.com  CNAME  <the-app>.ondigitalocean.app  (proxied/DNS-only)
+# and remove the tunnel route for that hostname.
+# ---------------------------------------------------------------------------
+# domains:
+#   - domain: resistome.imhoit.com
+#     type: PRIMARY

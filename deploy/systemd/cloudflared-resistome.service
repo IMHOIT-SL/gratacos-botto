@@ -1,0 +1,25 @@
+[Unit]
+Description=Cloudflare Tunnel — resistome (resistome.imhoit.com)
+Documentation=https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/
+After=network-online.target resistome-dashboard.service
+Wants=network-online.target resistome-dashboard.service
+
+[Service]
+Type=simple
+User=ia
+Group=ia
+ExecStart=/usr/bin/cloudflared --no-autoupdate --config /home/ia/.cloudflared/resistome.yml tunnel run resistome
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/home/ia/.cloudflared
+
+[Install]
+WantedBy=multi-user.target

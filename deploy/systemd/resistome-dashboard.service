@@ -1,0 +1,34 @@
+[Unit]
+Description=AMR Research Dashboard (gunicorn) — resistome.imhoit.com
+Documentation=https://resistome.imhoit.com
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ia
+Group=ia
+WorkingDirectory=/home/ia/projects/Gratacos-Botto
+Environment=PORT=8082
+ExecStart=/home/ia/projects/Gratacos-Botto/venv/bin/gunicorn \
+    --chdir dashboard \
+    --bind 127.0.0.1:8082 \
+    --workers 2 \
+    --timeout 120 \
+    --access-logfile - \
+    --error-logfile - \
+    app:server
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ia/projects/Gratacos-Botto
+
+[Install]
+WantedBy=multi-user.target
