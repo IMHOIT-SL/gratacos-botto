@@ -77,6 +77,7 @@ NAV_ITEMS = [
     ("Time Series", "/timeseries"),
     ("Industry", "/industry"),
     ("Metabolic", "/metabolic"),
+    ("Methods", "/methods"),
     ("Data Sources", "/datasources"),
     ("References", "/references"),
     ("Export Studio", "/export"),
