@@ -361,7 +361,7 @@ def build_validation_chart():
 
     mae = resid["residual"].abs().mean()
     fig.add_annotation(
-        x=2024, y=22, xanchor="right", showarrow=False, align="right",
+        x=1991, y=74, xanchor="left", yanchor="top", showarrow=False, align="left",
         text=f"Held-out MAE = {mae:.1f} index pts<br>(model runs conservative)",
         font=dict(color="#ffb74d", size=11),
     )
@@ -373,8 +373,8 @@ def build_validation_chart():
     fig.update_layout(
         **template,
         title=dict(
-            text="Historical Back-Validation — calibrated on ≤2015, tested on 2019–2025",
-            font=dict(size=14),
+            text="Back-validation — calibrated ≤2015, tested 2019–2025",
+            font=dict(size=14), x=0.0, xanchor="left",
         ),
         xaxis_title="Year",
         xaxis=dict(gridcolor="#2d2f3a", zerolinecolor="#2d2f3a"),
