@@ -1,8 +1,8 @@
 """
-Methods page — Materials & Methods of the paper: the open computational
-companion (programming tools, implementation, components, access & licensing,
-reproducibility, citation). Mirrors the manuscript's Materials and Methods
-section so the methodology is inspectable from within the app itself.
+Methods page — Materials & Methods of the paper, redesigned to be scannable:
+every point is a highlighted row, acronyms are expanded in parentheses, and the
+"reproducible / open" story reads at a glance. Content mirrors the manuscript's
+Materials and Methods section.
 """
 
 import dash
@@ -11,116 +11,144 @@ from dash import html
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from components import help_section
 
 dash.register_page(__name__, path="/methods", name="Methods")
 
+CY = "#4fc3f7"   # cyan
+PU = "#ce93d8"   # purple
+AM = "#ffb74d"   # amber
+GR = "#66bb6a"   # green
 
-def _card(title, *children):
-    return html.Div([html.H3(title, className="card-title"), *children], className="card")
+
+def _point(emoji, lead, body=None, color=CY):
+    """A single highlighted point: emoji + bold lead + optional body."""
+    content = [html.B(lead, style={"color": color})]
+    if body is not None:
+        content.append(html.Span(" — ", style={"color": "var(--text-secondary)"}))
+        content.extend(body if isinstance(body, list) else [body])
+    return html.Div(
+        [
+            html.Span(emoji, style={"flex": "0 0 auto", "fontSize": "1.05rem", "width": "1.5rem", "textAlign": "center"}),
+            html.Div(content, style={"flex": "1", "lineHeight": "1.5", "fontSize": "0.92rem"}),
+        ],
+        style={
+            "display": "flex", "gap": "0.55rem", "alignItems": "baseline",
+            "padding": "0.6rem 0.85rem", "marginBottom": "0.5rem",
+            "background": "var(--bg-secondary)", "border": "1px solid var(--border)",
+            "borderLeft": f"3px solid {color}", "borderRadius": "9px",
+        },
+    )
+
+
+def _section(emoji, title, color, points):
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Span(emoji, style={"fontSize": "1.25rem"}),
+                    html.H3(title, style={"margin": 0, "color": color, "fontSize": "1.05rem"}),
+                ],
+                style={"display": "flex", "alignItems": "center", "gap": "0.55rem", "marginBottom": "0.85rem"},
+            ),
+            *points,
+        ],
+        className="card",
+    )
+
+
+def _badge(text, color=CY):
+    return html.Span(
+        text,
+        style={
+            "display": "inline-block", "padding": "0.28rem 0.7rem", "margin": "0.2rem 0.35rem 0.2rem 0",
+            "background": "var(--bg-secondary)", "border": f"1px solid {color}",
+            "color": color, "borderRadius": "999px", "fontSize": "0.78rem", "fontWeight": "600",
+            "fontFamily": "var(--font-mono)",
+        },
+    )
 
 
 layout = html.Div([
-    help_section("Methods", [
-        "This page reproduces the Materials & Methods of the paper: how the open "
-        "computational companion is built, what it contains, how it is licensed, and "
-        "why it is fully reproducible. Every quantitative claim in the paper can be "
-        "traced and re-derived through this application.",
+
+    # Hero
+    html.Div(
+        [
+            html.H2("How it's built — and why every figure can be reproduced, bit for bit.",
+                    style={"margin": "0 0 0.6rem", "fontSize": "1.35rem", "lineHeight": "1.3"}),
+            html.P("The methods behind the model, and the open companion that lets you verify every number yourself.",
+                   style={"color": "var(--text-secondary)", "margin": "0 0 0.9rem", "fontSize": "0.95rem"}),
+            html.Div([
+                _badge("Python 3.12"), _badge("Plotly + Dash"), _badge("statsmodels"),
+                _badge("Open-source", GR), _badge("Zenodo DOI", GR),
+                _badge("No fitting", AM), _badge("No randomness", AM), _badge("Bit-for-bit", GR),
+            ]),
+        ],
+        className="card",
+        style={"borderLeft": f"3px solid {CY}"},
+    ),
+
+    # 1 — Evidence
+    _section("📚", "Built on the evidence", CY, [
+        _point("📄", "10+ peer-reviewed sources", "for the resistance trajectory.", CY),
+        _point("💀", "3 independent mortality streams", "GRAM (Global Research on Antimicrobial Resistance) / O'Neill, Murray 2022, and Tai 2025.", CY),
+        _point("🌍", "4 global surveillance agencies", "WHO GLASS (Global Antimicrobial Resistance & Use Surveillance System), ECDC EARS-Net (European Antimicrobial Resistance Surveillance Network), CDC AR Threats (Antibiotic Resistance Threats report), and Murray 2022.", CY),
+        _point("🔎", "Literature harvested from", "PubMed, EMBASE and the Cochrane Library.", CY),
+        _point("✅", "Built to open-science standards", [
+            "the ", html.A("FAIR", href="https://doi.org/10.1038/s41597-022-01710-x", target="_blank"),
+            " (Findable, Accessible, Interoperable, Reusable) Principles for Research Software and the ",
+            html.A("Force11", href="https://doi.org/10.7717/peerj-cs.86", target="_blank"),
+            " software-citation principles.",
+        ], CY),
     ]),
 
-    _card(
-        "Programming tools & computational companion",
-        html.P(
-            "The quantitative claims rest on a multi-source synthesis: more than ten "
-            "peer-reviewed sources for the resistance trajectory, three independent "
-            "mortality streams (GRAM/O'Neill, Murray 2022, Tai 2025), a per-pathogen "
-            "surveillance matrix spanning four global agencies (WHO GLASS, ECDC "
-            "EARS-Net, CDC AR Threats, Murray 2022), and a complementary SARIMA "
-            "exercise. The literature was harvested from PubMed, EMBASE and the "
-            "Cochrane Library."
-        ),
-        html.P([
-            "Rather than static figures, we developed an open computational companion "
-            "that exposes every model surface, anchor table and calibration coefficient "
-            "to direct inspection, following the ",
-            html.A("FAIR Principles for Research Software", href="https://doi.org/10.1038/s41597-022-01710-x", target="_blank"),
-            " and the ",
-            html.A("Force11 Software Citation Principles", href="https://doi.org/10.7717/peerj-cs.86", target="_blank"),
-            ".",
-        ]),
-    ),
+    # 2 — How it's built
+    _section("🛠️", "How it's built", PU, [
+        _point("🐍", "Python 3.12", "the whole application.", PU),
+        _point("📊", "NumPy + pandas", "run the closed-form (analytic) models.", PU),
+        _point("📈", "statsmodels", "runs the SARIMA (Seasonal AutoRegressive Integrated Moving Average) fits.", PU),
+        _point("🎨", "Plotly + Dash", "the interactive charts you're looking at.", PU),
+        _point("🔌", "No external API", "(Application Programming Interface) at run-time — every coefficient is embedded in the source.", PU),
+        _point("🌐", "Runs online or fully offline", "with identical results.", PU),
+    ]),
 
-    _card(
-        "Implementation",
-        html.P(
-            "A multi-page interactive application implemented in Python 3.12. NumPy and "
-            "pandas drive the closed-form models; statsmodels performs the SARIMA fits; "
-            "and the rendering layer is built on Plotly and Dash. The application runs "
-            "as a single self-contained process and requires no external API at "
-            "run-time — every coefficient and anchor point is embedded in the source — "
-            "so it can be served as a public web instance or executed offline from a "
-            "local clone with identical results."
-        ),
-    ),
+    # 3 — What's inside
+    _section("🧩", "What's inside — 10 pages", AM, [
+        _point("📉", "Overview", "the super-exponential curve vs. the constant-rate reference, with the 2040–2047 critical-point window.", AM),
+        _point("🦠", "Pathogens", "the ESKAPEE (the 7 priority superbugs) × antibiotic map, with WHO priority and Magiorakos MDR/XDR/PDR (Multidrug- / Extensively drug- / Pandrug-Resistant) badges.", AM),
+        _point("⏱️", "Time Series", "SARIMA forecasts with ACF/PACF (Auto- / Partial Autocorrelation) diagnostics and AIC/BIC (Akaike / Bayesian Information Criterion).", AM),
+        _point("🏭", "Industry", "publications (PubMed 1990–2025), the market (CAGR — Compound Annual Growth Rate — 5.4%), and awareness-vs-effectiveness.", AM),
+        _point("🧪", "Metabolic", "the antimetabolic line of treatment — presented as a working hypothesis.", AM),
+        _point("🗂️", "Data Sources · References · Export Studio · Docs · Tutorial", "cited sources, publication-grade figure export, and onboarding.", AM),
+    ]),
 
-    _card(
-        "Components",
-        html.P("The application is organized in ten pages that mirror the structure of the paper:"),
-        html.Ul([
-            html.Li([html.B("Overview"), " — the super-exponential resistance trajectory against the constant-rate reference logistic, with published anchor points and the 2040–2047 critical-point window."]),
-            html.Li([html.B("Pathogens"), " — the ESKAPEE × antibiotic-class surveillance matrix with WHO priority labels and Magiorakos (2012) MDR/XDR/PDR badges, plus regional and temporal-trend panels."]),
-            html.Li([html.B("Time Series"), " — SARIMAX(1,1,1)(1,1,0,12) fits with ACF/PACF correlograms, residual diagnostics, AIC/BIC and a counterfactual intervention scenario."]),
-            html.Li([html.B("Industry"), " — bibliometric growth (PubMed 1990–2025), the antibiotic-resistance market (CAGR 5.4% through 2032), and the awareness-vs-effectiveness divergence."]),
-            html.Li([html.B("Metabolic"), " — scaffolds the antimetabolic line of treatment at a conceptual level (presented as a working hypothesis)."]),
-            html.Li([html.B("Data Sources, References, Export Studio, Documentation, Tutorial"), " — a fully cited source list with direct links, a publication-grade figure-export workspace, and onboarding material for first-time users."]),
-        ], style={"paddingLeft": "1.2rem", "lineHeight": "1.7"}),
-    ),
+    # 4 — Open & citable
+    _section("📖", "Open & citable", GR, [
+        _point("🔓", "Open-source license", "the full source is public.", GR),
+        _point("🏛️", "Archived in Zenodo", "with a citable DOI (Digital Object Identifier) at the time of publication.", GR),
+        _point("🔗", "Cite the deposited release", "if you reuse the coefficients, tables or visualizations (Force11).", GR),
+        _point("🌍", "Live at", [html.A("resistome.imhoit.com", href="https://resistome.imhoit.com", target="_blank")], GR),
+    ]),
 
-    _card(
-        "Access & licensing",
-        html.P([
-            "The source code is released under an open-source license and will be "
-            "deposited in a long-term archive (",
-            html.A("Zenodo", href="https://zenodo.org/", target="_blank"),
-            ") with a citable DOI at the time of publication. Following the Force11 "
-            "Software Citation Principles, we ask that any reuse of the model "
-            "coefficients, anchor tables or visualizations cite the deposited release "
-            "rather than the paper alone. The application is publicly available at ",
-            html.A("resistome.imhoit.com", href="https://resistome.imhoit.com", target="_blank"),
-            ".",
-        ]),
-    ),
+    # 5 — Reproducible (the WoW)
+    _section("🔁", "100% reproducible", GR, [
+        _point("🧮", "Closed-form model", "an exact formula — no parameter fitting.", GR),
+        _point("🎲", "No random sampling", "and no Monte Carlo simulation.", GR),
+        _point("📌", "Data loaded from named sources", "mortality & surveillance values are cited, not model-derived.", GR),
+        _point("🌱", "Fixed random seed", "so the SARIMA diagnostics come out identical on any machine.", GR),
+        _point("💎", "Every figure re-derivable bit-for-bit", "from the open source — the minimum bar of FAIR4RS (FAIR for Research Software).", GR),
+    ]),
 
-    _card(
-        "Reproducibility",
-        html.P(
-            "The central super-exponential forecast is a closed-form analytic "
-            "expression with hand-calibrated coefficients — no parameter fitting, no "
-            "random sampling and no Monte Carlo. Mortality and pathogen-surveillance "
-            "values are loaded from named published sources and presented as such, not "
-            "derived from the resistance-pressure model. The SARIMA series are "
-            "generated deterministically with a fixed seed, so the diagnostic plots "
-            "reproduce identically across machines. Every figure can therefore be "
-            "re-derived bit-for-bit from the open source — the minimum bar the FAIR4RS "
-            "framework sets for research software supporting a publication."
-        ),
-    ),
-
-    _card(
-        "Cite this companion",
+    # 6 — Cite
+    _section("✍️", "Cite this companion", CY, [
         html.P(
             "Prieto Gratacós, E. & Botto, J. A. (2026). The Twilight of Antibiotics "
             "— open computational companion [Software]. Zenodo. "
             "DOI: [to be assigned at publication]. Available at resistome.imhoit.com",
             style={
-                "fontFamily": "var(--font-mono)",
-                "fontSize": "0.83rem",
-                "background": "var(--bg-secondary)",
-                "border": "1px solid var(--border)",
-                "borderRadius": "6px",
-                "padding": "0.7rem 0.9rem",
-                "lineHeight": "1.55",
+                "fontFamily": "var(--font-mono)", "fontSize": "0.82rem",
+                "background": "var(--bg-secondary)", "border": "1px solid var(--border)",
+                "borderRadius": "8px", "padding": "0.75rem 0.9rem", "lineHeight": "1.55", "margin": 0,
             },
         ),
-    ),
+    ]),
 ])

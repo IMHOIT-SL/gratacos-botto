@@ -162,6 +162,7 @@ def build_main_curve():
         title=dict(
             text="AMR Resistance Pressure Index (1990–2060) — Super-exponential model",
             font=dict(size=16),
+            x=0.0, xanchor="left",
         ),
         xaxis_title="Year",
         xaxis=dict(gridcolor="#2d2f3a", zerolinecolor="#2d2f3a"),
@@ -207,7 +208,8 @@ def build_mortality_chart():
 
     fig.update_layout(
         **CHART_TEMPLATE["layout"],
-        title=dict(text="Projected AMR Mortality (thousands/year)", font=dict(size=14)),
+        title=dict(text="Projected AMR Mortality (thousands/year)", font=dict(size=14),
+                   x=0.0, xanchor="left"),
         barmode="stack",
         xaxis_title="Year",
         yaxis_title="Deaths (thousands)",
@@ -284,6 +286,7 @@ def build_carbapenem_chart():
         title=dict(
             text="Carbapenem-Resistance Mortality (CRE + CRAB + CRPA) — through 2035",
             font=dict(size=14),
+            x=0.0, xanchor="left",
         ),
         xaxis_title="Year",
         xaxis=dict(gridcolor="#2d2f3a", zerolinecolor="#2d2f3a"),
