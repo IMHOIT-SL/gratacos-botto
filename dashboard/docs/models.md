@@ -150,6 +150,45 @@ The paper does not yet cite a within-host **metabolic** model. This is the natur
 
 ## 3. SARIMA Model
 
+### Intuition — what the letters mean
+
+Before the formal notation, the plain-language idea. The name is built up one layer at a time:
+
+| Letter | Stands for | What it adds |
+|--------|-----------|--------------|
+| **AR** | AutoRegressive | Today's value depends on the **past values** of the series itself. |
+| **I**  | Integrated (differenced) | Works with the **year-over-year change** instead of the level, to remove the trend and stabilise the series. |
+| **MA** | Moving Average | Corrects using the **errors** of past forecasts. |
+| **S**  | Seasonal | Captures **cycles that repeat** (every 12 months, every 4 quarters…). |
+| **X**  | eXogenous | The key of SARIMAX: lets you feed in **external variables** that help explain the series. |
+
+In one sentence: **SARIMA** forecasts a series using *only its own past*; **SARIMAX** adds the "X" — **outside variables** that also influence what you are predicting.
+
+### SARIMA vs SARIMAX — a worked example
+
+Suppose you want to **forecast monthly *Klebsiella pneumoniae* resistance to carbapenems** in a hospital.
+
+**With SARIMA (no X):**
+
+> "I estimate this month's resistance by looking at the resistance of previous months, its rising trend, and the seasonal pattern (it climbs in winter, when admissions rise)."
+
+It uses only the resistance history. Nothing else.
+
+**With SARIMAX (adding the X):**
+
+> "I use all of the above **plus the hospital's carbapenem consumption** (an external variable). If a lot of carbapenems were prescribed this month, I know the **selection pressure** pushes resistance upward in the following months."
+
+Here antibiotic consumption is the **exogenous variable (X)**. It is not resistance itself, but it *influences* it — and adding it improves the forecast. Other typical exogenous inputs in this context: ICU bed occupancy, temperature/season, infection-control policies, reported outbreaks.
+
+**The underlying distinction:**
+
+- **Endogenous** — what you want to predict (resistance). The model explains it from its own past.
+- **Exogenous (X)** — something external that *pushes* the endogenous variable but that you are not modelling; you only use it as a "clue".
+
+### A note on this platform
+
+The Time Series page is implemented with the `SARIMAX` class (Section 3, Specification below), but it **passes no exogenous regressors** — so in practice it runs as a **pure SARIMA** (see Limitation 10). This is deliberate. The long-horizon projections (to 2040) are a single series anchored to published sources; adding exogenous variables would require **also projecting those variables into the future** (how much carbapenem will be consumed in 2038?), which would inject uncertainty with no hard data to anchor it. Staying with SARIMA keeps the model simpler, more transparent, and consistent with the project's **determinism** rule — no assumptions about future covariates we cannot anchor.
+
 ### Specification
 
 The Time Series page fits a **SARIMAX(1,1,1)(1,1,0,12)** model to monthly synthetic resistance data.
