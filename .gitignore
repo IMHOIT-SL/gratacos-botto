@@ -4,3 +4,6 @@ __pycache__/
 *.pyo
 .DS_Store
 c.png
+
+# Claude Code local config (internal — not for public repo)
+.claude/
