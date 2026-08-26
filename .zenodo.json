@@ -1,0 +1,33 @@
+{
+  "title": "The Twilight of Antibiotics — Open Computational Companion",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "description": "<p>Deterministic, reproducible dashboard companion to the paper <em>The Twilight of Antibiotics</em> (E. Prieto Gratacós &amp; J. A. Botto).</p><p>It implements a closed-form <strong>super-exponential</strong> model of the antimicrobial-resistance (AMR) trajectory (1990&ndash;2060), <strong>SARIMA</strong> time-series forecasts, a carbapenem-resistance mortality spotlight, and an ESKAPEE pathogen &times; antibiotic map. All coefficients are embedded and hand-calibrated to published sources &mdash; <strong>no parameter fitting, no random sampling</strong> &mdash; so every figure is reproducible bit-for-bit. Built following the FAIR Principles for Research Software and the Force11 software-citation principles.</p><p>Live instance: <a href=\"https://resistome.imhoit.com\">resistome.imhoit.com</a></p>",
+  "creators": [
+    {
+      "name": "Prieto Gratacós, Ernesto"
+    },
+    {
+      "name": "Botto, Julio A."
+    }
+  ],
+  "keywords": [
+    "antimicrobial resistance",
+    "AMR",
+    "forecasting",
+    "super-exponential model",
+    "SARIMA",
+    "epidemiology",
+    "carbapenem resistance",
+    "ESKAPEE",
+    "Plotly Dash"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://resistome.imhoit.com",
+      "relation": "isIdenticalTo",
+      "scheme": "url"
+    }
+  ]
+}
