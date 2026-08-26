@@ -1,6 +1,6 @@
 # The Twilight of Antibiotics — Open Computational Companion
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22117641.svg)](https://doi.org/10.5281/zenodo.22117641)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22117640.svg)](https://doi.org/10.5281/zenodo.22117640)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Live](https://img.shields.io/badge/live-resistome.imhoit.com-2ea44f)](https://resistome.imhoit.com)
 
@@ -99,9 +99,12 @@ If you use this companion, please cite the archived release:
 
 > Prieto Gratacós, E. & Botto, J. A. (2026). *The Twilight of Antibiotics —
 > open computational companion* [Software]. Zenodo.
-> https://doi.org/10.5281/zenodo.22117641
+> https://doi.org/10.5281/zenodo.22117640
 
-Machine-readable metadata: [`CITATION.cff`](./CITATION.cff).
+The DOI above is the **concept DOI** — it always resolves to the latest
+version. To cite this exact release (v1.0.0), use
+`10.5281/zenodo.22117641`. Machine-readable metadata:
+[`CITATION.cff`](./CITATION.cff).
 
 ## License
 

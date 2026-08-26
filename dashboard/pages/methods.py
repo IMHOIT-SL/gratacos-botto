@@ -126,7 +126,7 @@ layout = html.Div([
         _point("🔓", "Open-source license", "the full source is public.", GR),
         _point("🏛️", "Archived in Zenodo", [
             "with a citable DOI (Digital Object Identifier): ",
-            html.A("10.5281/zenodo.22117641", href="https://doi.org/10.5281/zenodo.22117641", target="_blank"),
+            html.A("10.5281/zenodo.22117640", href="https://doi.org/10.5281/zenodo.22117640", target="_blank"),
             ".",
         ], GR),
         _point("🔗", "Cite the deposited release", "if you reuse the coefficients, tables or visualizations (Force11).", GR),
@@ -148,9 +148,9 @@ layout = html.Div([
             [
                 "Prieto Gratacós, E. & Botto, J. A. (2026). The Twilight of Antibiotics "
                 "— open computational companion [Software]. Zenodo. DOI: ",
-                html.A("10.5281/zenodo.22117641",
-                       href="https://doi.org/10.5281/zenodo.22117641", target="_blank"),
-                ". Available at resistome.imhoit.com",
+                html.A("10.5281/zenodo.22117640",
+                       href="https://doi.org/10.5281/zenodo.22117640", target="_blank"),
+                " (concept DOI — always latest). Available at resistome.imhoit.com",
             ],
             style={
                 "fontFamily": "var(--font-mono)", "fontSize": "0.82rem",
