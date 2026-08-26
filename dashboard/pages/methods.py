@@ -124,7 +124,11 @@ layout = html.Div([
     # 4 — Open & citable
     _section("📖", "Open & citable", GR, [
         _point("🔓", "Open-source license", "the full source is public.", GR),
-        _point("🏛️", "Archived in Zenodo", "with a citable DOI (Digital Object Identifier) at the time of publication.", GR),
+        _point("🏛️", "Archived in Zenodo", [
+            "with a citable DOI (Digital Object Identifier): ",
+            html.A("10.5281/zenodo.22117641", href="https://doi.org/10.5281/zenodo.22117641", target="_blank"),
+            ".",
+        ], GR),
         _point("🔗", "Cite the deposited release", "if you reuse the coefficients, tables or visualizations (Force11).", GR),
         _point("🌍", "Live at", [html.A("resistome.imhoit.com", href="https://resistome.imhoit.com", target="_blank")], GR),
     ]),
@@ -141,9 +145,13 @@ layout = html.Div([
     # 6 — Cite
     _section("✍️", "Cite this companion", CY, [
         html.P(
-            "Prieto Gratacós, E. & Botto, J. A. (2026). The Twilight of Antibiotics "
-            "— open computational companion [Software]. Zenodo. "
-            "DOI: [to be assigned at publication]. Available at resistome.imhoit.com",
+            [
+                "Prieto Gratacós, E. & Botto, J. A. (2026). The Twilight of Antibiotics "
+                "— open computational companion [Software]. Zenodo. DOI: ",
+                html.A("10.5281/zenodo.22117641",
+                       href="https://doi.org/10.5281/zenodo.22117641", target="_blank"),
+                ". Available at resistome.imhoit.com",
+            ],
             style={
                 "fontFamily": "var(--font-mono)", "fontSize": "0.82rem",
                 "background": "var(--bg-secondary)", "border": "1px solid var(--border)",
