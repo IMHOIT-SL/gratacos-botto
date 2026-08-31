@@ -93,18 +93,29 @@ The models are analytic and fully deterministic (SARIMA uses a fixed seed), so
 the output is identical on every reload and every machine. See the **Methods**
 page in the app, or `dashboard/docs/models.md`, for the full specification.
 
-## Cite this software
+## How to cite
 
-If you use this companion, please cite the archived release:
+**Cite the paper** (Vancouver):
+
+> Prieto Gratacós E, Botto JA. The Twilight of Antibiotics: a predictive
+> mathematical model of declining antimicrobial effectiveness, and a possible
+> metabolic escape route. Br J Med Health Res. 2026. (Under review; manuscript
+> BJMHR-13-000038).
+
+*(Journal abbreviated per ISO; full title: British Journal of Medical and
+Health Research. Volume, issue, pages and DOI will be added on acceptance.)*
+
+**Cite the software** (archived release):
 
 > Prieto Gratacós, E. & Botto, J. A. (2026). *The Twilight of Antibiotics —
 > open computational companion* [Software]. Zenodo.
 > https://doi.org/10.5281/zenodo.22117640
 
-The DOI above is the **concept DOI** — it always resolves to the latest
-version. To cite this exact release (v1.0.0), use
-`10.5281/zenodo.22117641`. Machine-readable metadata:
-[`CITATION.cff`](./CITATION.cff).
+The Zenodo DOI above is the **concept DOI** — it always resolves to the latest
+version. To cite this exact release (v1.0.0), use `10.5281/zenodo.22117641`.
+Machine-readable metadata: [`CITATION.cff`](./CITATION.cff) — GitHub's *Cite
+this repository* button reads it (APA / BibTeX; GitHub does not offer Vancouver,
+hence the ready-made Vancouver reference above).
 
 ## License
 
