@@ -172,13 +172,13 @@ layout = html.Div([
     ]),
 
     # 3 — What's inside
-    _section("layers", "What's inside — 10 pages", [
+    _section("layers", "What's inside — 11 pages", [
         _point("trending", "Overview", "the super-exponential curve vs. the constant-rate reference, with the 2040–2047 critical-point window."),
         _point("activity", "Pathogens", "the ESKAPEE (the 7 priority superbugs) × antibiotic map, with WHO priority and Magiorakos MDR/XDR/PDR (Multidrug- / Extensively drug- / Pandrug-Resistant) badges."),
         _point("clock", "Time Series", "SARIMA forecasts with ACF/PACF (Auto- / Partial Autocorrelation) diagnostics and AIC/BIC (Akaike / Bayesian Information Criterion)."),
         _point("briefcase", "Industry", "publications (PubMed 1990–2025), the market (CAGR — Compound Annual Growth Rate — 5.4%), and awareness-vs-effectiveness."),
         _point("flask", "Metabolic", "the antimetabolic line of treatment — presented as a working hypothesis."),
-        _point("folder", "Data Sources · References · Export Studio · Docs · Tutorial", "cited sources, publication-grade figure export, and onboarding."),
+        _point("folder", "Methods · Data Sources · References · Export Studio · Docs · Tutorial", "this methodology page, cited sources, publication-grade figure export, and onboarding."),
     ]),
 
     # 4 — Open & citable

@@ -159,7 +159,7 @@ layout = html.Div([
     # Help section
     help_section("Tutorial", [
         "This page teaches you how to use the interactive chart controls available on every chart in the dashboard.",
-        "DASHBOARD MAP: The current build has 10 pages with 11 distinct charts in total (plus auxiliary panels). The Plotly toolbar described below works identically on every chart — once you learn the controls here, they apply everywhere. The 'Where to find each chart' section at the bottom of this page lists which page hosts which chart.",
+        "DASHBOARD MAP: The current build has 11 pages with 11 distinct charts in total (plus auxiliary panels). The Plotly toolbar described below works identically on every chart — once you learn the controls here, they apply everywhere. The 'Where to find each chart' section at the bottom of this page lists which page hosts which chart.",
         "PUBLICATION-QUALITY EXPORT: Every chart can be exported as SVG (3x scale) directly via the camera icon on its modebar. For more control (light/B&W themes, drug-class panel, etc.), use the dedicated Export Studio page (`/export`) — it surfaces all 11 charts with theme switching.",
     ]),
 
