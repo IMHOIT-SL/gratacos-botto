@@ -58,6 +58,8 @@ Gratacos-Botto/
     │   │                        #   drug-class breakdown, awareness/effectiveness divergence
     │   ├── antimetabolic.py     # "/metabolic" — paper's metabolic-solution scaffold:
     │   │                        #   WORKING HYPOTHESIS banner, paradigm comparison
+    │   ├── methods.py           # "/methods" — Materials & Methods: line-icon points,
+    │   │                        #   reproducibility + Zenodo/paper citation blocks
     │   ├── datasources.py       # "/datasources" — Data source catalog + Gantt timeline
     │   ├── references.py        # "/references" — 60 peer-reviewed citations grouped
     │   │                        #   by paper section
@@ -95,6 +97,7 @@ The dashboard uses **Dash Pages**, the built-in multi-page routing system. The m
 | `pages/timeseries.py`    | `/timeseries`   | Time Series  |
 | `pages/bibliometrics.py` | `/industry`     | Industry     |
 | `pages/antimetabolic.py` | `/metabolic`    | Metabolic    |
+| `pages/methods.py`       | `/methods`      | Methods      |
 | `pages/datasources.py`   | `/datasources`  | Data Sources |
 | `pages/references.py`    | `/references`   | References   |
 | `pages/export.py`        | `/export`       | Export       |

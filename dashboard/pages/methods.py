@@ -206,10 +206,13 @@ layout = html.Div([
     _section("edit", "Cite this companion", [
         html.Div("Cite the paper (Vancouver)", style=_CITE_LABEL),
         html.P(
-            "Prieto Gratacós E, Botto JA. The Twilight of Antibiotics: a predictive "
-            "mathematical model of declining antimicrobial effectiveness, and a possible "
-            "metabolic escape route. Br J Med Health Res. 2026. "
-            "(Under review; manuscript BJMHR-13-000038).",
+            [
+                "Prieto Gratacós E, Botto J. The Twilight of Antibiotics: a predictive "
+                "mathematical model of declining antimicrobial effectiveness, and a possible "
+                "metabolic escape route. Br J Med Health Res. 2026;13(8):43-56. doi:",
+                html.A("10.5281/zenodo.21898960",
+                       href="https://doi.org/10.5281/zenodo.21898960", target="_blank"),
+            ],
             style=_CITE_BOX,
         ),
         html.Div("Cite the software (archived release)", style={**_CITE_LABEL, "marginTop": "0.9rem"}),

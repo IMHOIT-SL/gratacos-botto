@@ -115,6 +115,7 @@ Once the dashboard is running at `http://localhost:8082`:
 | Time Series  | http://localhost:8082/timeseries  | SARIMA forecasting with interactive controls   |
 | Industry     | http://localhost:8082/industry    | PubMed scientometric + market CAGR + drug class + divergence |
 | Metabolic    | http://localhost:8082/metabolic   | Antimetabolic solution scaffold (working hypothesis) |
+| Methods      | http://localhost:8082/methods     | Materials & Methods + reproducibility + citation |
 | Data Sources | http://localhost:8082/datasources | Data source catalog and coverage timeline      |
 | References   | http://localhost:8082/references  | 60 peer-reviewed citations grouped by paper section |
 | Export       | http://localhost:8082/export      | Export Studio (11 charts × 3 themes)           |
@@ -215,7 +216,7 @@ Push the repo to GitHub, then create an App on DigitalOcean App Platform pointin
 The Procfile ships with:
 
 ```
-web: gunicorn --chdir dashboard --bind 0.0.0.0:${PORT:-8082} --workers 2 --timeout 120 app:app.server
+web: gunicorn --chdir dashboard --bind 0.0.0.0:${PORT:-8082} --workers 2 --timeout 120 app:server
 ```
 
 This serves the Dash app via the Flask WSGI object exposed by Dash (`app.server`). DigitalOcean injects `$PORT` automatically.
@@ -228,7 +229,7 @@ For full control on a VPS, run gunicorn under systemd and proxy through nginx fo
 
 ```bash
 # On the droplet, after cloning the repo and installing requirements:
-gunicorn --chdir dashboard --bind 127.0.0.1:8082 --workers 2 app:app.server
+gunicorn --chdir dashboard --bind 127.0.0.1:8082 --workers 2 app:server
 ```
 
 Front with nginx (reverse proxy, TLS via certbot) and run gunicorn as a systemd service. This option is the most flexible but requires the most setup.

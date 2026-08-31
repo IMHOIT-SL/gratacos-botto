@@ -97,13 +97,13 @@ page in the app, or `dashboard/docs/models.md`, for the full specification.
 
 **Cite the paper** (Vancouver):
 
-> Prieto Gratacós E, Botto JA. The Twilight of Antibiotics: a predictive
+> Prieto Gratacós E, Botto J. The Twilight of Antibiotics: a predictive
 > mathematical model of declining antimicrobial effectiveness, and a possible
-> metabolic escape route. Br J Med Health Res. 2026. (Under review; manuscript
-> BJMHR-13-000038).
+> metabolic escape route. Br J Med Health Res. 2026;13(8):43-56.
+> doi:10.5281/zenodo.21898960
 
 *(Journal abbreviated per ISO; full title: British Journal of Medical and
-Health Research. Volume, issue, pages and DOI will be added on acceptance.)*
+Health Research, ISSN 2394-2967.)*
 
 **Cite the software** (archived release):
 
