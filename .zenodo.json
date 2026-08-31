@@ -6,10 +6,13 @@
   "description": "<p>Deterministic, reproducible dashboard companion to the paper <em>The Twilight of Antibiotics</em> (E. Prieto Gratacós &amp; J. A. Botto).</p><p>It implements a closed-form <strong>super-exponential</strong> model of the antimicrobial-resistance (AMR) trajectory (1990&ndash;2060), <strong>SARIMA</strong> time-series forecasts, a carbapenem-resistance mortality spotlight, and an ESKAPEE pathogen &times; antibiotic map. All coefficients are embedded and hand-calibrated to published sources &mdash; <strong>no parameter fitting, no random sampling</strong> &mdash; so every figure is reproducible bit-for-bit. Built following the FAIR Principles for Research Software and the Force11 software-citation principles.</p><p>Live instance: <a href=\"https://resistome.imhoit.com\">resistome.imhoit.com</a></p>",
   "creators": [
     {
-      "name": "Prieto Gratacós, Ernesto"
+      "name": "Prieto Gratacós, Ernesto",
+      "affiliation": "Laboratorio de Ingeniería Biológica"
     },
     {
-      "name": "Botto, Julio A."
+      "name": "Botto, Julio",
+      "affiliation": "Imhoit",
+      "orcid": "0009-0008-2656-5946"
     }
   ],
   "keywords": [
