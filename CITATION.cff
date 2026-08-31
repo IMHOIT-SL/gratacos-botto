@@ -42,3 +42,18 @@ keywords:
   - Plotly Dash
 version: "1.0.0"
 date-released: "2026-08-17"
+
+# The paper is the preferred academic citation. GitHub's "Cite this repository"
+# surfaces this block; the software metadata above remains for the archived code.
+preferred-citation:
+  type: article
+  title: "The Twilight of Antibiotics: A predictive mathematical model of declining antimicrobial effectiveness, and a possible metabolic escape route"
+  authors:
+    - family-names: "Prieto Gratacós"
+      given-names: "Ernesto"
+    - family-names: "Botto"
+      given-names: "Julio A."
+  journal: "British Journal of Medical and Health Research"
+  year: 2026
+  status: submitted
+  notes: "Under peer review (manuscript BJMHR-13-000038). Volume, issue, pages and DOI to be added on acceptance."
