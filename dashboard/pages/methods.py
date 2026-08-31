@@ -104,6 +104,18 @@ def _section(icon, title, points):
     )
 
 
+_CITE_LABEL = {
+    "fontSize": "0.72rem", "fontWeight": "700", "letterSpacing": "0.08em",
+    "textTransform": "uppercase", "color": "var(--text-secondary)", "margin": "0.5rem 0 0.35rem",
+}
+
+_CITE_BOX = {
+    "fontFamily": "var(--font-mono)", "fontSize": "0.82rem",
+    "background": "var(--bg-secondary)", "border": "1px solid var(--border)",
+    "borderRadius": "8px", "padding": "0.75rem 0.9rem", "lineHeight": "1.55", "margin": "0",
+}
+
+
 def _badge(text):
     return html.Span(
         text,
@@ -192,6 +204,15 @@ layout = html.Div([
 
     # 6 — Cite
     _section("edit", "Cite this companion", [
+        html.Div("Cite the paper (Vancouver)", style=_CITE_LABEL),
+        html.P(
+            "Prieto Gratacós E, Botto JA. The Twilight of Antibiotics: a predictive "
+            "mathematical model of declining antimicrobial effectiveness, and a possible "
+            "metabolic escape route. Br J Med Health Res. 2026. "
+            "(Under review; manuscript BJMHR-13-000038).",
+            style=_CITE_BOX,
+        ),
+        html.Div("Cite the software (archived release)", style={**_CITE_LABEL, "marginTop": "0.9rem"}),
         html.P(
             [
                 "Prieto Gratacós, E. & Botto, J. A. (2026). The Twilight of Antibiotics "
@@ -200,12 +221,7 @@ layout = html.Div([
                        href="https://doi.org/10.5281/zenodo.22117640", target="_blank"),
                 " (concept DOI — always latest). Available at resistome.imhoit.com",
             ],
-            style={
-                "fontFamily": "var(--font-mono)", "fontSize": "0.82rem",
-                "background": "var(--bg-secondary)", "border": "1px solid var(--border)",
-                "borderRadius": "8px", "padding": "0.75rem 0.9rem", "lineHeight": "1.55",
-                "margin": "0.5rem 0 0",
-            },
+            style=_CITE_BOX,
         ),
     ]),
 ])
