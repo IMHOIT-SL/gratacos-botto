@@ -13,7 +13,3 @@ Flask==3.1.3
 # (DigitalOcean App Platform, Render, Fly.io). Local dev uses Flask's built-in
 # server via `python dashboard/app.py`.
 gunicorn>=21.2.0
-
-# Standalone matplotlib script (docs/antibiotics.py) — not used by the dashboard
-# itself. Uncomment if you want to run that script directly.
-# matplotlib>=3.8

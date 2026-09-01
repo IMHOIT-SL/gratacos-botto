@@ -58,7 +58,6 @@ pip install dash plotly statsmodels numpy pandas
 | `statsmodels` | 0.14            | SARIMAX model fitting, ACF/PACF computation  |
 | `numpy`       | 1.26+           | Numerical arrays, interpolation, random generation |
 | `pandas`      | 2.0+            | DataFrames for tabular data                   |
-| `matplotlib`  | 3.8+            | Only needed for the standalone `docs/antibiotics.py` script, not the dashboard |
 
 Note: `statsmodels` is a soft dependency for the Time Series page. If it is not installed, the SARIMA model falls back to linear extrapolation, and ACF/PACF computation uses a simplified manual method. All other pages work without it.
 
@@ -93,16 +92,6 @@ HOST=127.0.0.1 PORT=8080 DEBUG=false python dashboard/app.py
 ```
 
 Defaults are `HOST=0.0.0.0`, `PORT=8082`, `DEBUG=true`.
-
-## Running the Standalone Visualization
-
-The original matplotlib-based visualization can be run separately:
-
-```bash
-python docs/antibiotics.py
-```
-
-This opens a matplotlib window showing the logistic resistance curve. It does not require Dash or Plotly.
 
 ## Accessing Each Page
 

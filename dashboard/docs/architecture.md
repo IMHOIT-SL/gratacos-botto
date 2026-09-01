@@ -10,18 +10,12 @@
 | statsmodels     | 0.14     | SARIMAX time-series modeling, ACF/PACF computation   |
 | NumPy           | latest   | Numerical computation, array operations              |
 | pandas          | latest   | DataFrames for tabular data handling                 |
-| matplotlib      | latest   | Used only by the standalone `docs/antibiotics.py` script, not by the dashboard |
 
 ## File Structure
 
 ```
 Gratacos-Botto/
 ├── CLAUDE.md                    # Project-level instructions for Claude Code
-├── docs/
-│   ├── antibiotics.py           # Standalone matplotlib script (original logistic curve)
-│   ├── curves.png               # Static chart of historical AMR publication growth
-│   └── MathematicalModelsPaper.txt  # Literature review and data compilation
-│
 └── dashboard/
     ├── app.py                   # Application entry point — creates the Dash app,
     │                            #   defines the shell layout (header, nav, footer),
