@@ -205,10 +205,10 @@ Push the repo to GitHub, then create an App on DigitalOcean App Platform pointin
 The Procfile ships with:
 
 ```
-web: gunicorn --chdir dashboard --bind 0.0.0.0:${PORT:-8082} --workers 2 --timeout 120 app:server
+web: gunicorn --chdir dashboard --bind 0.0.0.0:${PORT:-8082} --workers 1 --threads 4 --timeout 120 app:server
 ```
 
-This serves the Dash app via the Flask WSGI object exposed by Dash (`app.server`). DigitalOcean injects `$PORT` automatically.
+This serves the Dash app via the Flask WSGI object exposed by Dash (`app.server`). DigitalOcean injects `$PORT` automatically. **1 worker + 4 threads** is intentional: on a 512 MB instance (Basic XXS) two workers each loading pandas/statsmodels can OOM, so concurrency comes from threads instead. On a larger instance you can raise `--workers`.
 
 Alternatives that read the same artifacts: Render.com, Fly.io (with a Dockerfile), Railway, Heroku.
 
@@ -218,7 +218,7 @@ For full control on a VPS, run gunicorn under systemd and proxy through nginx fo
 
 ```bash
 # On the droplet, after cloning the repo and installing requirements:
-gunicorn --chdir dashboard --bind 127.0.0.1:8082 --workers 2 app:server
+gunicorn --chdir dashboard --bind 127.0.0.1:8082 --workers 1 --threads 4 app:server
 ```
 
 Front with nginx (reverse proxy, TLS via certbot) and run gunicorn as a systemd service. This option is the most flexible but requires the most setup.

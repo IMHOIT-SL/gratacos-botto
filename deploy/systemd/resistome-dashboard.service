@@ -13,7 +13,8 @@ Environment=PORT=8082
 ExecStart=/home/ia/projects/Gratacos-Botto/venv/bin/gunicorn \
     --chdir dashboard \
     --bind 127.0.0.1:8082 \
-    --workers 2 \
+    --workers 1 \
+    --threads 4 \
     --timeout 120 \
     --access-logfile - \
     --error-logfile - \
