@@ -1,5 +1,9 @@
 # The Twilight of Antibiotics — Open Computational Companion
 
+> [!NOTE]
+> ### 🔬 Try it live → **[resistome.imhoit.com](https://resistome.imhoit.com)**
+> The full interactive dashboard runs in your browser — no install required.
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22117640.svg)](https://doi.org/10.5281/zenodo.22117640)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Live](https://img.shields.io/badge/live-resistome.imhoit.com-2ea44f)](https://resistome.imhoit.com)
