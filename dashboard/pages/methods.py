@@ -115,30 +115,42 @@ _CITE_BOX = {
     "borderRadius": "8px", "padding": "0.75rem 0.9rem", "lineHeight": "1.55", "margin": "0",
 }
 
-_ORCID_SVG = base64.b64encode(
-    ("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'>"
-     "<rect width='256' height='256' rx='50' fill='#A6CE39'/>"
-     "<text x='128' y='182' font-family='Arial, sans-serif' font-size='150' "
-     "font-weight='bold' fill='#ffffff' text-anchor='middle'>iD</text></svg>").encode("utf-8")
-).decode("ascii")
+def _icon_b64(fill, label):
+    return base64.b64encode(
+        (f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'>"
+         f"<rect width='256' height='256' rx='50' fill='{fill}'/>"
+         f"<text x='128' y='184' font-family='Arial, sans-serif' font-size='140' "
+         f"font-weight='bold' fill='#ffffff' text-anchor='middle'>{label}</text></svg>").encode("utf-8")
+    ).decode("ascii")
+
+_ORCID_SVG = _icon_b64("#A6CE39", "iD")
+_LINKEDIN_SVG = _icon_b64("#0A66C2", "in")
 
 
-def _author(name, oid):
-    """Author name with a clickable ORCID iD (green iD badge + link)."""
+def _author(name, oid, linkedin=None):
+    """Author name with a clickable ORCID iD; LinkedIn as a secondary link."""
+    row = [
+        html.B(name, style={"color": "#e9ebee"}),
+        html.A(
+            [html.Img(src=f"data:image/svg+xml;base64,{_ORCID_SVG}",
+                      style={"width": "1.05rem", "height": "1.05rem"}),
+             f"orcid.org/{oid}"],
+            href=f"https://orcid.org/{oid}", target="_blank",
+            style={"color": "#4fc3f7", "textDecoration": "none", "fontFamily": "var(--font-mono)",
+                   "fontSize": "0.82rem", "display": "inline-flex", "alignItems": "center", "gap": "0.35rem"},
+        ),
+    ]
+    if linkedin:
+        row.append(html.A(
+            [html.Img(src=f"data:image/svg+xml;base64,{_LINKEDIN_SVG}",
+                      style={"width": "1.05rem", "height": "1.05rem"}),
+             "LinkedIn"],
+            href=linkedin, target="_blank",
+            style={"color": "var(--text-secondary)", "textDecoration": "none",
+                   "fontSize": "0.8rem", "display": "inline-flex", "alignItems": "center", "gap": "0.35rem"},
+        ))
     return html.Div(
-        [
-            html.B(name, style={"color": "#e9ebee"}),
-            html.A(
-                [
-                    html.Img(src=f"data:image/svg+xml;base64,{_ORCID_SVG}",
-                             style={"width": "1.05rem", "height": "1.05rem"}),
-                    f"orcid.org/{oid}",
-                ],
-                href=f"https://orcid.org/{oid}", target="_blank",
-                style={"color": "#4fc3f7", "textDecoration": "none", "fontFamily": "var(--font-mono)",
-                       "fontSize": "0.82rem", "display": "inline-flex", "alignItems": "center", "gap": "0.35rem"},
-            ),
-        ],
+        row,
         style={"display": "flex", "alignItems": "center", "gap": "0.7rem",
                "flexWrap": "wrap", "marginBottom": "0.45rem"},
     )
@@ -235,8 +247,10 @@ layout = html.Div([
         html.Div("Autores", style={**_CITE_LABEL, "marginTop": "0"}),
         html.Div(
             [
-                _author("Ernesto Prieto Gratacós", "0000-0002-0323-7041"),
-                _author("Julio Botto", "0009-0008-2656-5946"),
+                _author("Ernesto Prieto Gratacós", "0000-0002-0323-7041",
+                        "https://www.linkedin.com/in/ernestoprietogratacos"),
+                _author("Julio Botto", "0009-0008-2656-5946",
+                        "https://www.linkedin.com/in/jabotto"),
             ],
             style={"background": "var(--bg-secondary)", "border": "1px solid var(--border)",
                    "borderRadius": "8px", "padding": "0.75rem 0.9rem", "marginBottom": "0.2rem"},
