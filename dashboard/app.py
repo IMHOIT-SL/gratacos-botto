@@ -7,6 +7,7 @@ import os
 
 import dash
 from dash import Dash, html, dcc, callback, Input, Output, State
+import dash_mantine_components as dmc
 
 app = Dash(
     __name__,
@@ -20,7 +21,7 @@ app = Dash(
 # (gunicorn 23+ rejects the dotted `app:app.server` spec.)
 server = app.server
 
-app.layout = html.Div(
+_app_body = html.Div(
     [
         dcc.Location(id="url", refresh=False),
         # Header
@@ -69,6 +70,22 @@ app.layout = html.Div(
         ),
     ],
     className="app-container",
+)
+
+# Mantine (dmc) provides the modern, accessible controls (SegmentedControl,
+# Select, Slider, Button) used on the interactive pages. The provider must wrap
+# the whole layout so those components work on any page. Theme is aligned to the
+# app's dark palette (cyan accent); fonts are inherited from style.css.
+app.layout = dmc.MantineProvider(
+    forceColorScheme="dark",
+    theme={
+        "primaryColor": "cyan",
+        "primaryShade": 4,
+        "fontFamily": "inherit",
+        "fontFamilyMonospace": "var(--font-mono, monospace)",
+        "defaultRadius": "md",
+    },
+    children=_app_body,
 )
 
 NAV_ITEMS = [

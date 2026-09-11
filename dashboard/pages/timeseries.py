@@ -8,6 +8,7 @@ import warnings
 
 import dash
 from dash import html, dcc, callback, Input, Output
+import dash_mantine_components as dmc
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
@@ -187,29 +188,32 @@ layout = html.Div([
         ]),
         html.Div([
             html.Div([
-                html.Label("Pathogen", style={"fontWeight": "600", "marginBottom": "0.3rem", "display": "block"}),
-                dcc.RadioItems(
+                html.Label("Pathogen", style={"fontWeight": "600", "marginBottom": "0.4rem", "display": "block"}),
+                dmc.SegmentedControl(
                     id="ts-pathogen-dropdown",
-                    options=[{"label": p, "value": p} for p in PATHOGEN_CHOICES],
+                    data=[{"label": p, "value": p} for p in PATHOGEN_CHOICES],
                     value="MRSA",
-                    className="seg-radio",
+                    color="cyan",
+                    radius="md",
+                    fullWidth=True,
                 ),
-            ], style={"marginRight": "2rem"}),
+            ], style={"flex": "1 1 340px"}),
             html.Div([
-                html.Label("Forecast horizon (months)", style={"fontWeight": "600", "marginBottom": "0.3rem", "display": "block"}),
-                dcc.RadioItems(
+                html.Label("Forecast horizon (months)", style={"fontWeight": "600", "marginBottom": "0.4rem", "display": "block"}),
+                dmc.SegmentedControl(
                     id="ts-horizon-slider",
-                    options=[
-                        {"label": "6 m", "value": 6},
-                        {"label": "12 m", "value": 12},
-                        {"label": "24 m", "value": 24},
-                        {"label": "36 m", "value": 36},
+                    data=[
+                        {"label": "6 m", "value": "6"},
+                        {"label": "12 m", "value": "12"},
+                        {"label": "24 m", "value": "24"},
+                        {"label": "36 m", "value": "36"},
                     ],
-                    value=12,
-                    className="seg-radio",
+                    value="12",
+                    color="cyan",
+                    radius="md",
                 ),
-            ], style={"minWidth": "260px"}),
-        ], style={"display": "flex", "alignItems": "flex-end", "flexWrap": "wrap", "gap": "1rem"}),
+            ], style={"flex": "0 0 auto"}),
+        ], style={"display": "flex", "alignItems": "flex-end", "flexWrap": "wrap", "gap": "1.25rem"}),
     ], className="card"),
 
     # Main forecast chart
@@ -285,6 +289,7 @@ _TS_CACHE = {}
     Input("ts-horizon-slider", "value"),
 )
 def update_timeseries(pathogen, horizon):
+    horizon = int(horizon)  # SegmentedControl returns the value as a string
     key = (pathogen, horizon)
     cached = _TS_CACHE.get(key)
     if cached is not None:

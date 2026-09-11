@@ -5,6 +5,7 @@ MDR/XDR/PDR phenotype badges, and a transient Sensitivity Analysis panel.
 
 import dash
 from dash import html, dcc, callback, Input, Output, State, ALL, ctx
+import dash_mantine_components as dmc
 import plotly.graph_objects as go
 import numpy as np
 
@@ -261,84 +262,66 @@ SVG_CONFIG = {
 # Sensitivity Analysis panel — transient overrides (per-session, not persisted)
 # ---------------------------------------------------------------------------
 def build_sensitivity_panel():
-    pathogen_options = [{"label": p, "value": i} for i, p in enumerate(PATHOGENS)]
-    abx_options = [{"label": a.replace("\n", " "), "value": j}
+    pathogen_options = [{"label": p, "value": str(i)} for i, p in enumerate(PATHOGENS)]
+    abx_options = [{"label": a.replace("\n", " "), "value": str(j)}
                    for j, a in enumerate(ANTIBIOTIC_CLASSES)]
 
     return html.Div([
         chart_title_with_info(
             "Sensitivity Analysis (what-if mode)",
             "Override individual pathogen × antibiotic resistance values for sensitivity analysis. Defaults are anchored to peer-reviewed surveillance data; overrides are transient (reset on page reload) to preserve reproducibility.",
-            "Transient cell-level overrides — peer-reviewed defaults preserved on reload",
+            "Transient cell-level overrides (peer-reviewed defaults preserved on reload)",
         ),
 
         html.Div([
             html.Div([
-                html.Label("Pathogen", style={"fontSize": "0.78rem", "color": "#9aa0a6", "display": "block", "marginBottom": "0.25rem"}),
-                dcc.RadioItems(
+                dmc.Select(
                     id="sens-pathogen",
-                    options=pathogen_options,
-                    value=0,
-                    className="seg-radio",
+                    label="Pathogen",
+                    data=pathogen_options,
+                    value="0",
+                    searchable=True,
+                    allowDeselect=False,
+                    comboboxProps={"withinPortal": False},
                 ),
-            ], style={"flex": "1 1 auto"}),
+            ], style={"flex": "1 1 260px", "minWidth": "220px"}),
 
             html.Div([
-                html.Label("Antibiotic class", style={"fontSize": "0.78rem", "color": "#9aa0a6", "display": "block", "marginBottom": "0.25rem"}),
-                dcc.RadioItems(
+                dmc.Select(
                     id="sens-antibiotic",
-                    options=abx_options,
-                    value=2,  # carbapenems by default
-                    className="seg-radio",
+                    label="Antibiotic class",
+                    data=abx_options,
+                    value="2",  # carbapenems by default
+                    searchable=True,
+                    allowDeselect=False,
+                    comboboxProps={"withinPortal": False},
                 ),
-            ], style={"flex": "1 1 auto"}),
+            ], style={"flex": "1 1 260px", "minWidth": "220px"}),
 
             html.Div([
-                html.Label("% Resistant override (0–100)",
-                           style={"fontSize": "0.78rem", "color": "#9aa0a6", "display": "block", "marginBottom": "0.25rem"}),
-                dcc.Slider(
+                html.Label("% Resistant override (0-100)",
+                           style={"fontSize": "0.875rem", "color": "#c1c2c5", "display": "block", "marginBottom": "0.55rem"}),
+                dmc.Slider(
                     id="sens-value",
                     min=0, max=100, step=1, value=50,
-                    marks={0: "0", 25: "25", 50: "50", 75: "75", 100: "100"},
-                    tooltip={
-                        "placement": "top",
-                        "always_visible": False,
-                        "style": {"color": "#000000", "opacity": "1",
-                                  "fontWeight": "700", "fontSize": "0.8rem"},
-                    },
+                    color="cyan",
+                    marks=[{"value": v, "label": str(v)} for v in (0, 25, 50, 75, 100)],
+                    labelAlwaysOn=False,
                 ),
-            ], style={"flex": "1 1 320px", "minWidth": "260px"}),
+            ], style={"flex": "1 1 320px", "minWidth": "260px", "paddingBottom": "0.4rem"}),
 
             html.Div([
-                html.Button("Apply override", id="sens-apply", n_clicks=0,
-                            style={
-                                "background": "var(--accent-dim)",
-                                "color": "var(--accent)",
-                                "border": "1px solid var(--border)",
-                                "padding": "0.5rem 1rem",
-                                "borderRadius": "6px",
-                                "fontSize": "0.82rem",
-                                "fontWeight": "600",
-                                "cursor": "pointer",
-                                "marginRight": "0.5rem",
-                            }),
-                html.Button("Reset all", id="sens-reset", n_clicks=0,
-                            style={
-                                "background": "transparent",
-                                "color": "var(--text-secondary)",
-                                "border": "1px solid var(--border)",
-                                "padding": "0.5rem 1rem",
-                                "borderRadius": "6px",
-                                "fontSize": "0.82rem",
-                                "fontWeight": "600",
-                                "cursor": "pointer",
-                            }),
-            ], style={"flex": "0 0 auto", "alignSelf": "flex-end"}),
+                dmc.Button("Apply override", id="sens-apply", n_clicks=0,
+                           color="cyan", variant="light",
+                           style={"marginRight": "0.5rem"}),
+                dmc.Button("Reset all", id="sens-reset", n_clicks=0,
+                           color="gray", variant="subtle"),
+            ], style={"flex": "0 0 auto", "alignSelf": "flex-end", "display": "flex", "gap": "0.4rem"}),
 
         ], style={
             "display": "flex",
             "flexWrap": "wrap",
-            "gap": "1rem",
+            "gap": "1.25rem",
             "alignItems": "flex-end",
             "marginTop": "0.5rem",
             "marginBottom": "0.75rem",
@@ -387,6 +370,8 @@ def update_overrides(_apply, _reset, p_idx, a_idx, val, overrides):
     if triggered == "sens-reset":
         return {}
     if triggered == "sens-apply" and p_idx is not None and a_idx is not None:
+        # dmc.Select returns the value as a string; matrix indices are ints.
+        p_idx, a_idx = int(p_idx), int(a_idx)
         # Refuse to override intrinsic-R cells (NaN) — preserves biological correctness
         if np.isnan(RESISTANCE_MATRIX[p_idx, a_idx]):
             return overrides
@@ -403,7 +388,7 @@ def render_heatmap(overrides):
     overrides = overrides or {}
     fig = build_heatmap(overrides)
     if not overrides:
-        status = "Defaults active — 0 cells modified."
+        status = "Defaults active. 0 cells modified."
     else:
         status = (
             f"⚙ {len(overrides)} cell(s) modified vs literature defaults. "
@@ -425,6 +410,7 @@ def render_preview(p_idx, a_idx, target_val, overrides):
     if p_idx is None or a_idx is None:
         return "Select a pathogen and an antibiotic class to preview the override."
 
+    p_idx, a_idx = int(p_idx), int(a_idx)  # dmc.Select returns strings
     pathogen = PATHOGENS[p_idx]
     abx = ANTIBIOTIC_CLASSES[a_idx].replace("\n", " ")
     default_val = RESISTANCE_MATRIX[p_idx, a_idx]
@@ -435,7 +421,7 @@ def render_preview(p_idx, a_idx, target_val, overrides):
     if np.isnan(default_val):
         return [
             html.Span("⚠ ", style={"color": "var(--warning)"}),
-            html.Span(f"{pathogen} × {abx} — "),
+            html.Span(f"{pathogen} × {abx}: "),
             html.Span("intrinsic resistance",
                       style={"color": "var(--warning)", "fontWeight": "700"}),
             html.Span(" · override blocked (biological correctness preserved)."),
@@ -445,7 +431,7 @@ def render_preview(p_idx, a_idx, target_val, overrides):
     if key in overrides:
         current = float(overrides[key])
         return [
-            html.Span(f"{pathogen} × {abx} — current: "),
+            html.Span(f"{pathogen} × {abx}, current: "),
             html.Span(f"{current:.0f}%",
                       style={"color": "var(--accent)", "fontWeight": "700"}),
             html.Span(" (modified) · default: "),
@@ -458,7 +444,7 @@ def render_preview(p_idx, a_idx, target_val, overrides):
 
     # Cell at literature default
     return [
-        html.Span(f"{pathogen} × {abx} — current: "),
+        html.Span(f"{pathogen} × {abx}, current: "),
         html.Span(f"{default_val:.0f}%",
                   style={"color": "var(--accent)", "fontWeight": "700"}),
         html.Span(" (literature default)  →  Apply will set to: "),
