@@ -19,11 +19,13 @@ antimicrobial-resistance (AMR) dynamics. It is deployed live at
 
 Everything runs from `dashboard/`:
 
-- `dashboard/app.py` — Dash app (`use_pages=True`), shell layout, `NAV_ITEMS` (12 pages). WSGI target `app:server`.
-- `dashboard/pages/` — one module per page (12): `overview`, `scenarios` (`/scenarios`, Scenario Lab), `pathogens`, `timeseries`, `bibliometrics` (`/industry`), `antimetabolic` (`/metabolic`), `methods`, `datasources`, `references`, `export`, `documentation` (`/docs`), `tutorial`.
+- `dashboard/app.py` — Dash app (`use_pages=True`), shell layout, `NAV_ITEMS` (13 pages). WSGI target `app:server`.
+- `dashboard/pages/` — one module per page (13): `overview`, `scenarios` (`/scenarios`, Scenario Lab), `pathogens`, `timeseries`, `bibliometrics` (`/industry`), `antimetabolic` (`/metabolic`), `methods`, `datasources`, `references`, `press` (`/press`, paper/poster/posts), `export`, `documentation` (`/docs`), `tutorial`. Each exposes `layout(lang=None, **query)` returning `translate(_layout, current_lang(lang))`.
 - `dashboard/data/` — the data/model layer: `amr_data.py` (super-exponential curve), `pathogen_data.py`, `timeseries_data.py`, `bibliometrics_data.py`, `references_data.py` (55 refs, numbered as in the published paper).
 - `dashboard/docs/` — in-app markdown documentation (`architecture`, `setup`, `charts_guide`, `models`, `data_sources`), rendered by the Documentation page.
-- `dashboard/assets/` — `style.css` (dark theme) + `export_download.js`.
+- `dashboard/i18n/` — English/Spanish. `translate()` swaps any rendered string found in `i18n/es/*.json` ({English: Spanish}; `__patterns__` for run-time strings). Language = `?lang=` > `amr_lang` cookie > browser. Callbacks that return text/figures use `@translated`.
+- `dashboard/components.py` — `help_section`, `chart_title_with_info`, `graph_config()` (curated chart toolbar; every `dcc.Graph` must use it).
+- `dashboard/assets/` — `style.css` (dark theme), `export_download.js`, `graph_toolbar.js` (SVG/PNG/CSV/full-screen buttons), `i18n.js` (EN/ES switch), `plotly-locale-es.js`, `press/` (poster PDF + preview).
 - Deploy: `Procfile`, `.do/app.yaml` (DigitalOcean App Platform), `deploy/systemd/` (self-host fallback), `run-api.sh` / `run-web.sh`. See `DEPLOY.md`.
 - Citation/metadata: `CITATION.cff`, `.zenodo.json`, `LICENSE` (MIT).
 
@@ -41,6 +43,8 @@ venv/bin/gunicorn --chdir dashboard --bind 0.0.0.0:8082 --workers 1 --threads 4 
 - **Deterministic only.** Closed-form/analytic models, no parameter fitting, no random sampling; SARIMA uses a fixed seed (42). Every figure must reproduce bit-for-bit on any machine. Transient UI state goes through `dcc.Store(storage_type="memory")`.
 - **Sources are cited, not invented.** Mortality/surveillance values come from named published sources; every source mention gets a clickable link.
 - Keep the app self-contained: no database, no external API at run-time — all coefficients embedded.
+- **Bilingual.** Every new user-visible string needs a Spanish entry in `dashboard/i18n/es/*.json`; run `cd dashboard && python -m i18n.extract` (the only strings left without Spanish must be names, citations, acronyms). Bibliographic citations stay in English; technical docs (`dashboard/docs/`) are English-only.
+- **100% aligned with the published paper.** Claims, badges, quotes and references must be backed by the published text or its 55 references.
 
 ## Key Domain Context
 

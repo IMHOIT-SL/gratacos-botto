@@ -23,6 +23,8 @@ from data.amr_data import (
 )
 from components import help_section, chart_title_with_info, graph_config
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/", name="Overview")
 
 SOURCE_URLS = {
@@ -449,7 +451,7 @@ def build_data_table():
 
 
 # Layout
-layout = html.Div([
+_layout = html.Div([
     help_section("Overview", [
         "RESISTANCE PRESSURE INDEX: The y-axis on the main chart represents a normalized 'Resistance Pressure Index' scored from 0 to 100. This is a composite conceptual metric, not a raw epidemiological measurement. It synthesizes multiple indicators -- percentage of resistant isolates across priority pathogens, loss of effective drug classes, and clinical treatment failure rates -- into a single normalized score. A value of 0 represents a pre-antibiotic baseline; 100 represents near-total resistance across all first-line agents for hospital-acquired Gram-negative infections.",
         "SUPER-EXPONENTIAL MODEL (Gratacós-Botto thesis, published paper, Discussion): The primary curve plotted on this chart is NOT a standard logistic. The Gratacós-Botto model proposes that the rate of increasing resistance is itself growing — i.e., resistance accelerates faster than a constant-rate process would predict. Mathematically the curve is y(τ) = K / (1 + A · exp(-r·τ - b·τ²)), where the time-quadratic term -b·τ² makes the effective rate r_eff(τ) = r + 2·b·τ grow linearly with elapsed years. Coefficients (K=100, A=7.333, r=0.0705, b=3.05·10⁻⁴) are hardcoded and calibrated to published anchor points; the model is fully deterministic and reproducible.",
@@ -611,3 +613,8 @@ layout = html.Div([
         ], className="chart-sources"),
     ], className="card"),
 ])
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser)."""
+    return translate(_layout, current_lang(lang))

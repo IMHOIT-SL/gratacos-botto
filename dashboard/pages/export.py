@@ -44,6 +44,8 @@ from data.bibliometrics_data import (
     AWARENESS_EFFECTIVENESS,
 )
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/export", name="Export")
 
 # ---------------------------------------------------------------------------
@@ -698,7 +700,7 @@ CHART_BUILDERS = {
 # Layout
 # ---------------------------------------------------------------------------
 
-layout = html.Div([
+_layout = html.Div([
     help_section("Export Studio", [
         "FORMAT SELECTION -- SVG VS PNG VS PDF: SVG (Scalable Vector Graphics) is recommended for journal submissions and any context where the figure may be resized. SVG files are resolution-independent, produce crisp text and lines at any zoom level, and are accepted by most major publishers (Nature, Lancet, PLOS, BMJ, JAMA). PNG is best for presentations and web; use 2x or 3x scale for clarity. For PDF, export as SVG and convert with Inkscape (free) or Adobe Illustrator.",
         "RESOLUTION GUIDE: 1x is screen-only. 2x (~150 dpi) is appropriate for slide presentations, posters, and internal reports. 3x (~300 dpi) meets the minimum for print publication in peer-reviewed journals. When in doubt, export at 3x.",
@@ -847,8 +849,14 @@ layout = html.Div([
     Input("export-chart-select", "value"),
     Input("export-color-scheme", "value"),
 )
+@translated
 def update_preview(chart_name, color_scheme):
     theme = THEMES.get(color_scheme, THEMES["dark"])
     builder = CHART_BUILDERS.get(chart_name, build_main_curve)
     fig = builder(theme)
     return fig
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser)."""
+    return translate(_layout, current_lang(lang))

@@ -26,6 +26,8 @@ from data.amr_data import (
 )
 from components import help_section, chart_title_with_info, graph_config
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/scenarios", name="Scenario Lab")
 
 PAPER_URL = "https://doi.org/10.5281/zenodo.21898960"
@@ -105,7 +107,7 @@ controls = html.Div([
 ], className="card")
 
 
-layout = html.Div([
+_layout = html.Div([
     help_section("Scenario Lab", [
         "PURPOSE: This page answers one question: how many years before the critical inefficacy threshold (~95) do we gain if we act, and how much does it matter when we start? It applies hypothetical interventions to the paper's super-exponential model and redraws the curve instantly.",
         "WHAT THIS IS NOT: The paper does not quantify the effect of any intervention. The lever percentages are assumptions you choose, not measured effects, and the presets are illustrative. Read the results as the sensitivity of the paper's model to those assumptions, not as a prediction.",
@@ -189,6 +191,7 @@ def _stat(value, label, cls):
     Input("scn-pipeline", "value"),
     Input("scn-start", "value"),
 )
+@translated
 def update_scenario(stewardship, pipeline, start_year):
     s, p, start_year = stewardship / 100.0, pipeline / 100.0, int(start_year)
     df = compute_scenario_curve(s, p, start_year, end=END_YEAR)
@@ -278,3 +281,8 @@ def update_scenario(stewardship, pipeline, start_year):
         hovermode="x unified",
     )
     return fig, rate, stats
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser)."""
+    return translate(_layout, current_lang(lang))

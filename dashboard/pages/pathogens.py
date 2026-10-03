@@ -17,6 +17,8 @@ from data.pathogen_data import (
 )
 from components import help_section, chart_title_with_info, graph_config
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/pathogens", name="Pathogens")
 
 CHART_LAYOUT = dict(
@@ -333,7 +335,8 @@ def build_phenotype_legend():
             *badges,
             html.Span(
                 "MDR = ≥1 agent in ≥3 classes · XDR = susceptible to ≤2 classes · "
-                "PDR = resistant to all tested agents",
+                "PDR = resistant to all tested agents · "
+                "'no data in paper' = phenotype not documented in the published paper's references",
                 style={"color": "#9aa0a6"},
             ),
         ],
@@ -537,6 +540,7 @@ def update_overrides(_apply, _reset, _bulk, _opt, _pess, _lit,
     Output("sens-bulk-target", "disabled"),
     Input("sens-bulk-scope", "value"),
 )
+@translated
 def update_bulk_target(scope):
     if scope == "pathogen":
         return [{"label": p, "value": str(i)} for i, p in enumerate(PATHOGENS)], "2", False
@@ -551,6 +555,7 @@ def update_bulk_target(scope):
     Input("sens-overrides", "data"),
     Input("sens-view", "value"),
 )
+@translated
 def render_heatmap(overrides, view):
     overrides = overrides or {}
     fig = build_delta_heatmap(overrides) if view == "delta" else build_heatmap(overrides)
@@ -584,6 +589,7 @@ def render_heatmap(overrides, view):
     Input("sens-value", "value"),
     Input("sens-overrides", "data"),
 )
+@translated
 def render_preview(p_idx, a_idx, target_val, overrides):
     """Live preview of the cell currently selected by the dropdowns + slider.
     Updates immediately on any input change — independent of the Apply button."""
@@ -633,12 +639,12 @@ def render_preview(p_idx, a_idx, target_val, overrides):
     ]
 
 
-layout = html.Div([
+_layout = html.Div([
     help_section("Pathogens", [
         "ESKAPEE PATHOGENS: The ESKAPEE group — Enterococcus faecium, Staphylococcus aureus, Klebsiella pneumoniae, Acinetobacter baumannii, Pseudomonas aeruginosa, Enterobacter species, and Escherichia coli — are the leading causes of nosocomial (hospital-acquired) infections worldwide. The acronym was originally ESKAPE (published paper, Introduction, ESKAPEE makes E. coli explicit, hence ESKAPEE). They 'escape' the effects of most available antibiotics through multiple resistance mechanisms. Together, these organisms account for the majority of multidrug-resistant infections in intensive care units and a disproportionate share of AMR-attributable mortality globally.",
         "STENOTROPHOMONAS MALTOPHILIA: Added to the heatmap per paper ref 36 (extensively drug-resistant S. maltophilia, Tan et al. 2008). S. maltophilia is intrinsically resistant to most β-lactams (penicillins, 3rd-gen cephalosporins, carbapenems) due to its L1 metallo-β-lactamase and L2 cephalosporinase, and to aminoglycosides, vancomycin, and macrolides. It is therefore shown with many grey ('—') cells: those reflect biology, not missing data. The few treatable classes — TMP/SMX (~15% R), fluoroquinolones (~35% R), tetracyclines (~25% R) — are themselves losing efficacy in resistant isolates.",
         "WHO PRIORITY CLASSIFICATION: 'Critical' priority (red) includes carbapenem-resistant Acinetobacter, Pseudomonas, and Enterobacterales. 'High' priority (amber) includes vancomycin-resistant Enterococcus, MRSA, and others where resistance is widespread but some treatment alternatives exist. 'Medium' priority (blue) includes organisms like penicillin-non-susceptible Streptococcus pneumoniae. 'Special' priority (lavender) covers M. tuberculosis and S. maltophilia, which require their own surveillance frameworks.",
-        "MDR / XDR / PDR PHENOTYPE BADGES (Magiorakos 2012): Each row is also labelled with the strongest documented isolate-level phenotype reported in peer-reviewed literature. MDR = non-susceptible to ≥1 agent in ≥3 antibiotic classes. XDR = susceptible to agents in ≤2 classes. PDR = resistant to all tested agents. CRITICAL: these classifications are isolate-level, not species-level — saying 'A. baumannii is PDR' is shorthand for 'PDR strains of A. baumannii are documented in the literature'. Most clinical isolates of any species are still susceptible to at least some drugs.",
+        "MDR / XDR / PDR PHENOTYPE BADGES (Magiorakos 2012): Each row is also labelled with the strongest documented isolate-level phenotype reported in peer-reviewed literature. MDR = non-susceptible to ≥1 agent in ≥3 antibiotic classes. XDR = susceptible to agents in ≤2 classes. PDR = resistant to all tested agents. CRITICAL: these classifications are isolate-level, not species-level — saying 'A. baumannii is PDR' is shorthand for 'PDR strains of A. baumannii are documented in the literature'. Most clinical isolates of any species are still susceptible to at least some drugs. Rows marked 'no data in paper' (E. faecium, E. coli, N. gonorrhoeae, S. pneumoniae) have no phenotype documented in the published paper's references, so no badge is shown for them.",
         "INTRINSIC RESISTANCE (GREY CELLS): Cells displayed as a dash ('—') indicate intrinsic resistance — the organism is naturally resistant due to fundamental biology, not acquired mechanisms. Gram-negative bacteria are intrinsically resistant to vancomycin (drug cannot penetrate the outer membrane). S. maltophilia carries metallo-β-lactamases that hydrolyze every carbapenem. These cells are excluded from the colour scale because the resistance is not clinically meaningful in the same way as acquired resistance.",
         "SENSITIVITY ANALYSIS PANEL (research-mode what-if): Below the heatmap, a transient panel lets you override individual cell values to explore 'what if resistance for this pathogen-drug pair were X% instead?'. Defaults are anchored to peer-reviewed surveillance medians and are restored on every page reload — overrides are not persisted, by design, to preserve reproducibility for publication. The panel refuses to override intrinsic-R (NaN) cells: those reflect biology, not surveillance data, and forcing a number on them would be misleading.",
         "BULK CHANGES AND SCENARIOS: The panel also changes a whole pathogen (row), a whole antibiotic class (column) or the entire matrix at once, by a relative percentage of each literature value (clipped to 0-100). Bulk changes are always computed from the literature value, so applying the same change twice gives the same result. The Optimistic (-20%) and Pessimistic (+25%) presets are illustrative assumptions, not projections. Switch the heatmap to 'Difference vs literature' to see exactly which cells changed and by how many percentage points; the summary row compares the mean resistance and the number of pathogen-drug pairs at or above 50% resistant.",
@@ -741,3 +747,8 @@ layout = html.Div([
         ], style={"fontSize": "0.82rem", "color": "#9aa0a6"}),
     ], className="card"),
 ])
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser)."""
+    return translate(_layout, current_lang(lang))

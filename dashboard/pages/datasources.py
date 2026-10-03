@@ -10,6 +10,8 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from components import help_section, chart_title_with_info, graph_config
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/datasources", name="Data Sources")
 
 CHART_LAYOUT = dict(
@@ -220,7 +222,7 @@ def build_summary_cards():
 
 SVG_CONFIG = graph_config()
 
-layout = html.Div([
+_layout = html.Div([
     # Help section
     help_section("Data Sources", [
         "WHY DATA PROVENANCE MATTERS: Antimicrobial resistance research is only as reliable as the underlying surveillance data. Different data sources use different sampling methods (clinical isolates vs population-based sampling), different breakpoint standards (EUCAST vs CLSI), and different geographic coverage. Understanding where the data comes from, how it was collected, and what populations it represents is essential for interpreting resistance estimates correctly and for assessing whether findings from one setting can be generalized to another. This page provides a transparent audit trail linking every dashboard visualization back to its primary data source.",
@@ -259,3 +261,8 @@ layout = html.Div([
         ),
     ], className="card"),
 ])
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser)."""
+    return translate(_layout, current_lang(lang))

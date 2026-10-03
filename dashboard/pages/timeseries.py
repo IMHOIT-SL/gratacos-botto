@@ -17,6 +17,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from data.timeseries_data import PATHOGEN_CHOICES, MONTHLY_DATA
 from components import help_section, chart_title_with_info, graph_config
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/timeseries", name="Time Series")
 
 # Suppress convergence warnings from statsmodels during fitting
@@ -149,7 +151,7 @@ def apply_intervention(bau, slope, reduction, delay):
 # Layout
 # ---------------------------------------------------------------------------
 
-layout = html.Div([
+_layout = html.Div([
     # Help section
     help_section("Time Series", [
         "WHAT IS SARIMA: SARIMA (Seasonal AutoRegressive Integrated Moving Average) is a statistical forecasting method that decomposes time series data into three components: trend (long-term direction), seasonality (repeating cyclical patterns), and noise (random variation). It then uses the patterns found in historical data to project future values. Unlike machine learning approaches, SARIMA provides interpretable parameters and well-defined confidence intervals, making it widely used in epidemiological forecasting including AMR surveillance. The model captures both short-term autocorrelation (this month's value depends on recent months) and seasonal patterns (resistance rates may fluctuate with antibiotic prescribing seasons).",
@@ -310,6 +312,7 @@ _TS_CACHE = {}
     Input("ts-pathogen-dropdown", "value"),
     Input("ts-horizon-slider", "value"),
 )
+@translated
 def update_timeseries(pathogen, horizon):
     horizon = int(horizon)  # SegmentedControl returns the value as a string
     key = (pathogen, horizon)
@@ -531,6 +534,7 @@ def _scenario_stat(value, label, cls):
     Input("ts-int-delay", "value"),
     Input("ts-int-band", "checked"),
 )
+@translated
 def update_scenario(pathogen, horizon, reduction, delay, show_band):
     horizon, delay = int(horizon), int(delay)  # SegmentedControl values are strings
     series, result = _get_fit(pathogen, horizon)
@@ -642,3 +646,8 @@ def _warm_default_ts_cache():
 
 
 _threading.Thread(target=_warm_default_ts_cache, daemon=True).start()
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser)."""
+    return translate(_layout, current_lang(lang))

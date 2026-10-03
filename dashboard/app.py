@@ -9,6 +9,8 @@ import dash
 from dash import Dash, html, dcc, callback, Input, Output, State
 import dash_mantine_components as dmc
 
+from i18n import T, current_lang, translate
+
 app = Dash(
     __name__,
     use_pages=True,
@@ -50,13 +52,19 @@ _app_body = html.Div(
                     href="/",
                     style={"textDecoration": "none"},
                 ),
-                # Direct access to the published paper (open-access PDF on Zenodo)
-                html.A(
-                    "📄 Read the paper",
-                    href=PAPER_URL,
-                    target="_blank",
-                    title=PAPER_CITATION,
-                    className="paper-pill",
+                html.Div(
+                    [
+                        # Direct access to the published paper (open-access PDF on Zenodo)
+                        html.A(
+                            "📄 Read the paper",
+                            href=PAPER_URL,
+                            target="_blank",
+                            title=PAPER_CITATION,
+                            className="paper-pill",
+                        ),
+                        html.Div(id="lang-switch", className="lang-switch"),
+                    ],
+                    className="header-actions",
                 ),
                 html.Nav(
                     id="nav-bar",
@@ -94,17 +102,33 @@ _app_body = html.Div(
 # Select, Slider, Button) used on the interactive pages. The provider must wrap
 # the whole layout so those components work on any page. Theme is aligned to the
 # app's dark palette (cyan accent); fonts are inherited from style.css.
-app.layout = dmc.MantineProvider(
-    forceColorScheme="dark",
-    theme={
-        "primaryColor": "cyan",
-        "primaryShade": 4,
-        "fontFamily": "inherit",
-        "fontFamilyMonospace": "var(--font-mono, monospace)",
-        "defaultRadius": "md",
-    },
-    children=_app_body,
-)
+def _lang_buttons(lang):
+    """EN / ES switch; assets/i18n.js sets the amr_lang cookie and reloads."""
+    return [
+        html.Button(code.upper(), className="lang-btn active" if code == lang else "lang-btn",
+                    title=name, **{"data-lang": code, "aria-pressed": "true" if code == lang else "false"})
+        for code, name in (("en", "English"), ("es", "Español"))
+    ]
+
+
+def serve_layout():
+    # Called per page load, so the shell is rendered in the visitor's language
+    lang = current_lang()
+    body = translate(_app_body, lang)
+    return dmc.MantineProvider(
+        forceColorScheme="dark",
+        theme={
+            "primaryColor": "cyan",
+            "primaryShade": 4,
+            "fontFamily": "inherit",
+            "fontFamilyMonospace": "var(--font-mono, monospace)",
+            "defaultRadius": "md",
+        },
+        children=body,
+    )
+
+
+app.layout = serve_layout
 
 NAV_ITEMS = [
     ("Overview", "/"),
@@ -116,21 +140,23 @@ NAV_ITEMS = [
     ("Methods", "/methods"),
     ("Data Sources", "/datasources"),
     ("References", "/references"),
+    ("Press", "/press"),
     ("Export Studio", "/export"),
     ("Documentation", "/docs"),
     ("Tutorial", "/tutorial"),
 ]
 
 
-@callback(Output("nav-bar", "children"), Input("url", "pathname"))
+@callback(Output("nav-bar", "children"), Output("lang-switch", "children"), Input("url", "pathname"))
 def update_nav(pathname):
-    """Highlight the active page in the navigation bar."""
+    """Highlight the active page in the navigation bar (labels in the visitor's language)."""
+    lang = current_lang()
     links = []
     for label, href in NAV_ITEMS:
         is_active = (pathname == href) or (pathname and href != "/" and pathname.startswith(href))
         cls = "nav-link active" if is_active else "nav-link"
-        links.append(dcc.Link(label, href=href, className=cls))
-    return links
+        links.append(dcc.Link(T(label, lang), href=href, className=cls))
+    return links, _lang_buttons(lang)
 
 
 if __name__ == "__main__":

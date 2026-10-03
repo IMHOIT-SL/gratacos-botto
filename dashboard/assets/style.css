@@ -696,3 +696,53 @@ input.dash-range-slider-input,
     background: var(--bg-card, #21232d);
     padding: 16px;
 }
+
+/* Press & materials */
+.press-head { margin-bottom: 1.2rem; }
+.press-h1 { font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.3rem; }
+.press-lede { color: var(--text-secondary); font-size: 0.92rem; margin: 0; }
+.press-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 1.5rem; }
+.press-grid > .press-card { margin-bottom: 0; }
+.press-grid { margin-bottom: 1.5rem; }
+.press-card { display: flex; flex-direction: column; gap: 0.6rem; }
+.press-kind { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.12em; color: var(--accent); font-weight: 600; }
+.press-title { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 0; line-height: 1.35; }
+.press-meta { color: var(--text-secondary); font-size: 0.85rem; margin: 0; line-height: 1.55; }
+.press-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: auto; padding-top: 0.4rem; }
+.press-btn { display: inline-block; padding: 0.45rem 0.95rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600;
+    text-decoration: none; color: var(--accent); border: 1px solid var(--accent); white-space: nowrap; }
+.press-btn:hover { background: rgba(79, 195, 247, 0.1); }
+.press-btn.primary { background: var(--accent); color: var(--bg-primary); }
+.press-btn.primary:hover { opacity: 0.88; }
+.press-poster { flex-direction: row; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
+.press-poster-link { flex: 0 1 300px; display: block; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+.press-poster-img { display: block; width: 100%; height: auto; }
+.press-poster-body { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+.press-list { margin: 0; padding-left: 1.1rem; color: var(--text-secondary); font-size: 0.85rem; line-height: 1.7; }
+.press-rows { display: flex; flex-direction: column; gap: 0.6rem; }
+.press-row { display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 0.75rem; background: var(--bg-secondary);
+    border: 1px solid var(--border); border-radius: 8px; }
+.press-row-text { flex: 1 1 auto; min-width: 0; }
+.press-row-title { font-size: 0.86rem; font-weight: 600; color: var(--text-primary); }
+.press-row-detail { font-size: 0.76rem; color: var(--text-secondary); }
+.press-chip { font-family: var(--font-mono); font-size: 0.66rem; padding: 0.15rem 0.5rem; border-radius: 999px;
+    background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); white-space: nowrap; }
+.press-soon { font-size: 0.74rem; color: var(--warning); white-space: nowrap; }
+.press-cite-label { font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3rem; }
+.press-cite { font-family: var(--font-mono); font-size: 0.76rem; line-height: 1.6; color: var(--text-primary); margin: 0.25rem 0 0;
+    background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.8rem; }
+
+/* Header actions: paper pill + language switch */
+.header-actions { display: flex; align-items: center; gap: 0.75rem; }
+.lang-switch { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; }
+.lang-btn { background: transparent; border: 0; color: var(--text-secondary); font: 600 0.75rem var(--font-mono);
+    padding: 0.35rem 0.7rem; cursor: pointer; }
+.lang-btn:hover { color: var(--text-primary); }
+.lang-btn.active { background: var(--accent); color: var(--bg-primary); }
+.lang-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.note-en-only { background: var(--bg-secondary); border: 1px solid var(--border); border-left: 3px solid var(--warning);
+    border-radius: 8px; padding: 0.7rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-secondary); }
+
+/* Navigation: 13 sections, keep labels on one line and wrap the row instead */
+.nav-bar { flex-wrap: wrap; gap: 0.25rem; }
+.nav-link { white-space: nowrap; padding: 0.45rem 0.75rem; }

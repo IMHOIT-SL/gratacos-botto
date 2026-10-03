@@ -18,6 +18,21 @@
     };
     function icon(path) { return { width: 24, height: 24, path: path }; }
 
+    // Language: same rule as the server (cookie set by assets/i18n.js, else browser)
+    var LANG = (function () {
+        var m = document.cookie.match(/(?:^|;\s*)amr_lang=(en|es)/);
+        if (m) return m[1];
+        return (navigator.language || "").toLowerCase().indexOf("es") === 0 ? "es" : "en";
+    })();
+    var LABELS = {
+        en: { svg: "Download SVG (vector, for the paper)", png: "Download PNG (3x, high resolution)",
+              csv: "Download chart data (CSV)", full: "Full screen",
+              head: ["series", "x", "y", "value"], series: "series" },
+        es: { svg: "Descargar SVG (vectorial, para el paper)", png: "Descargar PNG (3x, alta resolución)",
+              csv: "Descargar datos del gráfico (CSV)", full: "Pantalla completa",
+              head: ["serie", "x", "y", "valor"], series: "serie" }
+    }[LANG];
+
     function baseName(gd) {
         var opts = gd._context && gd._context.toImageButtonOptions;
         if (opts && opts.filename) return opts.filename;
@@ -33,9 +48,9 @@
     }
     function toArray(a) { return a ? Array.prototype.slice.call(a) : []; }
     function traceRows(gd) {
-        var rows = [["series", "x", "y", "value"]];
+        var rows = [LABELS.head];
         (gd.data || []).forEach(function (t, i) {
-            var name = t.name || ("series " + (i + 1));
+            var name = t.name || (LABELS.series + " " + (i + 1));
             if (t.z) {
                 var zs = toArray(t.z), xs = toArray(t.x), ys = toArray(t.y);
                 zs.forEach(function (row, r) {
@@ -84,13 +99,13 @@
     });
 
     var BUTTONS = [
-        { name: "Download SVG (vector, for the paper)", icon: icon(ICONS.svg),
+        { name: LABELS.svg, icon: icon(ICONS.svg),
           click: function (gd) { window.Plotly.downloadImage(gd, { format: "svg", scale: 3, filename: baseName(gd) }); } },
-        { name: "Download PNG (3x, high resolution)", icon: icon(ICONS.png),
+        { name: LABELS.png, icon: icon(ICONS.png),
           click: function (gd) { window.Plotly.downloadImage(gd, { format: "png", scale: 3, filename: baseName(gd) }); } },
-        { name: "Download chart data (CSV)", icon: icon(ICONS.csv),
+        { name: LABELS.csv, icon: icon(ICONS.csv),
           click: function (gd) { downloadText(traceRows(gd), baseName(gd) + ".csv"); } },
-        { name: "Full screen", icon: icon(ICONS.full),
+        { name: LABELS.full, icon: icon(ICONS.full),
           click: function (gd) { toggleFullscreen(gd); } }
     ];
     BUTTONS.forEach(function (b) { b._amr = true; });
@@ -100,11 +115,14 @@
         if (cfg.displayModeBar === false) return cfg;
         var add = (cfg.modeBarButtonsToAdd || []).filter(function (b) { return !(b && b._amr); });
         cfg.modeBarButtonsToAdd = add.concat(BUTTONS);
+        if (LANG !== "en" && !cfg.locale) cfg.locale = LANG;  // Plotly's own texts, dates, numbers
         return cfg;
     }
 
     function wrap(P) {
         if (!P || P.__amrToolbar) return P;
+        // Locales queued by assets/plotly-locale-*.js before Plotly existed
+        (window.PlotlyLocales || []).forEach(function (loc) { try { P.register(loc); } catch (e) {} });
         ["react", "newPlot"].forEach(function (fn) {
             var orig = P[fn];
             if (typeof orig !== "function") return;

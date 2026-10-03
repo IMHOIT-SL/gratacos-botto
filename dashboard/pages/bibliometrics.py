@@ -23,6 +23,8 @@ from data.bibliometrics_data import (
 )
 from components import help_section, chart_title_with_info, graph_config
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/industry", name="Industry")
 
 
@@ -210,7 +212,7 @@ last_year = int(PUBMED_ANNUAL["year"].iloc[-1])
 last_papers = int(PUBMED_ANNUAL["papers"].iloc[-1])
 market_2032 = float(MARKET_GROWTH[MARKET_GROWTH["year"] == 2032]["market_size_bn"].iloc[0])
 
-layout = html.Div([
+_layout = html.Div([
     help_section("Industry & Bibliometrics", [
         "PAPER CONTEXT (note on bibliometric dynamics and industry trends): The paper observes that 'a scientometric assessment of this phenomenon (as per the search terms \"antibiotic resistance\") does indeed show an increase in recognition within the community... However, research and development (R&D) investments have been decelerating, currently at 5.4% compound annual growth rate (CAGR), a pace clearly insufficient relative to the pervasive loss of germicidal power... Although the antibiotic resistance market has been evolving on par with the declining effect of standard pharmaceuticals, no increase in efficacy is apparent.' This page operationalises that thesis with four charts.",
         "PUBMED SCIENTOMETRIC TREND: The bar chart shows annual publication counts for the search term 'antibiotic resistance' on PubMed, 1990–2025. The cumulative total in the figure (~253K) closely matches the 250,267 results visible in the PubMed query screenshot embedded in the paper (image 3). The annual count is computed deterministically by the closed-form expression count(y) = round(500 · exp(0.115 · (y - 1990))) — calibrated to reproduce the visual envelope of the PubMed bar chart. The exponential growth in publications confirms rising awareness; the next chart shows the awareness has not translated into improved effectiveness.",
@@ -331,3 +333,8 @@ layout = html.Div([
         ]),
     ], className="card"),
 ])
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser)."""
+    return translate(_layout, current_lang(lang))

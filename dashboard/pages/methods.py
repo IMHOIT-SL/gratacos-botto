@@ -17,6 +17,8 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/methods", name="Methods")
 
 ACCENT = "#4fc3f7"   # single accent (cyan) — section-header icons + hero rule
@@ -168,7 +170,7 @@ def _badge(text):
     )
 
 
-layout = html.Div([
+_layout = html.Div([
 
     # Hero
     html.Div(
@@ -212,13 +214,14 @@ layout = html.Div([
     ]),
 
     # 3 — What's inside
-    _section("layers", "What's inside — 11 pages", [
+    _section("layers", "What's inside: 13 pages", [
         _point("trending", "Overview", "the super-exponential curve vs. the constant-rate reference, with the 2040–2047 critical-point window."),
+        _point("refresh", "Scenario Lab", "what-if interventions on the paper's model: how many years before the critical threshold are gained by acting, and by acting early."),
         _point("activity", "Pathogens", "the ESKAPEE (the 7 priority superbugs) × antibiotic map, with WHO priority and Magiorakos MDR/XDR/PDR (Multidrug- / Extensively drug- / Pandrug-Resistant) badges."),
         _point("clock", "Time Series", "SARIMA forecasts with ACF/PACF (Auto- / Partial Autocorrelation) diagnostics and AIC/BIC (Akaike / Bayesian Information Criterion)."),
         _point("briefcase", "Industry", "publications (PubMed 1990–2025), the market (CAGR — Compound Annual Growth Rate — 5.4%), and awareness-vs-effectiveness."),
         _point("flask", "Metabolic", "the antimetabolic line of treatment — presented as a working hypothesis."),
-        _point("folder", "Methods · Data Sources · References · Export Studio · Docs · Tutorial", "this methodology page, cited sources, publication-grade figure export, and onboarding."),
+        _point("folder", "Methods · Data Sources · References · Press · Export Studio · Docs · Tutorial", "this methodology page, cited sources, press materials (paper, poster, posts), publication-grade figure export, and onboarding."),
     ]),
 
     # 4 — Open & citable
@@ -244,7 +247,7 @@ layout = html.Div([
 
     # 6 — Cite
     _section("edit", "Cite this companion", [
-        html.Div("Autores", style={**_CITE_LABEL, "marginTop": "0"}),
+        html.Div("Authors", style={**_CITE_LABEL, "marginTop": "0"}),
         html.Div(
             [
                 _author("Ernesto Prieto Gratacós", "0000-0002-0323-7041",
@@ -285,3 +288,8 @@ layout = html.Div([
         ),
     ]),
 ])
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser)."""
+    return translate(_layout, current_lang(lang))

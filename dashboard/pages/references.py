@@ -18,6 +18,8 @@ from data.references_data import (
 )
 from components import help_section
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/references", name="References")
 
 
@@ -128,7 +130,7 @@ def stats_row():
 # ---------------------------------------------------------------------------
 grouped = references_by_section()
 
-layout = html.Div([
+_layout = html.Div([
     help_section("References", [
         "PURPOSE: This page reproduces the full bibliography of the published paper (Prieto Gratacós E, Botto J. Br J Med Health Res. 2026;13(8):43-56), grouped by paper section. Every entry is a clickable link.",
         "GROUPING: References are organised by the section of the published paper they support: Introduction, Foundational epidemiology and global burden (refs 1-10); Introduction, Exponentially evolving pan resistant strains (ESKAPEE, dynamic susceptibility and antibiotic cycling, refs 11-22; superbugs and Magiorakos MDR/XDR/PDR definitions, refs 23-36); Materials and Method, bibliometric dynamics and industry trends (refs 37-38); and Antimetabolites in the treatment of infections (refs 39-55).",
@@ -190,3 +192,8 @@ layout = html.Div([
         ),
     ], className="card"),
 ])
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser)."""
+    return translate(_layout, current_lang(lang))

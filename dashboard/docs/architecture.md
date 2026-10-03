@@ -236,3 +236,16 @@ Each theme is a dictionary controlling `paper_bgcolor`, `plot_bgcolor`, `font_co
        yaxis=dict(gridcolor="#2d2f3a", zerolinecolor="#2d2f3a"),
    )
    ```
+
+---
+
+## Internationalisation (English / Spanish)
+
+The app is authored in English and rendered in Spanish on demand, without changing page code:
+
+- `i18n/__init__.py` — `translate(obj, lang)` walks a component tree or figure and replaces every user-visible string that has an entry in `i18n/es/*.json` (`{"English": "Español"}`); `__patterns__` entries (`[regex, template]`, groups named `t_*` are translated recursively) cover strings built at run time, e.g. heatmap tooltips. Strings without an entry stay in English.
+- Language choice: `?lang=es|en` > `amr_lang` cookie (EN/ES switch in the header, `assets/i18n.js`) > browser `Accept-Language` > English.
+- Pages expose `layout(lang=None, **query)` and return `translate(_layout, current_lang(lang))`; callbacks that return text or figures are decorated with `@translated`. `app.layout` is a function (`serve_layout`) so the header and footer follow the language.
+- Plotly's own texts, dates and number format use `assets/plotly-locale-es.js`; the chart toolbar labels follow the same cookie.
+- `python -m i18n.extract` renders every page and callback, lists strings with no Spanish entry, and `--dump DIR` writes them as JSON for translation.
+- Technical documents under `docs/` are English-only; the Documentation page tells Spanish visitors so.

@@ -10,6 +10,8 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from components import help_section
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/docs", name="Docs")
 
 # ---------------------------------------------------------------------------
@@ -38,7 +40,7 @@ DOC_LABELS = list(DOC_FILES.keys())
 # ---------------------------------------------------------------------------
 # Layout
 # ---------------------------------------------------------------------------
-layout = html.Div([
+_layout = html.Div([
     help_section(
         "Documentation",
         [
@@ -72,5 +74,22 @@ layout = html.Div([
     Output("docs-markdown-content", "children"),
     Input("docs-tab-selector", "value"),
 )
+@translated
 def switch_doc(selected_tab):
     return DOC_CONTENTS.get(selected_tab, "Document not found.")
+
+
+_EN_ONLY_NOTE = html.Div(
+    "Esta documentación técnica (para desarrolladores) está disponible solo en inglés.",
+    className="note-en-only",
+)
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser).
+    The technical Markdown documents stay in English; Spanish visitors get a note."""
+    lang = current_lang(lang)
+    page = translate(_layout, lang)
+    if lang == "es":
+        page = html.Div([_EN_ONLY_NOTE, page])
+    return page

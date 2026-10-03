@@ -87,17 +87,22 @@ WHO_PRIORITY = {
 #   * Magiorakos AP et al., Clin Microbiol Infect 2012 (definitions)
 #   * Published paper (Br J Med Health Res 2026), refs 23-36 (CRE, CRAB, CRPA,
 #     MRSA, VRE, PDR-Ab, PDR-Pa, PDR-Kp, PDR-Enterobacter, XDR-TB, XDR-Sm)
+# Rows the published paper does not document get NO_PAPER_DATA instead of a
+# badge (confirmed with E. Prieto Gratacós, 2026-10-03): the app shows only
+# phenotypes backed by the paper's references.
+NO_PAPER_DATA = "no data in paper"
+
 MDR_XDR_PDR = {
     "S. aureus (MRSA)":   "MDR",   # MRSA classic (paper ref 28)
-    "E. faecium (VRE)":   "XDR",   # VRE + linezolid resistance reported
+    "E. faecium (VRE)":   NO_PAPER_DATA,  # ref 29 documents VRE, not an XDR phenotype
     "K. pneumoniae":      "PDR",   # PDR-Kp (paper ref 34, Antimicrob Agents Chemother 2020)
     "A. baumannii":       "PDR",   # PDR-Ab (paper refs 30-31, J Infect 2018; Crit Care 2021)
     "P. aeruginosa":      "PDR",   # PDR-Pa (paper ref 32, J Infect Public Health 2019)
     "Enterobacter spp.":  "PDR",   # PDR-Enterobacter (paper ref 35, J Glob Antimicrob Resist 2021)
-    "E. coli":            "XDR",   # XDR-EC widely reported
+    "E. coli":            NO_PAPER_DATA,
     "S. maltophilia":     "XDR",   # XDR-Sm (paper ref 36, Tan et al. 2008)
-    "N. gonorrhoeae":     "XDR",   # XDR-Ng (cefixime + azithro)
-    "S. pneumoniae":      "MDR",
+    "N. gonorrhoeae":     NO_PAPER_DATA,
+    "S. pneumoniae":      NO_PAPER_DATA,
     "M. tuberculosis":    "XDR",   # XDR-TB (paper ref 33, Lancet 2018)
 }
 

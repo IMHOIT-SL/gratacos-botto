@@ -1,0 +1,40 @@
+{
+ "__patterns__": [
+  [
+   "^(?P<p>.+?)<br>(?P<t_abx>[^<]+)<br><b>(?P<v>-?\\d+)%</b> resistant(?P<mod>  ⚙ modified)?$",
+   "{p}<br>{t_abx}<br><b>{v}%</b> resistente{mod}"
+  ],
+  [
+   "^(?P<p>.+?)<br>(?P<t_abx>[^<]+)<br>N/A \\(intrinsic R or not tested\\)$",
+   "{p}<br>{t_abx}<br>N/D (resistencia intrínseca o no evaluado)"
+  ],
+  [
+   "^(?P<p>.+?)<br>(?P<t_abx>[^<]+)<br>literature (?P<a>\\d+)% → scenario (?P<b>\\d+)%<br><b>(?P<d>[+-]\\d+) pp</b>$",
+   "{p}<br>{t_abx}<br>literatura {a}% → escenario {b}%<br><b>{d} pp</b>"
+  ],
+  [
+   "^(?P<n>\\d+) refs$",
+   "{n} refs."
+  ],
+  [
+   "^AIC: (?P<v>[\\d.]+)$",
+   "AIC: {v}"
+  ],
+  [
+   "^BIC: (?P<v>[\\d.]+)$",
+   "BIC: {v}"
+  ],
+  [
+   "^Residual std: (?P<v>[\\d.]+)$",
+   "Desv. est. de residuos: {v}"
+  ],
+  [
+   "^(?P<v>[+-]?[\\d.]+) pp$",
+   "{v} pp"
+  ],
+  [
+   "^⚙ (?P<n>\\d+) cell\\(s\\) modified vs literature defaults\\. Overrides reset on page reload \\(preserves reproducibility\\)\\.$",
+   "⚙ {n} celda(s) modificada(s) frente a los valores de la literatura. Las modificaciones se restablecen al recargar la página (preserva la reproducibilidad)."
+  ]
+ ]
+}

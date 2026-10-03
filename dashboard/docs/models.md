@@ -65,7 +65,7 @@ This index does not correspond to any single measured quantity. It synthesises t
 
 ## 2. Mathematical Model Families in the AMR Literature
 
-The paper's Math section catalogues a number of model families that have been applied to antimicrobial-resistance dynamics. These are not implemented in the dashboard but are listed here for methodological context — they could underpin future quantitative extensions (e.g. the antimetabolic page).
+Model families that have been applied to antimicrobial-resistance dynamics, gathered in the authors' literature review while drafting the paper. They are **not cited in the published paper** and are not implemented in the dashboard; they are listed here only as methodological context for possible future quantitative extensions.
 
 ### 2.1 Within-host / between-host integrated models
 

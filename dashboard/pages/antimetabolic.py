@@ -18,6 +18,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from data.amr_data import compute_super_exponential_curve
 from components import help_section, chart_title_with_info, graph_config
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/metabolic", name="Metabolic")
 
 
@@ -240,61 +242,10 @@ def open_questions_card():
     ], className="card")
 
 
-def model_categories_card():
-    """Mathematical model categories from the paper's Math section that may
-    underpin a quantitative antimetabolic-resistance trajectory."""
-    rows = [
-        ("Multiscale (mutation + selection + horizontal gene transfer)",
-         "Proc. R. Soc. B 2019",
-         "Whole-organism dynamics with inter-cell genetic exchange — natural fit for population-scale resistance kinetics."),
-        ("Mechanistic cycling/mixing",
-         "Pimenta et al., Microb. Drug Resist. 2020",
-         "Compares antibiotic cycling vs mixing strategies — relevant when reasoning about combination therapy with antimetabolic agents."),
-        ("Population-level AMR modelling",
-         "Niewiadomska et al., Infect. Dis. Model. 2019",
-         "Foundational framework for hospital/community AMR — adaptable to alternate selective topologies."),
-        ("Pharmacodynamic models under sub-therapeutic dosing",
-         "J. Theor. Biol. 2019",
-         "Drug-concentration thresholds that drive (or avoid) resistance emergence."),
-        ("Biofilm models",
-         "Bull. Math. Biol. 2020",
-         "Biofilm-bound bacteria respond differently to therapy — relevant for nosocomial Gram-negative settings (P. aeruginosa, K. pneumoniae)."),
-        ("Network / hospital-spread models",
-         "Sci. Rep. 2020",
-         "Healthcare-system contact networks — bound the population-scale impact of any new therapeutic strategy."),
-        ("Within-host metabolic models (gap)",
-         "—",
-         "Not covered by the published paper's references. This is the natural quantitative complement to the antimetabolic proposal."),
-    ]
-
-    return html.Div([
-        html.H3("Mathematical model categories (from paper's Math section)",
-                className="card-title"),
-        html.P(
-            "Existing model families that could underpin a quantitative "
-            "antimetabolic-resistance trajectory once the mechanism is specified. "
-            "The last row marks a gap — no within-host metabolic model is cited "
-            "in the paper, suggesting a possible methodology contribution.",
-            className="card-subtitle",
-        ),
-        html.Table([
-            html.Thead(html.Tr([
-                html.Th("Model family"),
-                html.Th("Reference"),
-                html.Th("Relevance to antimetabolic angle"),
-            ])),
-            html.Tbody([
-                html.Tr([html.Td(f), html.Td(r), html.Td(rel)])
-                for f, r, rel in rows
-            ]),
-        ], className="data-table"),
-    ], className="card")
-
-
 # ---------------------------------------------------------------------------
 # Layout
 # ---------------------------------------------------------------------------
-layout = html.Div([
+_layout = html.Div([
     help_section("Antimetabolic Escape Route", [
         "PAGE PURPOSE: This page previews the antimetabolic line of treatment proposed by the published paper. The corresponding section ('Antimetabolites in the treatment of infections') names enzymatic inhibition with structural analogs (EISA) — 2-deoxy-D-glucose, sodium ascorbate and autophagy inhibitors such as hydroxychloroquine — acting through competitive inhibition. What the paper does not yet provide is a quantitative model of resistance emergence under this mechanism. This dashboard page mirrors that status — it is conceptual and citational, not therapeutic, and leaves explicit placeholders only where the paper itself is still silent.",
         "WHY A PARADIGM SHIFT IS PROPOSED: The Abstract, the Discussion and the note on bibliometric dynamics and industry trends establish that classical antibiotics are caught in a structural feedback loop. Selective pressure on bacterial targets selects for resistant survivors; combination therapy can intensify rather than relieve the pressure (Abstract: 'combinatorial treatments... may even accelerate the rate of microbial adaptation'); cycling strategies have been studied but do not break the underlying Darwinian adaptation (Introduction, antibiotic cycling). The paper's quantitative model — visualised on the Overview page — projects the critical inefficacy threshold within the 2040–2047 window under this paradigm. The paper concludes that 'unless new categories of germicidal substances are developed, a reverse epidemiological transition seems inevitable' (Abstract).",
@@ -302,7 +253,6 @@ layout = html.Div([
         "PARADIGM-COMPARISON CHART: The chart on this page contrasts two trajectories. The red curve is the classical antibiotic effectiveness trajectory derived deterministically from the super-exponential resistance model (i.e. 100 minus the resistance index). The blue band is a qualitative envelope intended only to visualise the paper's claim that an alternative line could sustain therapeutic effectiveness — it is NOT a quantitative forecast. The band is annotated as such directly in the figure to prevent any misreading. This is the only page in the dashboard where a series is shown without empirical anchoring; the convention is enforced everywhere else.",
         "COMPARISON TABLE: The qualitative comparison table contrasts six dimensions (mechanism, selective-pressure target, resistance trajectory, R&D pipeline, combinatorial use, empirical anchoring) between the classical and antimetabolic paradigms. Right-column cells marked 'to be specified' are explicit author-fillable placeholders — they signal where additional content from the authors will replace the scaffold.",
         "OPEN RESEARCH QUESTIONS: The numbered list captures questions the antimetabolic proposal raises but does not yet answer. They cover specificity (how host metabolism is preserved while pathogen metabolism is disrupted), kinetics (what the resistance-emergence curve looks like under the new mechanism), pathogen scope (which ESKAPEE / PDR phenotypes are best candidates), and methodological prerequisites. Authors can replace each item with the corresponding answer or sub-thesis.",
-        "MATHEMATICAL MODEL CATEGORIES: The final card lists the model families cited in the paper's Math section (multiscale, mechanistic cycling, population-level, pharmacodynamic, biofilm, network) and notes a gap — no within-host metabolic model is cited, suggesting a possible methodology contribution from the authors.",
         "EDITORIAL DISCIPLINE: Throughout this page the constraint is the same as the rest of the dashboard — no fabricated data, no speculative therapeutic claims, all references traceable to the paper or to peer-reviewed literature. The qualitative band on the chart is the single exception, clearly marked as qualitative. Once the authors specify the molecular mechanism and supply quantitative inputs, this page can be upgraded to mirror the empirical rigour of the Overview and Pathogens pages.",
     ]),
 
@@ -329,8 +279,6 @@ layout = html.Div([
     comparison_table_card(),
 
     open_questions_card(),
-
-    model_categories_card(),
 
     # Closing card with cross-links
     html.Div([
@@ -359,3 +307,8 @@ layout = html.Div([
         ], style={"fontSize": "0.85rem", "color": "#9aa0a6"}),
     ], className="card"),
 ])
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser)."""
+    return translate(_layout, current_lang(lang))

@@ -11,6 +11,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from components import help_section, chart_title_with_info, graph_config
 from data.amr_data import compute_super_exponential_curve
 
+from i18n import translate, translated, current_lang
+
 dash.register_page(__name__, path="/tutorial", name="Tutorial")
 
 # Plotly dark template matching our CSS
@@ -155,7 +157,7 @@ def control_card(icon, name, description, steps, example, tips=None):
     return html.Div(elements, className="card", style={"marginBottom": "1rem"})
 
 
-layout = html.Div([
+_layout = html.Div([
     # Help section
     help_section("Tutorial", [
         "This page teaches you how to use the interactive chart controls available on every chart in the dashboard.",
@@ -463,3 +465,8 @@ layout = html.Div([
         ], style={"color": "#9aa0a6", "marginTop": "1rem", "fontSize": "0.85rem"}),
     ], className="card"),
 ])
+
+
+def layout(lang=None, **_query):
+    """Page layout in the visitor's language (?lang=, cookie or browser)."""
+    return translate(_layout, current_lang(lang))
