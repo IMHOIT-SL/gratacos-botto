@@ -1,6 +1,7 @@
 """
-References page — full bibliography of the paper UPDATE v.A-29, grouped by
-section, with clickable links (DOI when known, journal/PubMed otherwise).
+References page — full bibliography of the published paper (Br J Med Health
+Res. 2026;13(8):43-56), grouped by section, with clickable links (DOI when
+the paper gives one, journal/PubMed otherwise).
 """
 
 import dash
@@ -21,12 +22,11 @@ dash.register_page(__name__, path="/references", name="References")
 
 
 SECTION_COLOR = {
-    "Foundational epidemiology": "#4fc3f7",
-    "ESKAPEE pathogens":          "#ef5350",
-    "Surveillance & cycling":     "#ce93d8",
-    "Superbugs (MDR/XDR/PDR)":    "#ff7043",
-    "Industry / market":          "#ffb74d",
-    "Mathematical models":        "#66bb6a",
+    "Foundational epidemiology":        "#4fc3f7",
+    "ESKAPEE & dynamic susceptibility": "#ef5350",
+    "Superbugs (MDR/XDR/PDR)":          "#ff7043",
+    "Bibliometrics & industry":         "#ffb74d",
+    "Antimetabolites":                  "#66bb6a",
 }
 
 
@@ -130,11 +130,11 @@ grouped = references_by_section()
 
 layout = html.Div([
     help_section("References", [
-        "PURPOSE: This page reproduces the full bibliography of the paper UPDATE v.A-29 (Gratacós & Botto), grouped by paper section. Every entry is a clickable link — DOI when the paper provides one, journal homepage or PubMed search otherwise.",
-        "GROUPING: References are organised by the section of the paper they support: Foundational epidemiology and global burden (párrs. 6–9), ESKAPEE pathogens and dynamic susceptibility (párrs. 10–13), Surveillance and antibiotic cycling, Superbugs and Magiorakos MDR/XDR/PDR definitions (párrs. 51–65), Industry / market context (párr. 25), and the Mathematical Models catalogue from the paper's Math section.",
-        "REFERENCE NUMBERS: Where the paper assigns a numeric reference (refs 1–20), the number is shown in monospace before the citation. Many of the post-numbered entries in the paper are subsequent listings in the Math, Trends, and Superbugs subsections — they are linked here without their narrative number for clarity.",
-        "URL POLICY: All links are best-effort. The paper provides DOIs for ~5 of the 50+ references; for the rest this page links to the journal landing page or to a PubMed search. When a DOI is provided in the paper text it is preserved verbatim. None of these URLs is fabricated — every target is either explicitly cited in the paper or a canonical resolver for the journal in question.",
-        "USE IN DRAFTING: Use this page as a single source-of-truth bibliography while drafting the paper. The Magiorakos 2012 link, in particular, is the canonical source for the MDR / XDR / PDR isolate-level definitions used elsewhere in this dashboard (Pathogens page badges).",
+        "PURPOSE: This page reproduces the full bibliography of the published paper (Prieto Gratacós E, Botto J. Br J Med Health Res. 2026;13(8):43-56), grouped by paper section. Every entry is a clickable link.",
+        "GROUPING: References are organised by the section of the published paper they support: Introduction, Foundational epidemiology and global burden (refs 1-10); Introduction, Exponentially evolving pan resistant strains (ESKAPEE, dynamic susceptibility and antibiotic cycling, refs 11-22; superbugs and Magiorakos MDR/XDR/PDR definitions, refs 23-36); Materials and Method, bibliometric dynamics and industry trends (refs 37-38); and Antimetabolites in the treatment of infections (refs 39-55).",
+        "REFERENCE NUMBERS: The number shown in monospace before each citation is the reference number in the published paper, so [10] here is reference 10 in the journal version.",
+        "URL POLICY: When the published paper gives a DOI, the link goes to that DOI. Otherwise the link goes to the article or journal page, or to a PubMed search on the article title. None of these URLs is fabricated: every target is either cited in the paper or a canonical resolver.",
+        "MAGIORAKOS 2012 (ref 23) is the canonical source for the MDR / XDR / PDR isolate-level definitions used elsewhere in this dashboard (Pathogens page badges).",
     ]),
 
     # How to cite the companion (mirrors the paper's "Citation of the companion"
@@ -144,7 +144,7 @@ layout = html.Div([
         html.P(
             "Prieto Gratacós, E. & Botto, J. A. (2026). The Twilight of Antibiotics "
             "— open computational companion [Software]. Zenodo. "
-            "DOI: [to be assigned at publication]. Available at "
+            "DOI: 10.5281/zenodo.22117640. Available at "
             "https://resistome.imhoit.com",
             style={
                 "fontFamily": "var(--font-mono)",
@@ -164,8 +164,13 @@ layout = html.Div([
             html.A("FAIR Principles for Research Software (FAIR4RS)", href="https://doi.org/10.1038/s41597-022-01710-x", target="_blank"),
             ", any reuse of the model coefficients, anchor tables or visualizations "
             "should cite the deposited release rather than the paper alone. The source "
-            "is released under an open-source license and will be deposited in Zenodo "
-            "with a citable DOI at the time of publication.",
+            "is released under the MIT license and archived in Zenodo (",
+            html.A("10.5281/zenodo.22117640", href="https://doi.org/10.5281/zenodo.22117640", target="_blank"),
+            "). The paper itself: ",
+            html.A("Br J Med Health Res. 2026;13(8):43-56", href="https://doi.org/10.5281/zenodo.21898960", target="_blank"),
+            " (",
+            html.A("journal home page", href="https://www.bjmhr.com", target="_blank"),
+            ").",
         ], style={"fontSize": "0.82rem", "color": "var(--text-secondary)", "marginTop": "0.6rem"}),
     ], className="card", style={"borderLeft": "3px solid var(--accent)"}),
 

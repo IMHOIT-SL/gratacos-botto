@@ -1,5 +1,5 @@
 """
-Industry & Bibliometrics page — paper UPDATE v.A-29 párr. 25:
+Industry & Bibliometrics page — published paper, bibliometrics & industry note:
 "market grows but efficacy doesn't".
 
 Four charts:
@@ -159,7 +159,7 @@ def build_drug_class_chart():
 
 def build_divergence_chart():
     """
-    Awareness vs effectiveness divergence — paper párr. 25 thesis:
+    Awareness vs effectiveness divergence — paper bibliometrics & industry note thesis:
     'market grows but efficacy doesn't'.
     Both indexed to 1990 = 1.0; logarithmic Y to fit the 500x growth + 0.34x decline.
     """
@@ -215,13 +215,13 @@ market_2032 = float(MARKET_GROWTH[MARKET_GROWTH["year"] == 2032]["market_size_bn
 
 layout = html.Div([
     help_section("Industry & Bibliometrics", [
-        "PAPER CONTEXT (UPDATE v.A-29 párr. 25): The paper observes that 'a scientometric assessment of this phenomenon does indeed show an increase in recognition within the community... R&D investments are also on the rise, expanding at a compound annual growth rate (CAGR) of 5.4%. Through the lens of our own forecast, however, both awareness and actions seem insufficient. Although the antibiotic resistance market has been evolving on par with the declining effect of standard pharmaceuticals. Reports show an increase in volume of sales, but no increase in efficacy is discernible.' This page operationalises that thesis with four charts.",
+        "PAPER CONTEXT (note on bibliometric dynamics and industry trends): The paper observes that 'a scientometric assessment of this phenomenon (as per the search terms \"antibiotic resistance\") does indeed show an increase in recognition within the community... However, research and development (R&D) investments have been decelerating, currently at 5.4% compound annual growth rate (CAGR), a pace clearly insufficient relative to the pervasive loss of germicidal power... Although the antibiotic resistance market has been evolving on par with the declining effect of standard pharmaceuticals, no increase in efficacy is apparent.' This page operationalises that thesis with four charts.",
         "PUBMED SCIENTOMETRIC TREND: The bar chart shows annual publication counts for the search term 'antibiotic resistance' on PubMed, 1990–2025. The cumulative total in the figure (~253K) closely matches the 250,267 results visible in the PubMed query screenshot embedded in the paper (image 3). The annual count is computed deterministically by the closed-form expression count(y) = round(500 · exp(0.115 · (y - 1990))) — calibrated to reproduce the visual envelope of the PubMed bar chart. The exponential growth in publications confirms rising awareness; the next chart shows the awareness has not translated into improved effectiveness.",
         "MARKET GROWTH (CAGR 5.4%): The Univdatos 'Antibiotic Resistance Market 2024–2032' report projects a 5.4% compound annual growth rate. Anchored at a base of USD 5.5B in 2023, the market reaches approximately USD 8.83B by 2032 under uniform CAGR. The line chart represents this deterministic projection. While market size growth signals attention and capital, the paper's central observation is that growth in revenue has not translated into a measurable increase in clinical effectiveness — the next chart visualises that gap.",
-        "DRUG-CLASS BREAKDOWN: The grouped bar chart compares 2023 and 2032 estimated revenue for the four drug-class buckets reported by Univdatos: Oxazolidinones (linezolid family — Gram-positive infections), Lipoglycopeptides (dalbavancin/oritavancin — long-acting Gram-positive), Tetracyclines (tigecycline/eravacycline/omadacycline — broad-spectrum salvage), and Others (β-lactam/inhibitor combinations and novel agents). Per-class shares are visual approximations of the Univdatos figure embedded in the paper (image 2). Note: this is revenue allocation, not therapeutic effectiveness — the antibiotics are still the same molecules, with the same resistance pressures eroding their utility.",
+        "DRUG-CLASS BREAKDOWN: The grouped bar chart compares 2023 and 2032 estimated revenue for the four drug-class buckets reported by Univdatos: Oxazolidinones (linezolid family — Gram-positive infections), Lipoglycopeptides (dalbavancin/oritavancin — long-acting Gram-positive), Tetracyclines (tigecycline/eravacycline/omadacycline — broad-spectrum salvage), and Others (β-lactam/inhibitor combinations and novel agents). Per-class shares are visual approximations of the Univdatos figure embedded in the paper (Image #5). Note: this is revenue allocation, not therapeutic effectiveness — the antibiotics are still the same molecules, with the same resistance pressures eroding their utility.",
         "AWARENESS-vs-EFFECTIVENESS DIVERGENCE: The fourth chart is the most important. Both series are indexed to 1990 = 1.0 to make the divergence visible. Awareness (blue solid) tracks cumulative PubMed publications: by 2025 it reaches ~500× the 1990 baseline. Effectiveness (red dashed) tracks (100 − resistance pressure index), the proportion of antibiotic activity remaining: by 2025 it has declined to ~0.34× of the 1990 baseline. The two curves move in opposite directions on a log scale — exactly the pattern the paper describes as 'increase in volume of sales, but no increase in efficacy'. This is a structural, not cyclical, divergence; awareness alone has not solved the problem.",
-        "WHY THIS MATTERS FOR THE PAPER'S THESIS: The Industry section supports the paper's call (párr. 5) for 'new categories of germicidal substances'. Funding and publications are growing exponentially, but the underlying biology of selective pressure means that more of the same kind of drug development cannot, by itself, reverse the resistance trajectory. The Antimetabolic Escape Route page elaborates the alternative therapeutic angle the paper proposes.",
-        "DATA PROVENANCE: PubMed annual counts are deterministic approximations to the visual envelope of the search-results-by-year chart at the time the paper was prepared (image 3, 250,267 cumulative results). Market and drug-class data are deterministic projections anchored to the Univdatos 'Antibiotic Resistance Market 2024–2032' report (image 2). The awareness-vs-effectiveness chart combines these with the super-exponential resistance model from the Overview page. All values reproduce identically on every reload — no random sampling, no fitting.",
+        "WHY THIS MATTERS FOR THE PAPER'S THESIS: The Industry section supports the paper's call (Abstract) for 'new categories of germicidal substances'. Funding and publications are growing exponentially, but the underlying biology of selective pressure means that more of the same kind of drug development cannot, by itself, reverse the resistance trajectory. The Antimetabolic Escape Route page elaborates the alternative therapeutic angle the paper proposes.",
+        "DATA PROVENANCE: PubMed annual counts are deterministic approximations to the visual envelope of the search-results-by-year chart at the time the paper was prepared (Image #4, 250,267 cumulative results). Market and drug-class data are deterministic projections anchored to the Univdatos 'Antibiotic Resistance Market 2024–2032' report (Image #5). The awareness-vs-effectiveness chart combines these with the super-exponential resistance model from the Overview page. All values reproduce identically on every reload — no random sampling, no fitting.",
     ]),
 
     # Stats row — 4 cards
@@ -258,8 +258,8 @@ layout = html.Div([
                    href="https://pubmed.ncbi.nlm.nih.gov/?term=antibiotic+resistance",
                    target="_blank"),
             " · ",
-            html.A("Paper UPDATE v.A-29 párr. 25",
-                   href="#", target="_blank"),
+            html.A("Gratacós & Botto, Br J Med Health Res 2026 (bibliometrics & industry note)",
+                   href="https://doi.org/10.5281/zenodo.21898960", target="_blank"),
         ], className="chart-sources"),
     ], className="card"),
 
@@ -299,7 +299,7 @@ layout = html.Div([
     html.Div([
         chart_title_with_info(
             "Awareness vs Effectiveness — divergence",
-            "Paper UPDATE v.A-29 párr. 25 thesis. Both series indexed to 1990 = 1.0 on a log scale. Awareness (blue) reflects cumulative PubMed publications; effectiveness (red) reflects (100 − resistance index). By 2025: awareness at ~500× baseline, effectiveness at ~0.34× — a structural divergence.",
+            "Published paper, bibliometrics & industry note thesis. Both series indexed to 1990 = 1.0 on a log scale. Awareness (blue) reflects cumulative PubMed publications; effectiveness (red) reflects (100 − resistance index). By 2025: awareness at ~500× baseline, effectiveness at ~0.34× — a structural divergence.",
             "The paper's central industry argument visualised",
         ),
         dcc.Graph(id="divergence-chart", figure=build_divergence_chart(), config=SVG_CONFIG),

@@ -1,9 +1,10 @@
 """
-Bibliometric and industry data for the paper UPDATE v.A-29 párr. 25:
-"a scientometric assessment of this phenomenon does indeed show an increase
-in recognition... R&D investments are also on the rise, expanding at a CAGR
-of 5.4%... Reports show an increase in volume of sales, but no increase in
-efficacy is discernible."
+Bibliometric and industry data for the published paper's note on bibliometric
+dynamics and industry trends: "a scientometric assessment of this phenomenon
+... does indeed show an increase in recognition within the community...
+However, research and development (R&D) investments have been decelerating,
+currently at 5.4% compound annual growth rate (CAGR)... no increase in
+efficacy is apparent."
 
 Anchors:
   * Image 3 (PubMed): 250,267 results for "antibiotic resistance" (1990-2025)
@@ -90,7 +91,7 @@ def class_size_2032():
 
 
 # ---------------------------------------------------------------------------
-# Awareness-vs-effectiveness divergence (paper párr. 25 thesis)
+# Awareness-vs-effectiveness divergence (paper bibliometrics & industry note thesis)
 #
 # Both series indexed to 1990 = 1.0 to make divergence visible.
 #   * Awareness  = cumulative PubMed publications (proxy for collective recognition)

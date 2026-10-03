@@ -151,7 +151,7 @@ The resistance matrix values are approximate global medians compiled from multip
 **What we extract:**
 - ~1.91M annual attributable deaths by 2040 anchor — the `tai_2025_deaths_k` column in `MORTALITY_DATA`. This is a more conservative GBD-hierarchical methodology vs the GRAM/O'Neill stack and provides a legitimate alternative trajectory.
 - Carbapenem-resistance mortality projections through 2035 — the basis for `CARBAPENEM_PROJECTION` (CRE/CRAB/CRPA stacked area on the Overview page).
-- Paper UPDATE v.A-29 párr. 9: "carbapenem-resistant deaths are projected to escalate sharply by 2035 even as overall age-standardized mortality declines."
+- Published paper, Introduction, global burden: "carbapenem-resistant deaths are projected to escalate sharply by 2035 even as overall age-standardized mortality declines."
 
 **Data quality:** Modeled (GBD-hierarchical). Recent peer-reviewed publication. The CRE/CRAB/CRPA per-pathogen split shown in the dashboard is illustrative — refer to the source for the underlying figures.
 
@@ -165,7 +165,7 @@ The resistance matrix values are approximate global medians compiled from multip
 
 **What we extract:**
 - The MIC-based isolate-level definitions of MDR, XDR, and PDR phenotypes used as badges on the Pathogens heatmap (`MDR_XDR_PDR` dict in `pathogen_data.py`).
-- MDR = non-susceptible to ≥1 agent in ≥3 antibiotic classes. XDR = susceptible to agents in ≤2 classes. PDR = resistant to all tested agents. Phenotype assignment per species reflects the strongest documented in literature (paper UPDATE v.A-29 párrs. 51–65).
+- MDR = non-susceptible to ≥1 agent in ≥3 antibiotic classes. XDR = susceptible to agents in ≤2 classes. PDR = resistant to all tested agents. Phenotype assignment per species reflects the strongest documented in literature (published paper, refs 23-36).
 
 **Data quality:** Definitional. This is the international expert proposal that standardised the terminology. Definitions are isolate-level — species-level badges in the dashboard reflect the strongest documented phenotype, not all isolates.
 
@@ -180,7 +180,7 @@ The resistance matrix values are approximate global medians compiled from multip
 **What we extract:**
 - CAGR 5.4% used for the `MARKET_GROWTH` series (2022–2032) in `bibliometrics_data.py`.
 - Drug-class share approximations (Oxazolidinones, Lipoglycopeptides, Tetracyclines, Others) for the `DRUG_CLASS_SHARE` table.
-- Paper UPDATE v.A-29 párr. 25 (image 2): industry-side context for the awareness-vs-effectiveness divergence chart.
+- Published paper, bibliometrics & industry note (Image #5): industry-side context for the awareness-vs-effectiveness divergence chart.
 
 **Data quality:** Industry market research. Used as deterministic projection anchor — the dashboard does not assert per-class CAGR differences.
 
@@ -193,14 +193,14 @@ The resistance matrix values are approximate global medians compiled from multip
 **URL:** https://pubmed.ncbi.nlm.nih.gov/?term=antibiotic+resistance
 
 **What we extract:**
-- 250,267 cumulative results visible in the screenshot embedded in the paper (image 3, párr. 25).
+- 250,267 cumulative results visible in the screenshot embedded in the paper (Image #4, bibliometrics & industry note).
 - Annual publication counts approximated by the closed-form `count(y) = round(500·exp(0.115·(y-1990)))` in `bibliometrics_data.py`. The integrated total (~253K) closely matches the cited figure.
 
 **Data quality:** Bibliometric. Annual values are deterministic approximations to the visual envelope of the PubMed bar chart at the time the paper was prepared.
 
 ---
 
-## Super-exponential model parameters (Gratacós-Botto, paper UPDATE v.A-29)
+## Super-exponential model parameters (Gratacós-Botto, published paper)
 
 The primary resistance trajectory plotted on the Overview page is a closed-form generalised logistic with a time-quadratic exponent term:
 
@@ -216,9 +216,9 @@ y(τ) = K / (1 + A · exp(-r·τ - b·τ²))    where τ = year - 1990
 | `b`       | 3.05·10⁻⁴ | Super-exponential acceleration. `r_eff(τ) = r + 2b·τ` grows linearly with τ. |
 | `t0`      | 1990      | Time origin |
 
-These are hardcoded — no fitting, no random sampling. Reproduce identically on every reload. Calibrated to paper milestones (párr. 19): `y(2025)=70`, `y(2032)≈80`, `y(2040)≈90`, `y(2047)≈96`, `y(2060)≈99`.
+These are hardcoded — no fitting, no random sampling. Reproduce identically on every reload. Calibrated to paper milestones (forecast segment): `y(2025)=70`, `y(2032)≈80`, `y(2040)≈90`, `y(2047)≈96`, `y(2060)≈99`.
 
-**Reference logistic (faint comparison line):** Same `K`, `A`; `b=0`; `r' ≈ 0.0811` calibrated to also pass through `y(1990)=12` and `y(2025)=70`. Crosses the critical threshold (95) in 2051 vs 2047 for the super-exp — a 4-year advance illustrating the paper's "rate of increase is itself growing" thesis (párr. 22).
+**Reference logistic (faint comparison line):** Same `K`, `A`; `b=0`; `r' ≈ 0.0811` calibrated to also pass through `y(1990)=12` and `y(2025)=70`. Crosses the critical threshold (95) in 2051 vs 2047 for the super-exp — a 4-year advance illustrating the paper's "rate of increase is itself growing" thesis (Discussion).
 
 ---
 
@@ -229,11 +229,11 @@ These are hardcoded — no fitting, no random sampling. Reproduce identically on
 - `RESISTANCE_MATRIX`: Approximate global medians compiled from WHO GLASS, EARS-Net, Murray et al., and CDC reports. 11×10 with NaN for intrinsic resistance.
 - `REGIONAL_DATA`: Based on WHO GLASS 2022 regional breakdowns
 - `TEMPORAL_TRENDS`: Calibrated to published trends (MRSA decline, E. coli and CRE increase) with simplified trajectories
-- `MDR_XDR_PDR`: Per-species strongest documented phenotype, anchored to Magiorakos 2012 + paper UPDATE v.A-29 párrs. 51-65
+- `MDR_XDR_PDR`: Per-species strongest documented phenotype, anchored to Magiorakos 2012 + published paper, refs 23-36
 
 ### Projections
 - `OBSERVED_DATA` year 2025: CIDRAP/GRAM projection (not yet fully observed)
-- `FORECAST_DATA` (2025-2060): Recalibrated to paper UPDATE v.A-29 párr. 19 milestones (2032=80, 2040=90, 2047=96)
+- `FORECAST_DATA` (2025-2060): Recalibrated to published paper, forecast segment milestones (2032=80, 2040=90, 2047=96)
 - `MORTALITY_DATA` years 2025-2050: Three methodologies — GRAM/O'Neill stack + Tai 2025 (~1.91M @ 2040) overlay
 - `CARBAPENEM_PROJECTION` (2010-2035): CRE/CRAB/CRPA mortality anchored to Murray 2022 + Tai 2025
 - `MARKET_GROWTH` (2022-2032): CAGR 5.4% from Univdatos $5.5B 2023 base
@@ -248,9 +248,9 @@ These are hardcoded — no fitting, no random sampling. Reproduce identically on
 - `MONTHLY_DATA` in `timeseries_data.py`: Entirely synthetic monthly resistance time series generated with `np.random.default_rng(seed=42)`. These are deterministic (reproducible) but do not correspond to any specific real-world dataset. They combine logistic/polynomial trends, sinusoidal seasonality, and Gaussian noise to produce plausible-looking series for SARIMA demonstration purposes.
 
 ### Bibliography
-- `references_data.py`: 60 peer-reviewed citations from paper UPDATE v.A-29, grouped by section (Foundational, ESKAPEE, Surveillance, Superbugs, Industry, Math). Each entry has a clickable link (DOI when known, journal homepage or PubMed search otherwise).
+- `references_data.py`: 55 references of the published paper, numbered as in the journal and grouped by section (Foundational, ESKAPEE, Superbugs, Bibliometrics & industry, Antimetabolites). Each entry has a clickable link (DOI when known, journal homepage or PubMed search otherwise).
 
 ### Constructed/Composite
 - The "Resistance Pressure Index" (0-100 scale) is a conceptual composite metric, not a raw epidemiological measurement. It normalizes and aggregates across multiple resistance indicators to provide a single trajectory visualization.
-- The "Awareness vs Effectiveness" divergence index normalizes both series to 1990=1.0 to make their opposite trajectories visible on a single log-scale chart (paper párr. 25 thesis).
-- Confidence bounds in `OBSERVED_DATA` and the ±3-year band on the super-exponential curve are interpretive, not derived from a formal statistical model — they reflect the paper's stated uncertainty (párr. 5: "fourteen years (±3)").
+- The "Awareness vs Effectiveness" divergence index normalizes both series to 1990=1.0 to make their opposite trajectories visible on a single log-scale chart (paper bibliometrics & industry note thesis).
+- Confidence bounds in `OBSERVED_DATA` and the ±3-year band on the super-exponential curve are interpretive, not derived from a formal statistical model — they reflect the paper's stated uncertainty (Abstract: "fourteen years (±3)").

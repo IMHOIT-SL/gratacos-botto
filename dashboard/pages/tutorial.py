@@ -58,7 +58,7 @@ def build_demo_chart():
         hovertemplate="<b>%{x}</b><br>Resistance Index: %{y:.1f} (projected)<extra></extra>",
     ))
 
-    # Key milestones aligned with the paper UPDATE v.A-29 párr. 19
+    # Key milestones aligned with the published paper, forecast segment
     key_years = [1990, 2000, 2010, 2019, 2025, 2032, 2040, 2047, 2060]
     key_vals = [
         float(curve.loc[curve["year"] == y, "resistance_index"].iloc[0])
@@ -93,7 +93,7 @@ def build_demo_chart():
         annotation_font=dict(color="#ef5350", size=11),
     )
 
-    # Critical point zone (paper UPDATE v.A-29 párr. 19: 2040–2047)
+    # Critical point zone (published paper, forecast segment: 2040–2047)
     fig.add_vrect(
         x0=2040, x1=2047,
         fillcolor="rgba(239, 83, 80, 0.1)",
@@ -454,7 +454,7 @@ layout = html.Div([
                          html.Td("Murray/GRAM/O'Neill stack + Tai 2025 (~1.91M @ 2040) overlay")]),
                 html.Tr([html.Td("Carbapenem 2035 Spotlight"),
                          html.Td(dcc.Link("Overview", href="/", style={"color": "var(--accent)"})),
-                         html.Td("Stacked CRE + CRAB + CRPA mortality through 2035 (Tai 2025 párr. 9)")]),
+                         html.Td("Stacked CRE + CRAB + CRPA mortality through 2035 (Tai 2025; paper Introduction)")]),
                 html.Tr([html.Td("ESKAPEE Resistance Heatmap"),
                          html.Td(dcc.Link("Pathogens", href="/pathogens", style={"color": "var(--accent)"})),
                          html.Td("11×10 matrix with WHO priority + Magiorakos MDR/XDR/PDR badges")]),
@@ -481,7 +481,7 @@ layout = html.Div([
                          html.Td("Oxazolidinones / Lipoglycopeptides / Tetracyclines / Others — 2023 vs 2032")]),
                 html.Tr([html.Td("Awareness vs Effectiveness divergence"),
                          html.Td(dcc.Link("Industry", href="/industry", style={"color": "var(--accent)"})),
-                         html.Td("Log-scale 1990=1 — awareness 500× vs effectiveness 0.34× (paper párr. 25)")]),
+                         html.Td("Log-scale 1990=1 — awareness 500× vs effectiveness 0.34× (paper bibliometrics & industry note)")]),
                 html.Tr([html.Td("Paradigm Comparison"),
                          html.Td(dcc.Link("Metabolic", href="/metabolic", style={"color": "var(--accent)"})),
                          html.Td("Classical (data-driven) + qualitative antimetabolic envelope (working hypothesis)")]),

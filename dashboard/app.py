@@ -21,6 +21,12 @@ app = Dash(
 # (gunicorn 23+ rejects the dotted `app:app.server` spec.)
 server = app.server
 
+# Published paper (open access, archived on Zenodo)
+PAPER_URL = "https://doi.org/10.5281/zenodo.21898960"
+JOURNAL_URL = "https://www.bjmhr.com"
+PAPER_CITATION = ("Prieto Gratacós E, Botto J. The Twilight of Antibiotics. "
+                  "Br J Med Health Res. 2026;13(8):43-56")
+
 _app_body = html.Div(
     [
         dcc.Location(id="url", refresh=False),
@@ -44,6 +50,14 @@ _app_body = html.Div(
                     href="/",
                     style={"textDecoration": "none"},
                 ),
+                # Direct access to the published paper (open-access PDF on Zenodo)
+                html.A(
+                    "📄 Read the paper",
+                    href=PAPER_URL,
+                    target="_blank",
+                    title=PAPER_CITATION,
+                    className="paper-pill",
+                ),
                 html.Nav(
                     id="nav-bar",
                     className="nav-bar",
@@ -59,10 +73,14 @@ _app_body = html.Div(
         # Footer
         html.Footer(
             html.P([
-                html.Span("Paper v.A-29 · ",
-                          style={"color": "var(--accent)", "fontWeight": "600",
-                                 "fontFamily": "var(--font-mono)"}),
-                "E. Prieto Gratacós, J.A. Botto · ",
+                html.A("Br J Med Health Res. 2026;13(8):43-56",
+                       href=PAPER_URL, target="_blank",
+                       style={"color": "var(--accent)", "fontWeight": "600",
+                              "fontFamily": "var(--font-mono)"}),
+                " (",
+                html.A("British Journal of Medical and Health Research",
+                       href=JOURNAL_URL, target="_blank"),
+                ") · E. Prieto Gratacós, J.A. Botto · ",
                 "Data sources: Lancet GBD, O'Neill Review, GRAM/CIDRAP, "
                 "Tai 2025 IJAA, Magiorakos 2012, WHO GLASS",
             ]),
@@ -90,6 +108,7 @@ app.layout = dmc.MantineProvider(
 
 NAV_ITEMS = [
     ("Overview", "/"),
+    ("Scenario Lab", "/scenarios"),
     ("Pathogens", "/pathogens"),
     ("Time Series", "/timeseries"),
     ("Industry", "/industry"),

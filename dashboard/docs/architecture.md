@@ -39,12 +39,14 @@ Gratacos-Botto/
     │   ├── bibliometrics_data.py # PubMed annual counts (closed-form exp), market
     │   │                        #   CAGR 5.4%, drug-class shares, awareness vs
     │   │                        #   effectiveness divergence series.
-    │   └── references_data.py   # 60 peer-reviewed citations from paper UPDATE v.A-29,
+    │   └── references_data.py   # 55 references of the published paper,
     │                            #   grouped by paper section.
     ├── pages/
     │   ├── __init__.py          # Empty package marker
     │   ├── overview.py          # "/" — Super-exp curve + reference logistic +
     │   │                        #   mortality (3-methodology) + Carbapenem 2035 spotlight
+    │   ├── scenarios.py         # "/scenarios" — Scenario Lab: what-if interventions
+    │   │                        #   on the super-exp model (closed-form)
     │   ├── pathogens.py         # "/pathogens" — ESKAPEE heatmap + Sensitivity Analysis
     │   │                        #   panel (transient overrides) + regional + temporal
     │   ├── timeseries.py        # "/timeseries" — SARIMA forecasting with diagnostics
@@ -87,6 +89,7 @@ The dashboard uses **Dash Pages**, the built-in multi-page routing system. The m
 | Module                   | Path            | Nav Label    |
 |--------------------------|-----------------|--------------|
 | `pages/overview.py`      | `/`             | Overview     |
+| `pages/scenarios.py`     | `/scenarios`    | Scenario Lab |
 | `pages/pathogens.py`     | `/pathogens`    | Pathogens    |
 | `pages/timeseries.py`    | `/timeseries`   | Time Series  |
 | `pages/bibliometrics.py` | `/industry`     | Industry     |

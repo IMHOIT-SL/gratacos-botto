@@ -5,8 +5,8 @@ Resistance rates (%) based on published surveillance data:
 - ECDC/EARS-Net surveillance
 - Murray et al. Lancet 2022 (GBD-AMR)
 - CDC AR Threats Report 2019/2022
-- Gratacós-Botto paper UPDATE v.A-29 (ESKAPEE designation, párr. 11;
-  Stenotrophomonas + PDR documentation, párr. 65)
+- Gratacós-Botto, Br J Med Health Res 2026 (ESKAPEE designation, Introduction;
+  S. maltophilia documentation, ref 36: XDR-Sm, Tan et al. 2008)
 - Magiorakos et al. Clin Microbiol Infect 2012 (MDR/XDR/PDR isolate-level
   definitions)
 """
@@ -16,8 +16,8 @@ import numpy as np
 
 # ESKAPEE + key pathogens vs antibiotic classes.
 # ESKAPEE = E. faecium, S. aureus, K. pneumoniae, A. baumannii,
-#           P. aeruginosa, Enterobacter spp., E. coli (added in párr. 11).
-# S. maltophilia added per párr. 65 (PDR-Sm bloodstream infections).
+#           P. aeruginosa, Enterobacter spp., E. coli (added in the paper's Introduction).
+# S. maltophilia added per paper ref 36 (XDR-Sm, Tan et al. 2008).
 PATHOGENS = [
     "S. aureus (MRSA)",
     "E. faecium (VRE)",
@@ -85,20 +85,20 @@ WHO_PRIORITY = {
 # in peer-reviewed literature (NOT a species-level claim; isolates vary).
 # References:
 #   * Magiorakos AP et al., Clin Microbiol Infect 2012 (definitions)
-#   * Paper UPDATE v.A-29 párrs. 53–65 (CRE, CRAB, CRPA, MRSA, VRE,
-#     PDR-Pa, PDR-Ab, PDR-Sm, XDR-Kp, XDR-TB)
+#   * Published paper (Br J Med Health Res 2026), refs 23-36 (CRE, CRAB, CRPA,
+#     MRSA, VRE, PDR-Ab, PDR-Pa, PDR-Kp, PDR-Enterobacter, XDR-TB, XDR-Sm)
 MDR_XDR_PDR = {
-    "S. aureus (MRSA)":   "MDR",   # MRSA classic
+    "S. aureus (MRSA)":   "MDR",   # MRSA classic (paper ref 28)
     "E. faecium (VRE)":   "XDR",   # VRE + linezolid resistance reported
-    "K. pneumoniae":      "PDR",   # PDR-Kp documented (Magiorakos; Antimicrob Agents Chemother 2020)
-    "A. baumannii":       "PDR",   # PDR-Ab — J. Infect. 2018; Crit. Care 2021
-    "P. aeruginosa":      "PDR",   # PDR-Pa — J Infect Public Health 2019
-    "Enterobacter spp.":  "PDR",   # J Glob Antimicrob Resist 2021
+    "K. pneumoniae":      "PDR",   # PDR-Kp (paper ref 34, Antimicrob Agents Chemother 2020)
+    "A. baumannii":       "PDR",   # PDR-Ab (paper refs 30-31, J Infect 2018; Crit Care 2021)
+    "P. aeruginosa":      "PDR",   # PDR-Pa (paper ref 32, J Infect Public Health 2019)
+    "Enterobacter spp.":  "PDR",   # PDR-Enterobacter (paper ref 35, J Glob Antimicrob Resist 2021)
     "E. coli":            "XDR",   # XDR-EC widely reported
-    "S. maltophilia":     "PDR",   # PDR-Sm bloodstream — J Hosp Infect 2020
+    "S. maltophilia":     "XDR",   # XDR-Sm (paper ref 36, Tan et al. 2008)
     "N. gonorrhoeae":     "XDR",   # XDR-Ng (cefixime + azithro)
     "S. pneumoniae":      "MDR",
-    "M. tuberculosis":    "XDR",   # XDR-TB — Lancet 2018
+    "M. tuberculosis":    "XDR",   # XDR-TB (paper ref 33, Lancet 2018)
 }
 
 # Regional variation (resistance index by WHO region)

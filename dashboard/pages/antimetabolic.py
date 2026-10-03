@@ -1,6 +1,6 @@
 """
 Antimetabolic Escape Route page — preview / companion for the paper's
-"metabolic escape route" thesis (UPDATE v.A-29 subtitle, párrs. 5 & 24).
+"metabolic escape route" thesis (published paper, subtitle, Abstract & Antimetabolites section).
 
 Editorial discipline: this page does not invent therapeutic claims. It
 presents the paper's exact framing, contrasts the classical-antibiotic
@@ -130,8 +130,8 @@ def hypothesis_banner():
                           }),
                 html.Span(
                     "This page previews the antimetabolic line of treatment "
-                    "proposed in the paper. The paper section (UPDATE v.A-29 "
-                    "párr. 24) now names the approach explicitly — enzymatic "
+                    "proposed in the paper. The paper's section 'Antimetabolites in the "
+                    "treatment of infections' names the approach explicitly: enzymatic "
                     "inhibition with structural analogs: 2-deoxy-D-glucose, "
                     "sodium ascorbate and autophagy inhibitors, via competitive "
                     "inhibition — but does not yet give a quantitative model of "
@@ -166,7 +166,7 @@ def paper_quote_card():
                    "fontSize": "0.88rem",
                    "lineHeight": "1.7",
                }),
-        html.P("— Gratacós & Botto, paper UPDATE v.A-29 párr. 5 (Summary)",
+        html.P("Gratacós & Botto, Br J Med Health Res. 2026;13(8):43-56, Abstract",
                style={"fontSize": "0.75rem", "color": "#9aa0a6"}),
     ], className="card")
 
@@ -175,7 +175,7 @@ def comparison_table_card():
     rows = [
         ("Therapeutic mechanism",
          "Direct microbicidal/microbistatic action on bacterial structures or biosynthetic pathways",
-         "Disruption of metabolic substrates / cofactors that resistant phenotypes still depend on (paper UPDATE v.A-29 párr. 24)"),
+         "Disruption of metabolic substrates / cofactors that resistant phenotypes still depend on (published paper, Antimetabolites section)"),
         ("Selective pressure target",
          "Bacteria — drug presence selects for resistant survivors (Darwinian adaptation)",
          "To be specified in paper — distinct selective topology proposed"),
@@ -186,7 +186,7 @@ def comparison_table_card():
          "Saturating: no fundamentally new antibiotic class approved in decades (paper Summary)",
          "Open territory — premise of the paper's solution proposal"),
         ("Combinatorial use",
-         "Combination therapy can accelerate adaptation due to compounded selective pressure (párr. 5)",
+         "Combination therapy can accelerate adaptation due to compounded selective pressure (Abstract)",
          "Combination logic differs — to be detailed by authors"),
         ("Empirical anchoring (in this dashboard)",
          "Anchored to 10+ peer-reviewed sources; super-exp model in Overview",
@@ -224,7 +224,7 @@ def open_questions_card():
         "In which ESKAPEE / PDR phenotypes is the antimetabolic angle expected to be most effective? Where might intrinsic biology limit it (e.g., S. maltophilia metabolic versatility)?",
         "What is the minimum viable preclinical evidence package required to test the hypothesis?",
         "Are there existing compounds (repurposed) whose mechanism overlaps with the proposed metabolic disruption, that could provide proof-of-concept data?",
-        "How does the proposal interact with combinatorial-use concerns (párr. 13: 'cycling strategies... force a Darwinian adaptation')?",
+        "How does the proposal interact with combinatorial-use concerns (Introduction: 'Different antibiotic-cycling strategies affect resistance evolution, but selective pressure simply forces a Darwinian adaptation')?",
     ]
 
     return html.Div([
@@ -267,7 +267,7 @@ def model_categories_card():
          "Healthcare-system contact networks — bound the population-scale impact of any new therapeutic strategy."),
         ("Within-host metabolic models (gap)",
          "—",
-         "No paper UPDATE v.A-29 reference yet. This is the natural quantitative complement to the antimetabolic proposal."),
+         "Not covered by the published paper's references. This is the natural quantitative complement to the antimetabolic proposal."),
     ]
 
     return html.Div([
@@ -299,9 +299,9 @@ def model_categories_card():
 # ---------------------------------------------------------------------------
 layout = html.Div([
     help_section("Antimetabolic Escape Route", [
-        "PAGE PURPOSE: This page previews the antimetabolic line of treatment proposed by the paper UPDATE v.A-29. The corresponding section (párr. 24) is now written: it names enzymatic inhibition with structural analogs (EISA) — 2-deoxy-D-glucose, sodium ascorbate and autophagy inhibitors such as hydroxychloroquine — acting through competitive inhibition. What the paper does not yet provide is a quantitative model of resistance emergence under this mechanism. This dashboard page mirrors that status — it is conceptual and citational, not therapeutic, and leaves explicit placeholders only where the paper itself is still silent.",
-        "WHY A PARADIGM SHIFT IS PROPOSED: The Summary (párr. 5) and Discussion (párrs. 22, 25) establish that classical antibiotics are caught in a structural feedback loop. Selective pressure on bacterial targets selects for resistant survivors; combination therapy can intensify rather than relieve the pressure (párr. 5: 'combinatorial treatments... may even accelerate the rate of microbial adaptation'); cycling strategies have been studied but do not break the underlying Darwinian adaptation (párr. 13). The paper's quantitative model — visualised on the Overview page — projects the critical inefficacy threshold within the 2040–2047 window under this paradigm. The paper concludes that 'unless new categories of germicidal substances are developed, a reverse epidemiological transition seems inevitable' (párr. 5).",
-        "WHAT THE PAPER PROPOSES (literal): The subtitle of the paper reads 'A predictive mathematical model of declining antimicrobial effectiveness, and a possible metabolic escape route.' The section 'Antimetabolites in the treatment of infections' (párr. 24) specifies the mechanism: enzymatic inhibition with structural analogs of glucose (e.g. 2-deoxy-D-glucose and sodium ascorbate), enhanced by autophagy inhibitors such as hydroxychloroquine, all by competitive inhibition. What the paper does not yet specify is the kinetics of resistance emergence under this mechanism or a quantitative model of it — those remain open. This page therefore presents a paradigm-comparison framework rather than a quantitative model.",
+        "PAGE PURPOSE: This page previews the antimetabolic line of treatment proposed by the published paper. The corresponding section ('Antimetabolites in the treatment of infections') names enzymatic inhibition with structural analogs (EISA) — 2-deoxy-D-glucose, sodium ascorbate and autophagy inhibitors such as hydroxychloroquine — acting through competitive inhibition. What the paper does not yet provide is a quantitative model of resistance emergence under this mechanism. This dashboard page mirrors that status — it is conceptual and citational, not therapeutic, and leaves explicit placeholders only where the paper itself is still silent.",
+        "WHY A PARADIGM SHIFT IS PROPOSED: The Abstract, the Discussion and the note on bibliometric dynamics and industry trends establish that classical antibiotics are caught in a structural feedback loop. Selective pressure on bacterial targets selects for resistant survivors; combination therapy can intensify rather than relieve the pressure (Abstract: 'combinatorial treatments... may even accelerate the rate of microbial adaptation'); cycling strategies have been studied but do not break the underlying Darwinian adaptation (Introduction, antibiotic cycling). The paper's quantitative model — visualised on the Overview page — projects the critical inefficacy threshold within the 2040–2047 window under this paradigm. The paper concludes that 'unless new categories of germicidal substances are developed, a reverse epidemiological transition seems inevitable' (Abstract).",
+        "WHAT THE PAPER PROPOSES (literal): The subtitle of the paper reads 'A predictive mathematical model of declining antimicrobial effectiveness, and a possible metabolic escape route.' The section 'Antimetabolites in the treatment of infections' specifies the mechanism: enzymatic inhibition with structural analogs of glucose (e.g. 2-deoxy-D-glucose and sodium ascorbate), enhanced by autophagy inhibitors such as hydroxychloroquine, all by competitive inhibition. What the paper does not yet specify is the kinetics of resistance emergence under this mechanism or a quantitative model of it — those remain open. This page therefore presents a paradigm-comparison framework rather than a quantitative model.",
         "PARADIGM-COMPARISON CHART: The chart on this page contrasts two trajectories. The red curve is the classical antibiotic effectiveness trajectory derived deterministically from the super-exponential resistance model (i.e. 100 minus the resistance index). The blue band is a qualitative envelope intended only to visualise the paper's claim that an alternative line could sustain therapeutic effectiveness — it is NOT a quantitative forecast. The band is annotated as such directly in the figure to prevent any misreading. This is the only page in the dashboard where a series is shown without empirical anchoring; the convention is enforced everywhere else.",
         "COMPARISON TABLE: The qualitative comparison table contrasts six dimensions (mechanism, selective-pressure target, resistance trajectory, R&D pipeline, combinatorial use, empirical anchoring) between the classical and antimetabolic paradigms. Right-column cells marked 'to be specified' are explicit author-fillable placeholders — they signal where additional content from the authors will replace the scaffold.",
         "OPEN RESEARCH QUESTIONS: The numbered list captures questions the antimetabolic proposal raises but does not yet answer. They cover specificity (how host metabolism is preserved while pathogen metabolism is disrupted), kinetics (what the resistance-emergence curve looks like under the new mechanism), pathogen scope (which ESKAPEE / PDR phenotypes are best candidates), and methodological prerequisites. Authors can replace each item with the corresponding answer or sub-thesis.",
@@ -323,7 +323,7 @@ layout = html.Div([
         dcc.Graph(id="paradigm-chart", figure=build_paradigm_chart(), config=SVG_CONFIG),
         html.Div([
             html.Span("Sources: ", className="source-label"),
-            html.A("Paper UPDATE v.A-29 párrs. 5, 22, 24", href="#", target="_blank"),
+            html.A("Gratacós & Botto, Br J Med Health Res 2026 (Abstract, Discussion, Antimetabolites)", href="https://doi.org/10.5281/zenodo.21898960", target="_blank"),
             " · ",
             html.A("Super-exponential resistance model (Overview)", href="/", target="_blank"),
         ], className="chart-sources"),

@@ -5,10 +5,13 @@ Anchored to 10+ published sources (Lancet GBD, O'Neill, GRAM, CIDRAP, Tai 2025).
 Deterministic models exposed:
   * compute_super_exponential_curve() — closed-form analytic curve, primary
                                         model of the Gratacós-Botto thesis
-                                        (paper UPDATE v.A-29 párr. 22):
+                                        (published paper, Discussion):
                                         "the rate of increasing resistance is
                                         itself growing".
   * compute_reference_logistic_curve() — constant-rate logistic, for contrast.
+  * compute_scenario_curve() / scenario_crossing_year() — Scenario Lab:
+                                        hypothetical interventions applied to
+                                        the super-exponential model.
 
 The super-exponential form has a time-quadratic term in the exponent
 (-r·τ - b·τ²) so the effective rate r_eff(τ) = r + 2·b·τ grows linearly
@@ -45,7 +48,7 @@ OBSERVED_DATA = pd.DataFrame({
 
 
 # ---------------------------------------------------------------------------
-# Forecast anchor points (recalibrated to paper UPDATE v.A-29 párr. 19)
+# Forecast anchor points (recalibrated to published paper, forecast segment)
 #   2025–2032: 70 → 80
 #   2033–2040: → 90
 #   2040–2047: → 95–98 (CRITICAL POINT, 14 ± 3 yrs from 2026)
@@ -58,9 +61,9 @@ FORECAST_DATA = pd.DataFrame({
     "upper_bound": [77, 87, 95, 99, 99.5, 99.8, 99.9],
     "source": [
         "CIDRAP/GRAM",
-        "Gratacós-Botto v.A-29 (párr. 19)",
-        "Gratacós-Botto v.A-29 (párr. 19)",
-        "Gratacós-Botto v.A-29 (critical point)",
+        "Gratacós-Botto 2026 (forecast segment)",
+        "Gratacós-Botto 2026 (forecast segment)",
+        "Gratacós-Botto 2026 (critical point)",
         "O'Neill 10M deaths/yr",
         "Extrapolation",
         "Asymptotic",
@@ -73,7 +76,7 @@ FORECAST_DATA = pd.DataFrame({
 #   * Murray 2022 (Lancet GBD)        — historical 2019 baseline
 #   * GRAM/O'Neill                    — high-end trajectory
 #   * Tai et al. 2025 (Int J Antimicrob Ag) — conservative GBD-hierarchical
-#     (paper párr. 9: "~1.91M annual deaths by 2040")
+#     (paper Introduction, global burden: "~1.91M annual deaths by 2040")
 # ---------------------------------------------------------------------------
 MORTALITY_DATA = pd.DataFrame({
     "year": [2019, 2025, 2030, 2035, 2040, 2045, 2050],
@@ -157,10 +160,81 @@ def compute_reference_logistic_curve(start=1990, end=2060):
 
 
 # ---------------------------------------------------------------------------
+# Scenario Lab: closed-form intervention scenarios on the super-exponential
+# model. Exploratory sensitivity of the paper's model to hypothetical
+# interventions, NOT part of the paper's forecast.
+#
+# Exponent of the generalized logistic: y = K / (1 + A·exp(-g(τ))).
+#   Baseline:      g(τ) = r·τ + b·τ²          → r_eff(τ) = g'(τ) = r + 2bτ
+#   Intervention from τs (year_start - t0), with levers s, p in [0, 1]:
+#     stewardship  s → base rate      r → r·(1 - s)
+#     new drugs    p → acceleration   b → b·(1 - p)
+#     g(τ) = g(τs) + r(1-s)(τ - τs) + b(1-p)(τ² - τs²)   for τ ≥ τs
+# g is continuous at τs, so the curve bends without jumping. Threshold
+# crossings are solved exactly (quadratic formula); nothing is fitted or
+# sampled, so every scenario reproduces bit-for-bit.
+# ---------------------------------------------------------------------------
+CRITICAL_THRESHOLD = 95.0
+
+
+def _scenario_exponent(tau, s, p, tau_s, r, b):
+    tau = np.asarray(tau, dtype=float)
+    base = r * tau + b * tau * tau
+    g_s = r * tau_s + b * tau_s * tau_s
+    after = g_s + r * (1 - s) * (tau - tau_s) + b * (1 - p) * (tau * tau - tau_s * tau_s)
+    return np.where(tau < tau_s, base, after)
+
+
+def compute_scenario_curve(s=0.0, p=0.0, year_start=2027, start=1990, end=2100):
+    """Baseline and intervention curves plus effective rates, per year."""
+    P = SUPER_EXP_PARAMS
+    years = np.arange(start, end + 1)
+    tau = years - P["t0"]
+    tau_s = year_start - P["t0"]
+    g_base = _scenario_exponent(tau, 0.0, 0.0, tau_s, P["r"], P["b"])
+    g_scen = _scenario_exponent(tau, s, p, tau_s, P["r"], P["b"])
+    rate_base = P["r"] + 2 * P["b"] * tau
+    rate_scen = np.where(tau < tau_s, rate_base,
+                         P["r"] * (1 - s) + 2 * P["b"] * (1 - p) * tau)
+    return pd.DataFrame({
+        "year": years,
+        "baseline": P["K"] / (1.0 + P["A"] * np.exp(-g_base)),
+        "scenario": P["K"] / (1.0 + P["A"] * np.exp(-g_scen)),
+        "rate_baseline": rate_base,
+        "rate_scenario": rate_scen,
+    })
+
+
+def scenario_crossing_year(s=0.0, p=0.0, year_start=2027, threshold=CRITICAL_THRESHOLD):
+    """Exact (fractional) year the scenario curve crosses `threshold`.
+
+    Returns None when the curve never reaches it (both levers at 100%).
+    """
+    P = SUPER_EXP_PARAMS
+    r, b, K, A = P["r"], P["b"], P["K"], P["A"]
+    g_star = np.log(A * threshold / (K - threshold))  # y = threshold  <=>  g = g_star
+    tau_s = year_start - P["t0"]
+    g_s = r * tau_s + b * tau_s * tau_s
+    if g_s >= g_star:  # crossed before the intervention starts: baseline root
+        tau = (-r + np.sqrt(r * r + 4 * b * g_star)) / (2 * b)
+        return P["t0"] + tau
+    r2, b2 = r * (1 - s), b * (1 - p)
+    # b2·τ² + r2·τ - c = 0, with c = g_star - g_s + r2·τs + b2·τs²
+    c = g_star - g_s + r2 * tau_s + b2 * tau_s * tau_s
+    if b2 > 0:
+        tau = (-r2 + np.sqrt(r2 * r2 + 4 * b2 * c)) / (2 * b2)
+    elif r2 > 0:
+        tau = c / r2
+    else:
+        return None
+    return P["t0"] + tau
+
+
+# ---------------------------------------------------------------------------
 # Carbapenem-resistance trajectory through 2035
 # Anchored to:
 #   * Murray et al. Lancet 2022 — ~140K carbapenem-resistant deaths in 2019
-#   * Tai et al. IJAA 2025 (paper ref 10, párr. 9) —
+#   * Tai et al. IJAA 2025 (paper ref 10, Introduction, global burden) —
 #     "carbapenem-resistant deaths are projected to escalate sharply by 2035
 #      even as overall age-standardized mortality declines"
 #   * Pathogen split (CRE / CRAB / CRPA) approximated from GBD AMR breakdown

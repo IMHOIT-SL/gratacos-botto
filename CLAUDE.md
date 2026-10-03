@@ -19,9 +19,9 @@ antimicrobial-resistance (AMR) dynamics. It is deployed live at
 
 Everything runs from `dashboard/`:
 
-- `dashboard/app.py` — Dash app (`use_pages=True`), shell layout, `NAV_ITEMS` (11 pages). WSGI target `app:server`.
-- `dashboard/pages/` — one module per page (11): `overview`, `pathogens`, `timeseries`, `bibliometrics` (`/industry`), `antimetabolic` (`/metabolic`), `methods`, `datasources`, `references`, `export`, `documentation` (`/docs`), `tutorial`.
-- `dashboard/data/` — the data/model layer: `amr_data.py` (super-exponential curve), `pathogen_data.py`, `timeseries_data.py`, `bibliometrics_data.py`, `references_data.py` (60 refs).
+- `dashboard/app.py` — Dash app (`use_pages=True`), shell layout, `NAV_ITEMS` (12 pages). WSGI target `app:server`.
+- `dashboard/pages/` — one module per page (12): `overview`, `scenarios` (`/scenarios`, Scenario Lab), `pathogens`, `timeseries`, `bibliometrics` (`/industry`), `antimetabolic` (`/metabolic`), `methods`, `datasources`, `references`, `export`, `documentation` (`/docs`), `tutorial`.
+- `dashboard/data/` — the data/model layer: `amr_data.py` (super-exponential curve), `pathogen_data.py`, `timeseries_data.py`, `bibliometrics_data.py`, `references_data.py` (55 refs, numbered as in the published paper).
 - `dashboard/docs/` — in-app markdown documentation (`architecture`, `setup`, `charts_guide`, `models`, `data_sources`), rendered by the Documentation page.
 - `dashboard/assets/` — `style.css` (dark theme) + `export_download.js`.
 - Deploy: `Procfile`, `.do/app.yaml` (DigitalOcean App Platform), `deploy/systemd/` (self-host fallback), `run-api.sh` / `run-web.sh`. See `DEPLOY.md`.

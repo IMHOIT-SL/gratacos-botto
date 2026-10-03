@@ -8,12 +8,12 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Page:** Overview (`/`)
 
-**What it shows:** The primary visualization of the project — a closed-form **super-exponential** curve plotting the "Resistance Pressure Index" (0-100) from 1990 to 2060, expressing the paper's "rate of increase is itself growing" thesis (UPDATE v.A-29 párr. 22). The observed segment (1990-2025) is drawn as a solid blue line; the forecast segment (2025-2060) is a dashed red line. A faint dotted grey line shows the constant-r reference logistic for visual contrast. Published data points are blue circle markers. A shaded band shows the ±3-year temporal envelope. A dotted red horizontal line marks the critical threshold at ~95, and a red-shaded vertical band highlights the critical point window **2040-2047** (matching paper párr. 19 milestones).
+**What it shows:** The primary visualization of the project — a closed-form **super-exponential** curve plotting the "Resistance Pressure Index" (0-100) from 1990 to 2060, expressing the paper's "rate of increase is itself growing" thesis (published paper, Discussion). The observed segment (1990-2025) is drawn as a solid blue line; the forecast segment (2025-2060) is a dashed red line. A faint dotted grey line shows the constant-r reference logistic for visual contrast. Published data points are blue circle markers. A shaded band shows the ±3-year temporal envelope. A dotted red horizontal line marks the critical threshold at ~95, and a red-shaded vertical band highlights the critical point window **2040-2047** (matching paper forecast segment milestones).
 
 **How to interpret it:**
 - The y-axis is a normalized conceptual composite, not a raw measurement.
 - The super-exponential curve crosses the critical threshold (95) in **2047**; the constant-r reference crosses it in **2051**. The 4-year advance is the paper's central forecasting claim.
-- The shaded ±3y band represents the paper's stated uncertainty (párr. 5: "fourteen years (±3)") — it is a temporal shift, not a statistical CI.
+- The shaded ±3y band represents the paper's stated uncertainty (Abstract: "fourteen years (±3)") — it is a temporal shift, not a statistical CI.
 - Hover over markers to see source citations.
 
 **Data sources:** `compute_super_exponential_curve()` and `compute_reference_logistic_curve()` in `data/amr_data.py` — closed-form, hardcoded coefficients (K=100, A≈7.333, r=0.0705, b=3.05·10⁻⁴), no fitting. Anchored to Murray et al. (Lancet 2022), O'Neill Review, GRAM Project, Tai 2025 IJAA, Oxford Vaccine Group, and IHME GBD.
@@ -43,7 +43,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Page:** Pathogens (`/pathogens`)
 
-**What it shows:** An 11×10 heatmap with the **ESKAPEE** pathogens (E. coli explicit per paper párr. 11) plus **S. maltophilia** (paper párr. 65) plus reference pathogens (rows) and 10 antibiotic classes (columns). Each cell shows the approximate percentage of resistant isolates. Color scale: dark teal (0%) → blue → amber → red (100%). Em-dash cells = intrinsic resistance or insufficient data. Each row is annotated with two badges: WHO priority (Critical/High/Medium/Special) **and** Magiorakos isolate-level phenotype (MDR/XDR/PDR documented).
+**What it shows:** An 11×10 heatmap with the **ESKAPEE** pathogens (E. coli explicit per paper Introduction, ESKAPEE) plus **S. maltophilia** (paper ref 36) plus reference pathogens (rows) and 10 antibiotic classes (columns). Each cell shows the approximate percentage of resistant isolates. Color scale: dark teal (0%) → blue → amber → red (100%). Em-dash cells = intrinsic resistance or insufficient data. Each row is annotated with two badges: WHO priority (Critical/High/Medium/Special) **and** Magiorakos isolate-level phenotype (MDR/XDR/PDR documented).
 
 **How to interpret it:**
 - Darker red cells indicate higher resistance — the most concerning pathogen-drug combinations.
@@ -51,7 +51,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 - MDR/XDR/PDR badges are isolate-level (Magiorakos 2012). Saying "K. pneumoniae = PDR" is shorthand for "PDR strains are documented in literature" — most clinical isolates remain susceptible to at least some drugs.
 - Hover any cell for the resistance percentage and modification flag (when overridden via Sensitivity Analysis).
 
-**Data sources:** `RESISTANCE_MATRIX`, `PATHOGENS`, `ANTIBIOTIC_CLASSES`, `WHO_PRIORITY`, `MDR_XDR_PDR` from `data/pathogen_data.py`. Anchored to WHO GLASS 2022/2023, ECDC EARS-Net, Murray et al. Lancet 2022, CDC AR Threats Report, Magiorakos 2012, paper UPDATE v.A-29 párrs. 51-65.
+**Data sources:** `RESISTANCE_MATRIX`, `PATHOGENS`, `ANTIBIOTIC_CLASSES`, `WHO_PRIORITY`, `MDR_XDR_PDR` from `data/pathogen_data.py`. Anchored to WHO GLASS 2022/2023, ECDC EARS-Net, Murray et al. Lancet 2022, CDC AR Threats Report, Magiorakos 2012, published paper, refs 23-36.
 
 **Export:** Camera icon → SVG 3x. Also in Export Studio.
 
@@ -208,7 +208,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 **What it shows:** Stacked area chart of carbapenem-resistant mortality through 2035: CRE (Enterobacterales) + CRAB (A. baumannii) + CRPA (P. aeruginosa). A vertical dotted line at 2025 marks the observed → forecast boundary; a second dotted line at 2035 marks the Tai 2025 horizon.
 
 **How to interpret it:**
-- Operationalises paper UPDATE v.A-29 párr. 9 / Tai 2025: "carbapenem-resistant deaths are projected to escalate sharply by 2035 even as overall age-standardized mortality declines".
+- Operationalises published paper, Introduction, global burden / Tai 2025: "carbapenem-resistant deaths are projected to escalate sharply by 2035 even as overall age-standardized mortality declines".
 - The per-pathogen split is illustrative — refer to Tai 2025 for the underlying figures.
 
 **Data sources:** `CARBAPENEM_PROJECTION` in `data/amr_data.py`. Anchored to Murray 2022 (2019 baseline) + Tai 2025 IJAA (paper ref 10).
@@ -224,7 +224,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 **What it shows:** Annual publication counts for the search term "antibiotic resistance" on PubMed, 1990-2025. Bar chart, ~253K cumulative results.
 
 **How to interpret it:**
-- Closely matches the 250,267 results visible in the PubMed query screenshot embedded in the paper (image 3, párr. 25).
+- Closely matches the 250,267 results visible in the PubMed query screenshot embedded in the paper (Image #4, bibliometrics & industry note).
 - Annual count derived from the closed-form `count(y) = round(500·exp(0.115·(y-1990)))` — calibrated to reproduce the visual envelope of the PubMed search results.
 
 **Data sources:** `compute_pubmed_annual()` in `data/bibliometrics_data.py`. Anchored to PubMed search "antibiotic resistance".
@@ -241,7 +241,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **How to interpret it:**
 - Univdatos "Antibiotic Resistance Market 2024-2032" report applied with uniform CAGR.
-- The chart supports the paper's párr. 25 thesis: market grows but efficacy doesn't.
+- The chart supports the paper's bibliometrics & industry note thesis: market grows but efficacy doesn't.
 
 **Data sources:** `MARKET_GROWTH` in `data/bibliometrics_data.py`. Anchored to Univdatos.
 
@@ -256,7 +256,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 **What it shows:** Grouped bar chart comparing 2023 vs 2032 USD revenue across four drug classes: Oxazolidinones (linezolid), Lipoglycopeptides (dalbavancin/oritavancin), Tetracyclines (tigecycline/eravacycline/omadacycline), and Others (β-lactam/inhibitor combos and novel agents).
 
 **How to interpret it:**
-- Per-class shares are visual approximations of the Univdatos drug-class figure embedded in the paper (image 2).
+- Per-class shares are visual approximations of the Univdatos drug-class figure embedded in the paper (Image #5).
 - Revenue allocation, not therapeutic effectiveness — same molecules face the same resistance pressures.
 
 **Data sources:** `DRUG_CLASS_SHARE`, `class_size_2023()`, `class_size_2032()` in `data/bibliometrics_data.py`. Anchored to Univdatos.
@@ -272,12 +272,12 @@ This document describes every chart in the dashboard: what it shows, how to read
 **What it shows:** Two series indexed to **1990 = 1.0** on a **log scale**. Awareness (blue solid) tracks cumulative PubMed publications and reaches ~500× by 2025. Effectiveness (red dashed) tracks `(100 − resistance index)` and declines to ~0.34× by 2025. The two curves move in opposite directions.
 
 **How to interpret it:**
-- Direct visualisation of paper UPDATE v.A-29 párr. 25: "increase in volume of sales, but no increase in efficacy is discernible".
+- Direct visualisation of published paper, bibliometrics & industry note: "Although the antibiotic resistance market has been evolving on par with the declining effect of standard pharmaceuticals, no increase in efficacy is apparent".
 - Structural, not cyclical, divergence — awareness alone has not solved the problem.
 
 **Data sources:** `AWARENESS_EFFECTIVENESS` in `data/bibliometrics_data.py`. Combines PubMed annual counts and the super-exponential resistance model.
 
-**Export:** Camera icon → SVG 3x. Also in Export Studio. **This is the central industry chart — recommended for the paper's párr. 25 figure.**
+**Export:** Camera icon → SVG 3x. Also in Export Studio. **This is the central industry chart — recommended for the paper's bibliometrics & industry note figure.**
 
 ---
 
@@ -289,7 +289,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **How to interpret it:**
 - This is the **only** chart in the dashboard that includes a non-empirical series. The convention is enforced everywhere else.
-- The blue band is intended only to visualise the paradigm shift the paper proposes (subtitle + párrs. 5, 24). Once authors specify the molecular mechanism and supply quantitative inputs, this band can be replaced with a quantitative trajectory.
+- The blue band is intended only to visualise the paradigm shift the paper proposes (subtitle, Abstract and Antimetabolites section). Once authors specify the molecular mechanism and supply quantitative inputs, this band can be replaced with a quantitative trajectory.
 
 **Data sources:** `compute_super_exponential_curve()` for the classical curve; the qualitative band is hand-drawn (years 2025–2060, fixed bounds 55–75).
 

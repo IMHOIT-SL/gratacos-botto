@@ -207,6 +207,64 @@ body {
     font-family: var(--font-mono);
 }
 
+/* Published-paper access (header pill + Overview callout) */
+.paper-pill {
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+.paper-pill:hover {
+    background: var(--accent);
+    color: var(--bg-primary);
+}
+.paper-callout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.9rem 1.2rem;
+    margin-bottom: 1.2rem;
+}
+.paper-callout-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-weight: 600;
+}
+.paper-callout-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0.2rem 0;
+}
+.paper-callout-meta {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+.paper-callout-btn {
+    background: var(--accent);
+    color: var(--bg-primary);
+    padding: 0.5rem 1.1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.paper-callout-btn:hover { opacity: 0.85; }
+
 /* Footer */
 .footer {
     background: var(--bg-secondary);
@@ -590,3 +648,24 @@ input.dash-range-slider-input,
         grid-template-columns: 1fr;
     }
 }
+.paper-callout-meta a,
+.footer a {
+    color: var(--accent);
+    text-decoration: none;
+}
+.paper-callout-meta a:hover,
+.footer a:hover { text-decoration: underline; }
+
+/* Scenario Lab */
+.scn-disclaimer {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--warning);
+    border-radius: 8px;
+    padding: 0.8rem 1.1rem;
+    margin-bottom: 1.2rem;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+.scn-disclaimer strong { color: var(--text-primary); }
+.scn-disclaimer a { color: var(--accent); }
