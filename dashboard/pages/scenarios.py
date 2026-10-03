@@ -24,7 +24,7 @@ from data.amr_data import (
     compute_scenario_curve,
     scenario_crossing_year,
 )
-from components import help_section, chart_title_with_info
+from components import help_section, chart_title_with_info, graph_config
 
 dash.register_page(__name__, path="/scenarios", name="Scenario Lab")
 
@@ -38,10 +38,7 @@ CHART_LAYOUT = dict(
     yaxis=dict(gridcolor="#2d2f3a", zerolinecolor="#2d2f3a"),
 )
 
-SVG_CONFIG = {
-    "toImageButtonOptions": {"format": "svg", "scale": 3},
-    "displayModeBar": True,
-}
+SVG_CONFIG = graph_config()
 
 BASE_COLOR = "#4fc3f7"
 SCEN_COLOR = "#66bb6a"

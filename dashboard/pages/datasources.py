@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from components import help_section, chart_title_with_info
+from components import help_section, chart_title_with_info, graph_config
 
 dash.register_page(__name__, path="/datasources", name="Data Sources")
 
@@ -218,10 +218,7 @@ def build_summary_cards():
     return html.Div(cards, className="stats-row")
 
 
-SVG_CONFIG = {
-    "toImageButtonOptions": {"format": "svg", "scale": 3},
-    "displayModeBar": True,
-}
+SVG_CONFIG = graph_config()
 
 layout = html.Div([
     # Help section

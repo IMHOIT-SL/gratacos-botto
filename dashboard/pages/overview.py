@@ -21,7 +21,7 @@ from data.amr_data import (
     MORTALITY_DATA,
     CARBAPENEM_PROJECTION,
 )
-from components import help_section, chart_title_with_info
+from components import help_section, chart_title_with_info, graph_config
 
 dash.register_page(__name__, path="/", name="Overview")
 
@@ -460,7 +460,7 @@ layout = html.Div([
         "PUBLISHED ANCHOR MARKERS: The blue circular markers represent published anchor points from the literature (Murray Lancet 2022, GRAM/CIDRAP, O'Neill 2016, Oxford VG, Tai IJAA 2025). The model curve does not pass exactly through every marker — the closed-form analytic function smooths slight inter-source variation. Hover over any marker to read its source citation.",
         "MORTALITY CHART — THREE METHODOLOGIES: The mortality chart now overlays three projection methodologies. (a) Stacked bars (red+amber): GRAM/O'Neill methodology — directly attributable + associated deaths, peaking at ~10M associated deaths/year by 2050. (b) Dashed blue diamond line: Tai et al. 2025 (Int J Antimicrob Agents) — a more conservative GBD-hierarchical methodology projecting ~1.91M annual attributable deaths by 2040. The two curves represent legitimate methodological alternatives; the gap between them is itself a measure of model uncertainty in long-horizon AMR mortality forecasting.",
         "HISTORICAL BACK-VALIDATION: To test the model out-of-sample, the two free coefficients (r, b) of the generalized logistic are re-derived analytically from only two pre-2016 anchors (the 2010 and 2015 observed points; the ceiling K=100 and A=88/12 are unchanged). That ≤2015-only curve is then used to predict the 2019, 2021 and 2025 observations, which were held out of the calibration. The held-out mean absolute error is under 4 index points and the prediction runs slightly conservative — the model calibrated on old data alone already forecasts the continued rise, modestly under-predicting the post-2015 acceleration. This is a deterministic, closed-form check (interpolation from exact anchors), not a statistical fit, and it addresses the reviewer's request for validation against historical data.",
-        "USING CHARTS IN PUBLICATIONS: To export any chart, click the camera icon in the Plotly toolbar (top-right of the chart). The default export is SVG at 3x resolution, suitable for most journal submissions. For the highest quality, use the Export Studio page where you can select Publication Light or Print B&W color themes with white backgrounds. When citing these visualizations, reference the underlying data sources listed below each chart and note that the resistance pressure index is a composite normalized metric constructed for this research project.",
+        "USING CHARTS IN PUBLICATIONS: To export any chart, use its toolbar (top-right of the chart): the arrow downloads SVG (vector, suitable for most journal submissions), the picture icon downloads PNG at 3x resolution, and the grid icon downloads the chart's data as CSV. For the highest quality, use the Export Studio page where you can select Publication Light or Print B&W color themes with white backgrounds. When citing these visualizations, reference the underlying data sources listed below each chart and note that the resistance pressure index is a composite normalized metric constructed for this research project.",
         "DATA TABLE: The reference data table at the bottom of this page lists every published anchor point used to construct the curve, including the year, index value, uncertainty range, original source, and whether the point is observed or forecast. Use this table to trace any point on the curve back to its primary literature source.",
     ]),
 
@@ -515,10 +515,7 @@ layout = html.Div([
             "Primary curve: super-exponential model from the Gratacós-Botto paper (Br J Med Health Res 2026) with rate growing linearly in time. Faint dotted grey: constant-rate logistic (continuous limit of V=S·(1+r)ᵀ) for comparison. Red-shaded zone: projected critical-point window (2040–2047).",
             "Super-exponential model anchored to 10+ published sources, with reference logistic and ±3-year uncertainty band",
         ),
-        dcc.Graph(id="main-curve", figure=build_main_curve(), config={
-            "toImageButtonOptions": {"format": "svg", "filename": "amr_resistance_curve", "scale": 3},
-            "displayModeBar": True,
-        }),
+        dcc.Graph(id="main-curve", figure=build_main_curve(), config=graph_config("amr_resistance_curve")),
         html.Div([
             html.Span("Sources: ", className="source-label"),
             html.A("Murray et al., Lancet 2022", href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)02724-0/fulltext", target="_blank"),
@@ -543,9 +540,7 @@ layout = html.Div([
                 "Stacked bars: GRAM/O'Neill methodology (attributable + associated). Dashed blue line: Tai et al. 2025 (conservative GBD-hierarchical, ~1.91M attributable deaths by 2040). Both methodologies are legitimate; the gap reflects model uncertainty.",
                 "Three methodologies: Murray/GRAM/O'Neill stacked + Tai 2025 overlay",
             ),
-            dcc.Graph(id="mortality-chart", figure=build_mortality_chart(), config={
-                "toImageButtonOptions": {"format": "svg", "filename": "amr_mortality", "scale": 3},
-            }),
+            dcc.Graph(id="mortality-chart", figure=build_mortality_chart(), config=graph_config("amr_mortality")),
             html.Div([
                 html.Span("Sources: ", className="source-label"),
                 html.A("Murray et al., Lancet 2022", href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)02724-0/fulltext", target="_blank"),
@@ -576,10 +571,7 @@ layout = html.Div([
         ),
         html.Div([
             html.Div([
-                dcc.Graph(id="validation-chart", figure=build_validation_chart(), config={
-                    "toImageButtonOptions": {"format": "svg", "filename": "amr_backvalidation", "scale": 3},
-                    "displayModeBar": True,
-                }),
+                dcc.Graph(id="validation-chart", figure=build_validation_chart(), config=graph_config("amr_backvalidation")),
             ]),
             html.Div([
                 html.P("Held-out predictions vs. observations (index points):",
@@ -604,10 +596,7 @@ layout = html.Div([
             "Carbapenem-resistant Enterobacterales (CRE), A. baumannii (CRAB) and P. aeruginosa (CRPA) mortality through 2035, anchored to Murray et al. Lancet 2022 (2019 baseline) and Tai et al. IJAA 2025 (paper ref 10, Introduction, global burden): 'carbapenem-resistant deaths are projected to escalate sharply by 2035 even as overall age-standardized mortality declines'. Stacked area shows the three pathogen contributions; vertical dotted line at 2025 marks observed → forecast.",
             "Spotlight on the paper's claim (Introduction, global burden) — sharp carbapenem-resistant escalation through 2035 (Tai 2025)",
         ),
-        dcc.Graph(id="carbapenem-chart", figure=build_carbapenem_chart(), config={
-            "toImageButtonOptions": {"format": "svg", "filename": "carbapenem_2035", "scale": 3},
-            "displayModeBar": True,
-        }),
+        dcc.Graph(id="carbapenem-chart", figure=build_carbapenem_chart(), config=graph_config("carbapenem_2035")),
         html.Div([
             html.Span("Sources: ", className="source-label"),
             html.A("Tai et al., IJAA 2025 (paper ref 10)",

@@ -118,7 +118,7 @@ Dash layout (dcc.Graph components with figure= or callback outputs)
        │
        │  JSON serialization over websocket
        ▼
-Browser (Plotly.js renders interactive charts with modebar)
+Browser (Plotly.js renders interactive charts with the curated toolbar from assets/graph_toolbar.js)
 ```
 
 ### Data Modules
@@ -211,10 +211,7 @@ Each theme is a dictionary controlling `paper_bgcolor`, `plot_bgcolor`, `font_co
        html.Div([
            html.H3("Chart Title", className="card-title"),
            html.P("Description", className="card-subtitle"),
-           dcc.Graph(figure=your_figure, config={
-               "toImageButtonOptions": {"format": "svg", "scale": 3},
-               "displayModeBar": True,
-           }),
+           dcc.Graph(figure=your_figure, config=graph_config("my_chart")),  # from components
        ], className="card"),
    ])
    ```

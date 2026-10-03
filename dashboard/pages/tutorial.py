@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from components import help_section, chart_title_with_info
+from components import help_section, chart_title_with_info, graph_config
 from data.amr_data import compute_super_exponential_curve
 
 dash.register_page(__name__, path="/tutorial", name="Tutorial")
@@ -160,27 +160,23 @@ layout = html.Div([
     help_section("Tutorial", [
         "This page teaches you how to use the interactive chart controls available on every chart in the dashboard.",
         "DASHBOARD MAP: The current build has 11 pages with 11 distinct charts in total (plus auxiliary panels). The Plotly toolbar described below works identically on every chart — once you learn the controls here, they apply everywhere. The 'Where to find each chart' section at the bottom of this page lists which page hosts which chart.",
-        "PUBLICATION-QUALITY EXPORT: Every chart can be exported as SVG (3x scale) directly via the camera icon on its modebar. For more control (light/B&W themes, drug-class panel, etc.), use the dedicated Export Studio page (`/export`) — it surfaces all 11 charts with theme switching.",
+        "PUBLICATION-QUALITY EXPORT: Every chart can be exported from its own toolbar as SVG (vector), PNG at 3x resolution, or CSV with its data. For more control (light/B&W themes, drug-class panel, etc.), use the dedicated Export Studio page (`/export`) — it surfaces all 11 charts with theme switching.",
     ]),
 
     # Demo chart
     html.Div([
         chart_title_with_info(
             "Practice Chart -- Try the Controls",
-            "This is a demo chart for practicing Plotly interactive controls. It uses a subset of the AMR sigmoid curve data with key milestones marked. Hover over the top-right corner to reveal the toolbar, then try each control described below.",
-            "Use this chart to practice all 10 toolbar controls described below",
+            "This is a demo chart for practicing Plotly interactive controls. It uses a subset of the AMR sigmoid curve data with key milestones marked. The toolbar sits at the top right of the chart; try each control described below.",
+            "Use this chart to practice the 9 toolbar controls described below",
         ),
         dcc.Graph(
             id="tutorial-demo-chart",
             figure=build_demo_chart(),
-            config={
-                "toImageButtonOptions": {"format": "svg", "filename": "amr_tutorial_demo", "scale": 3},
-                "displayModeBar": True,
-                "modeBarButtonsToAdd": ["toggleSpikelines"],
-            },
+            config=graph_config("amr_tutorial_demo"),
         ),
         html.P(
-            "Hover over the top-right corner of the chart above to reveal the modebar toolbar. Then follow the guides below to learn each control.",
+            "The toolbar is at the top right of the chart above. Follow the guides below to learn each control.",
             style={"color": "#b0b3b8", "fontStyle": "italic", "marginTop": "0.5rem"},
         ),
     ], className="card"),
@@ -191,37 +187,18 @@ layout = html.Div([
         "borderBottom": "1px solid #2d2f3a", "paddingBottom": "0.5rem",
     }),
     html.P(
-        "Each chart in the dashboard includes a toolbar (modebar) that appears when you hover over the top-right corner. Below is a detailed guide for each control, from left to right.",
+        "Every chart in the dashboard has the same toolbar at its top right: navigation tools on the left (zoom, pan, zoom in, zoom out, reset) and output tools on the right (SVG, PNG, data, full screen). Below is a guide for each control, from left to right.",
         style={"color": "#b0b3b8", "marginBottom": "1.5rem"},
     ),
 
-    # 1. Download Plot
-    control_card(
-        icon="\U0001f4f7",
-        name="Download Plot (Camera Icon)",
-        description="Downloads the current chart view as an image file. In this dashboard, all charts are configured to export as SVG at 3x scale for publication-quality output.",
-        steps=[
-            "Hover over the chart to reveal the toolbar in the top-right corner.",
-            "Click the camera icon (first button on the left).",
-            "The chart will be downloaded automatically as an SVG file.",
-            "Open the SVG in any browser, vector editor (Inkscape, Illustrator), or import into your manuscript.",
-        ],
-        example="Download the resistance curve as a high-resolution SVG for inclusion in your paper. SVG files are vector graphics, so they scale perfectly for print at any size.",
-        tips=[
-            "SVG format preserves text as selectable/searchable text, unlike PNG.",
-            "Right-click the chart for additional browser-level save options (e.g., copy image).",
-            "SVG files can be converted to PDF, EPS, or PNG using Inkscape or online tools.",
-            "The 3x scale ensures sharp output even when downscaled for publication columns.",
-        ],
-    ),
-
-    # 2. Zoom
+    # Toolbar layout: navigation tools on the left, downloads + full screen on the right.
+    # 1. Zoom
     control_card(
         icon="\U0001f50d",
         name="Zoom (Magnifying Glass)",
         description="Enables rectangular zoom mode. Click and drag on the chart to draw a box around the area you want to zoom into. The axes will rescale to show only the selected region.",
         steps=[
-            "Click the magnifying glass icon in the toolbar (active by default).",
+            "Click the magnifying glass (first button on the left; active by default).",
             "Click and hold on the chart at one corner of the area you want to inspect.",
             "Drag to the opposite corner to draw a selection rectangle.",
             "Release the mouse button -- the chart zooms to show only the selected area.",
@@ -235,7 +212,7 @@ layout = html.Div([
         ],
     ),
 
-    # 3. Pan
+    # 2. Pan
     control_card(
         icon="\u271c",
         name="Pan (Cross Arrows)",
@@ -254,45 +231,7 @@ layout = html.Div([
         ],
     ),
 
-    # 4. Box Select
-    control_card(
-        icon="\u25a1",
-        name="Box Select (Dotted Rectangle)",
-        description="Draws a rectangular selection box to highlight and select data points within that region. Selected points are visually emphasized while others are dimmed.",
-        steps=[
-            "Click the dotted-rectangle icon in the toolbar.",
-            "Click and drag on the chart to draw a rectangular selection area.",
-            "Data points inside the rectangle will be highlighted/selected.",
-            "Points outside the selection are dimmed for contrast.",
-        ],
-        example="Select the cluster of key milestones between 2010-2030 to identify which published data points fall within the steepest acceleration phase of the resistance curve.",
-        tips=[
-            "Hold Shift and drag to add more points to your existing selection.",
-            "Click on empty space (without dragging) to clear the selection.",
-            "Useful for identifying outlier data points that deviate from the trend.",
-        ],
-    ),
-
-    # 5. Lasso Select
-    control_card(
-        icon="\u27b0",
-        name="Lasso Select (Lasso Icon)",
-        description="Enables free-form selection by drawing an arbitrary shape. More flexible than box select for irregularly distributed data points.",
-        steps=[
-            "Click the lasso icon in the toolbar.",
-            "Click and hold on the chart, then draw a freehand shape around the points of interest.",
-            "Release the mouse -- the shape closes automatically and points inside are selected.",
-            "Selected points are highlighted; others are dimmed.",
-        ],
-        example="Draw a lasso around the key milestone markers that sit above the main curve line to isolate data points with higher-than-expected resistance readings.",
-        tips=[
-            "Hold Shift while drawing to add to an existing selection.",
-            "Lasso select is especially useful with scatter plots that have clusters.",
-            "Click on empty space to deselect all points.",
-        ],
-    ),
-
-    # 6. Zoom In
+    # 3. Zoom In
     control_card(
         icon="\u2295",
         name="Zoom In (+)",
@@ -310,7 +249,7 @@ layout = html.Div([
         ],
     ),
 
-    # 7. Zoom Out
+    # 4. Zoom Out
     control_card(
         icon="\u2296",
         name="Zoom Out (-)",
@@ -322,62 +261,87 @@ layout = html.Div([
         ],
         example="After closely inspecting the 2019 data point (Murray et al., 1.27M deaths), zoom out to see how it fits within the broader 70-year trajectory.",
         tips=[
-            "If you zoom out beyond the data range, use Autoscale to snap back to the data bounds.",
+            "If you zoom out beyond the data range, use Reset Axes (home icon) to return to the original view.",
             "Zoom Out can reveal data points that were clipped by previous zoom operations.",
         ],
     ),
 
-    # 8. Autoscale
-    control_card(
-        icon="\u2922",
-        name="Autoscale (Expanding Arrows)",
-        description="Automatically adjusts both axes to fit all visible data with optimal padding. Useful for quickly framing the data after manual zoom/pan operations.",
-        steps=[
-            "Click the expanding-arrows icon in the toolbar.",
-            "Both axes rescale automatically to encompass all visible data series.",
-            "Padding is added to prevent data from touching the edges.",
-        ],
-        example="After toggling off the forecast series in the legend and zooming around, click Autoscale to automatically frame just the observed 1990-2025 data with proper margins.",
-        tips=[
-            "Autoscale respects which series are currently visible (shown in legend).",
-            "This differs from Reset Axes, which returns to the original hardcoded view.",
-        ],
-    ),
-
-    # 9. Reset Axes
+    # 5. Reset Axes
     control_card(
         icon="\u2302",
         name="Reset Axes (Home Icon)",
-        description="Returns the chart to its original view, undoing all zoom, pan, and autoscale operations. Restores the exact axis ranges the chart was created with.",
+        description="Returns the chart to its original view, undoing all zoom and pan operations. Restores the exact axis ranges the chart was created with.",
         steps=[
             "Click the home icon in the toolbar.",
             "All axes return to their original ranges.",
             "All zoom and pan history is cleared.",
         ],
-        example="After exploring different periods of the resistance curve, click Reset Axes to return to the full 1990-2060 view with the y-axis range of 0-105.",
+        example="After exploring different periods of the resistance curve, click Reset Axes to return to the full 1990-2060 view.",
         tips=[
             "Keyboard shortcut: double-click anywhere on the chart background to reset.",
-            "Reset Axes restores the original programmed ranges, while Autoscale computes new optimal ranges.",
         ],
     ),
 
-    # 10. Toggle Spike Lines
+    # 6. Download SVG
     control_card(
-        icon="\u253c",
-        name="Toggle Spike Lines (Crosshair Icon)",
-        description="Shows or hides vertical and horizontal guide lines that extend from the cursor position to each axis. These help you read exact values by projecting the cursor position onto the axis labels.",
+        icon="\u2b07",
+        name="Download SVG (Arrow Icon)",
+        description="Downloads the chart as an SVG vector file, the best format for the paper: text stays selectable and the figure scales to any size without losing sharpness.",
         steps=[
-            "Click the crosshair icon in the toolbar to enable spike lines.",
-            "Move your cursor over the chart -- dashed lines will extend from the cursor to both axes.",
-            "Read the axis values where the spike lines intersect the axis labels.",
-            "Click the crosshair icon again to disable spike lines.",
+            "Click the downward-arrow icon (first button of the right-hand group).",
+            "The SVG file is saved with the chart's name.",
+            "Open it in a browser or a vector editor (Inkscape, Illustrator), or insert it in the manuscript.",
         ],
-        example="Enable spike lines, then hover over the year 2040 to see exactly where the resistance index stands relative to the critical inefficacy threshold of 95. The horizontal spike line makes it easy to compare values across different years.",
+        example="Download the resistance curve from the Overview page as SVG and place it as Image #1 of the manuscript.",
         tips=[
-            "Essential for comparing data points at different positions along the timeline.",
-            "Spike lines work with all other modes (zoom, pan, select) simultaneously.",
-            "Combined with the unified hover mode, spike lines provide the most precise data reading experience.",
+            "The download reflects the current view: reset the axes first if you want the full figure.",
+            "For light or black-and-white versions, use the Export Studio page.",
         ],
+    ),
+
+    # 7. Download PNG
+    control_card(
+        icon="\U0001f5bc",
+        name="Download PNG 3x (Picture Icon)",
+        description="Downloads the chart as a high-resolution PNG image (three times the on-screen size). Use it for slides, posters, social media or anywhere SVG is not accepted.",
+        steps=[
+            "Click the picture icon.",
+            "The PNG file is saved at 3x resolution.",
+        ],
+        example="Download the Scenario Lab curve as PNG to show the 'years gained' comparison in a talk.",
+        tips=[
+            "PNG is a raster image: prefer SVG for print and journal submissions.",
+        ],
+    ),
+
+    # 8. Download data (CSV)
+    control_card(
+        icon="\u25a6",
+        name="Download Data (Grid Icon)",
+        description="Downloads the numbers behind the chart as a CSV file that opens in Excel, LibreOffice, R or Python. Each row has the series name, the x and y values and, for heatmaps, the cell value.",
+        steps=[
+            "Click the grid icon.",
+            "A CSV file with every series of the chart is saved.",
+            "Open it in a spreadsheet or analysis tool.",
+        ],
+        example="Download the data of the resistance heatmap to check the exact value of each pathogen-antibiotic pair, including any what-if changes you made in the Sensitivity Analysis panel.",
+        tips=[
+            "The CSV contains what the chart shows, including scenario changes made on the page.",
+            "Empty cells mean intrinsic resistance or no value (grey cells in the heatmap).",
+        ],
+    ),
+
+    # 9. Full screen
+    control_card(
+        icon="\u26f6",
+        name="Full Screen (Corners Icon)",
+        description="Expands the chart to fill the whole screen, useful for presentations and for reading dense charts such as the heatmap.",
+        steps=[
+            "Click the four-corners icon (last button on the right).",
+            "The chart fills the screen; all tools keep working.",
+            "Press Esc (or click the icon again) to return to the page.",
+        ],
+        example="Open the resistance heatmap in full screen during a meeting so every value is readable from across the room.",
     ),
 
     # General Tips section
@@ -408,7 +372,7 @@ layout = html.Div([
                 ]),
                 html.Li([
                     html.Strong("Modebar location: "),
-                    "The toolbar (modebar) appears in the top-right corner of each chart when you hover over it. It auto-hides when the cursor moves away.",
+                    "The toolbar sits in the top-right corner of every chart and is always visible: navigation tools on the left, downloads and full screen on the right.",
                 ]),
             ], style={"color": "#b0b3b8", "lineHeight": "1.8"}),
         ], className="card"),

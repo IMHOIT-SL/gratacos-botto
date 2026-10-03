@@ -15,7 +15,7 @@ from data.pathogen_data import (
     PATHOGENS, ANTIBIOTIC_CLASSES, RESISTANCE_MATRIX,
     WHO_PRIORITY, MDR_XDR_PDR, REGIONAL_DATA, TEMPORAL_TRENDS,
 )
-from components import help_section, chart_title_with_info
+from components import help_section, chart_title_with_info, graph_config
 
 dash.register_page(__name__, path="/pathogens", name="Pathogens")
 
@@ -341,10 +341,7 @@ def build_phenotype_legend():
     )
 
 
-SVG_CONFIG = {
-    "toImageButtonOptions": {"format": "svg", "scale": 3},
-    "displayModeBar": True,
-}
+SVG_CONFIG = graph_config()
 
 
 # ---------------------------------------------------------------------------

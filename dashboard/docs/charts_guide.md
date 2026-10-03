@@ -18,7 +18,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `compute_super_exponential_curve()` and `compute_reference_logistic_curve()` in `data/amr_data.py` — closed-form, hardcoded coefficients (K=100, A≈7.333, r=0.0705, b=3.05·10⁻⁴), no fitting. Anchored to Murray et al. (Lancet 2022), O'Neill Review, GRAM Project, Tai 2025 IJAA, Oxford Vaccine Group, and IHME GBD.
 
-**Export:** Camera icon → SVG 3x. Filename: `amr_resistance_curve`. Also available in Export Studio with light/B&W themes.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV). Filename: `amr_resistance_curve`. Also available in Export Studio with light/B&W themes.
 
 ---
 
@@ -35,7 +35,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `MORTALITY_DATA` from `data/amr_data.py` with `tai_2025_deaths_k` column. Anchored to Murray et al. (2019 baseline), GRAM (2025-2035), O'Neill (2040-2050), and Tai et al. IJAA 2025.
 
-**Export:** Camera icon → SVG 3x. Filename: `amr_mortality`. Also in Export Studio.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV). Filename: `amr_mortality`. Also in Export Studio.
 
 ---
 
@@ -53,7 +53,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `RESISTANCE_MATRIX`, `PATHOGENS`, `ANTIBIOTIC_CLASSES`, `WHO_PRIORITY`, `MDR_XDR_PDR` from `data/pathogen_data.py`. Anchored to WHO GLASS 2022/2023, ECDC EARS-Net, Murray et al. Lancet 2022, CDC AR Threats Report, Magiorakos 2012, published paper, refs 23-36.
 
-**Export:** Camera icon → SVG 3x. Also in Export Studio.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV). Also in Export Studio.
 
 ---
 
@@ -91,7 +91,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `REGIONAL_DATA` from `data/pathogen_data.py`. Based on WHO GLASS 2022 regional breakdowns and EARS-Net for European data.
 
-**Export:** Camera icon, SVG at 3x scale. Also available in Export Studio.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV). Also available in Export Studio.
 
 ---
 
@@ -109,7 +109,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `TEMPORAL_TRENDS` from `data/pathogen_data.py`. Trends are calibrated to published surveillance data from EARS-Net and GLASS but are simplified representations (smooth trajectories rather than raw annual data).
 
-**Export:** Camera icon, SVG at 3x scale. Also available in Export Studio.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV). Also available in Export Studio.
 
 ---
 
@@ -128,7 +128,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `MONTHLY_DATA` from `data/timeseries_data.py`. This is entirely synthetic data generated with deterministic randomness (seed=42). See `data_sources.md` for details.
 
-**Export:** Camera icon, SVG at 3x scale.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV).
 
 ---
 
@@ -147,7 +147,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** Same synthetic monthly data as the SARIMA Forecast chart. BAU uses the standard SARIMA forecast; intervention uses `forecast_trend()` + `apply_intervention()` on the cached BAU forecast (no refit).
 
-**Export:** Camera icon, SVG at 3x scale.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV).
 
 ---
 
@@ -166,7 +166,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** Computed from `MONTHLY_DATA` using `statsmodels.tsa.stattools.acf` and `pacf` (or a manual fallback if statsmodels is unavailable).
 
-**Export:** Camera icon, SVG at 3x scale.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV).
 
 ---
 
@@ -185,7 +185,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** Computed by `fit_sarima()` in `pages/timeseries.py` from the SARIMAX model residuals.
 
-**Export:** Camera icon, SVG at 3x scale.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV).
 
 ---
 
@@ -202,7 +202,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `DATA_SOURCES` list in `pages/datasources.py`, with manually specified year ranges for each source.
 
-**Export:** Camera icon, SVG at 3x scale.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV).
 
 ---
 
@@ -218,7 +218,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `CARBAPENEM_PROJECTION` in `data/amr_data.py`. Anchored to Murray 2022 (2019 baseline) + Tai 2025 IJAA (paper ref 10).
 
-**Export:** Camera icon → SVG 3x. Filename: `carbapenem_2035`. Also in Export Studio.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV). Filename: `carbapenem_2035`. Also in Export Studio.
 
 ---
 
@@ -234,7 +234,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `compute_pubmed_annual()` in `data/bibliometrics_data.py`. Anchored to PubMed search "antibiotic resistance".
 
-**Export:** Camera icon → SVG 3x. Also in Export Studio.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV). Also in Export Studio.
 
 ---
 
@@ -250,7 +250,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `MARKET_GROWTH` in `data/bibliometrics_data.py`. Anchored to Univdatos.
 
-**Export:** Camera icon → SVG 3x. Also in Export Studio.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV). Also in Export Studio.
 
 ---
 
@@ -266,7 +266,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `DRUG_CLASS_SHARE`, `class_size_2023()`, `class_size_2032()` in `data/bibliometrics_data.py`. Anchored to Univdatos.
 
-**Export:** Camera icon → SVG 3x. Also in Export Studio.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV). Also in Export Studio.
 
 ---
 
@@ -282,7 +282,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `AWARENESS_EFFECTIVENESS` in `data/bibliometrics_data.py`. Combines PubMed annual counts and the super-exponential resistance model.
 
-**Export:** Camera icon → SVG 3x. Also in Export Studio. **This is the central industry chart — recommended for the paper's bibliometrics & industry note figure.**
+**Export:** Toolbar → SVG, PNG 3x or data (CSV). Also in Export Studio. **This is the central industry chart — recommended for the paper's bibliometrics & industry note figure.**
 
 ---
 
@@ -298,7 +298,7 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Data sources:** `compute_super_exponential_curve()` for the classical curve; the qualitative band is hand-drawn (years 2025–2060, fixed bounds 55–75).
 
-**Export:** Camera icon → SVG 3x. Also in Export Studio.
+**Export:** Toolbar → SVG, PNG 3x or data (CSV). Also in Export Studio.
 
 ---
 
@@ -319,4 +319,4 @@ Settings:
 - **Formats:** SVG (recommended for publications), PNG (presentations & web). For PDF, export as SVG and convert with Inkscape or `cairosvg`.
 - **Resolution:** 1x (screen), 2x (presentations), 3x (publication quality, ~300 DPI)
 
-To export, configure settings, then click the camera icon in the Plotly modebar of the preview chart. The file downloads with a descriptive filename.
+To export, configure settings, then click Download Chart (or use the SVG / PNG / CSV buttons in the preview chart's toolbar). The file downloads with a descriptive filename.

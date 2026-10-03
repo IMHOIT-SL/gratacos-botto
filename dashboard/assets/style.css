@@ -669,3 +669,30 @@ input.dash-range-slider-input,
 }
 .scn-disclaimer strong { color: var(--text-primary); }
 .scn-disclaimer a { color: var(--accent); }
+
+/* Curated chart toolbar (see components.graph_config + assets/graph_toolbar.js) */
+.js-plotly-plot .plotly .modebar {
+    background: rgba(43, 46, 61, 0.92) !important;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2px 4px;
+}
+.js-plotly-plot .plotly .modebar-group {
+    background: transparent !important;
+    padding-left: 2px;
+}
+.js-plotly-plot .plotly .modebar-btn svg {
+    width: 18px;
+    height: 18px;
+}
+.js-plotly-plot .plotly .modebar-btn path {
+    fill: #b8bcc8 !important;
+}
+.js-plotly-plot .plotly .modebar-btn:hover path,
+.js-plotly-plot .plotly .modebar-btn.active path {
+    fill: var(--accent) !important;
+}
+.dash-graph:fullscreen {
+    background: var(--bg-card, #21232d);
+    padding: 16px;
+}

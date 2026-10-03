@@ -14,7 +14,7 @@ import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from components import help_section, chart_title_with_info
+from components import help_section, chart_title_with_info, graph_config
 from data.amr_data import (
     compute_super_exponential_curve,
     compute_reference_logistic_curve,
@@ -713,7 +713,7 @@ layout = html.Div([
         chart_title_with_info(
             "Export Studio",
             "Configure chart appearance and export settings. 11 charts available, 3 themes (dark/light/bw), 2 formats (SVG/PNG), 3 resolutions (1x/2x/3x).",
-            "Preview charts with publication-ready color schemes, then export via the Plotly modebar.",
+            "Preview charts with publication-ready color schemes, then export with the Download button or the chart toolbar.",
         ),
         html.Div([
             html.Div([
@@ -776,10 +776,7 @@ layout = html.Div([
         ),
         dcc.Graph(
             id="export-preview",
-            config={
-                "displayModeBar": True,
-                "toImageButtonOptions": {"format": "svg", "scale": 2},
-            },
+            config=graph_config("amr_export"),
         ),
         html.Div([
             html.Button(
@@ -814,7 +811,7 @@ layout = html.Div([
                 html.Li("Select the chart, color scheme, format, and resolution above."),
                 html.Li([
                     "Click ", html.Strong("Download Chart"),
-                    " to save. You can also use the camera icon in the chart toolbar.",
+                    " to save. You can also use the SVG, PNG or data (CSV) buttons in the chart toolbar.",
                 ]),
                 html.Li([
                     html.Strong("SVG (recommended for publications): "),

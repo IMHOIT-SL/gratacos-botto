@@ -117,11 +117,12 @@ Use the navigation links in the top header bar to switch between pages. Navigati
 
 ### From Any Chart
 
-Every chart in the dashboard has a Plotly modebar that appears when you hover over the top-right corner of the chart. The modebar includes a camera icon for downloading the chart as an image.
+Every chart in the dashboard has the same toolbar in its top-right corner: zoom, pan, zoom in, zoom out and reset axes on the left; **SVG** (vector), **PNG 3x**, **data (CSV)** and **full screen** on the right. The toolbar is defined once in `components.graph_config()` plus `assets/graph_toolbar.js`.
 
-Default export settings:
-- **Format:** SVG
-- **Scale:** 3x (approximately 300 DPI for publication use)
+Export options from the toolbar:
+- **SVG:** vector, for the paper (file named after the chart)
+- **PNG:** 3x resolution (approximately 300 DPI for publication use)
+- **CSV:** the chart's data, one row per point (series, x, y, value)
 
 ### From the Export Studio
 
@@ -134,7 +135,7 @@ The Export page (`/export`) provides more control:
    - **Print B&W** — grayscale for black-and-white printing
 3. Choose the output format (SVG, PNG, or PDF).
 4. Choose the resolution scale (1x, 2x, or 3x).
-5. Click the camera icon in the preview chart's modebar to download.
+5. Click **Download Chart** (or the SVG / PNG / CSV buttons in the preview chart's toolbar).
 
 ### Post-Processing
 

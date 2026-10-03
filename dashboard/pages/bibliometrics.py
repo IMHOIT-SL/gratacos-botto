@@ -21,7 +21,7 @@ from data.bibliometrics_data import (
     DRUG_CLASS_SHARE, class_size_2023, class_size_2032,
     AWARENESS_EFFECTIVENESS,
 )
-from components import help_section, chart_title_with_info
+from components import help_section, chart_title_with_info, graph_config
 
 dash.register_page(__name__, path="/industry", name="Industry")
 
@@ -36,10 +36,7 @@ CHART_LAYOUT = dict(
     legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=11)),
 )
 
-SVG_CONFIG = {
-    "toImageButtonOptions": {"format": "svg", "scale": 3},
-    "displayModeBar": True,
-}
+SVG_CONFIG = graph_config()
 
 
 def build_pubmed_chart():
