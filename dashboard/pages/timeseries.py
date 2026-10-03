@@ -122,39 +122,30 @@ def compute_acf_pacf(series, nlags=36):
         return acf_vals, acf_vals  # PACF approximated by ACF
 
 
-def fit_intervention_sarima(series, horizon):
+def forecast_trend(series, bau):
+    """Monthly trend of the BAU forecast, free of seasonality.
+
+    Mean year-over-year change across the forecast months (each forecast
+    month minus the same month one year earlier, observed or forecast),
+    divided by 12. Year-over-year differences cancel the 12-month season.
     """
-    Fit the same model but reduce the trend component by 30% for
-    the 'intervention' scenario.
+    full = np.concatenate([np.asarray(series, dtype=float), np.asarray(bau, dtype=float)])
+    n_hist = len(series)
+    yoy = [full[n_hist + i] - full[n_hist + i - 12] for i in range(len(bau))]
+    return float(np.mean(yoy)) / 12.0
+
+
+def apply_intervention(bau, slope, reduction, delay):
+    """Intervention scenario as a closed-form transform of the BAU forecast.
+
+    The first `delay` forecast months follow BAU unchanged. From then on the
+    monthly trend `slope` is reduced by `reduction` (fraction), accumulating
+    month by month; seasonality is left untouched and the curve does not
+    jump at the start month. No refit, no randomness.
     """
-    try:
-        from statsmodels.tsa.statespace.sarimax import SARIMAX
-
-        model = SARIMAX(
-            series,
-            order=(1, 1, 1),
-            seasonal_order=(1, 1, 0, 12),
-            enforce_stationarity=False,
-            enforce_invertibility=False,
-        )
-        results = model.fit(disp=False, maxiter=200)
-        forecast = results.get_forecast(steps=horizon)
-        bau_mean = forecast.predicted_mean.values
-
-        # Intervention: dampen forecast by reducing distance from last obs
-        last_val = series.iloc[-1]
-        deltas = bau_mean - last_val
-        intervention_mean = last_val + deltas * 0.7  # 30% reduction in trend
-
-        return intervention_mean
-    except Exception:
-        t = np.arange(len(series))
-        coeffs = np.polyfit(t, series.values, 1)
-        t_future = np.arange(len(series), len(series) + horizon)
-        bau_mean = np.polyval(coeffs, t_future)
-        last_val = series.iloc[-1]
-        deltas = bau_mean - last_val
-        return last_val + deltas * 0.7
+    bau = np.asarray(bau, dtype=float)
+    months_active = np.clip(np.arange(len(bau)) - delay + 1, 0, None)
+    return bau - reduction * slope * months_active
 
 
 # ---------------------------------------------------------------------------
@@ -168,7 +159,7 @@ layout = html.Div([
         "MODEL PARAMETERS EXPLAINED: The notation SARIMAX(1,1,1)(1,1,0,12) describes the model structure. The first group (1,1,1) specifies: p=1 (one autoregressive lag -- the model uses the previous month's value), d=1 (one differencing step -- the model works with month-to-month changes rather than raw values, which removes trend), q=1 (one moving average term -- the model accounts for the previous month's forecast error). The second group (1,1,0,12) specifies the seasonal component: P=1 (one seasonal autoregressive lag -- last year's same-month value matters), D=1 (seasonal differencing -- removing year-over-year seasonal pattern), Q=0 (no seasonal moving average), s=12 (seasonality period is 12 months). In practical terms, this model says: 'predict next month's resistance rate by considering recent trends, recent forecast errors, and what happened at this time last year.'",
         "READING THE FORECAST CHART: The solid line shows historical (observed) monthly resistance rates. The dashed line extending beyond the historical period shows the model's point forecast -- the single most likely predicted value for each future month. The shaded band around the dashed line is the 95% confidence interval: there is approximately a 95% probability that the actual future value falls within this range, assuming the model is correctly specified and the underlying data-generating process remains stable.",
         "CONFIDENCE INTERVAL WIDTH: The confidence interval widens as the forecast extends further into the future. This is a fundamental property of time series forecasting -- uncertainty accumulates with each additional step ahead. A narrow band at 6 months that becomes very wide at 36 months is normal and expected. For policy purposes, this means short-term forecasts (3-12 months) are actionable for resource planning, while longer-term forecasts (24-36 months) are better treated as directional indicators. If the confidence interval is extremely wide even at short horizons, this suggests the data has high volatility or the model is a poor fit.",
-        "SCENARIO COMPARISON: The scenario chart overlays two forecasts. The red dashed line ('Business as Usual') shows the baseline forecast assuming current trends continue unchanged. The green dotted line ('Intervention') shows a counterfactual scenario where antimicrobial stewardship interventions reduce the resistance trend by 30%. The 30% reduction figure is based on published evidence that comprehensive stewardship programs (including prescribing guidelines, rapid diagnostics, infection control bundles, and surveillance feedback) can reduce resistance emergence rates by 20-40% depending on setting and pathogen. This comparison helps quantify the potential impact of policy action versus inaction.",
+        "SCENARIO COMPARISON: The scenario chart overlays two forecasts. The red dashed line ('Business as usual') is the SARIMA forecast. The green dotted line ('Intervention') is a counterfactual: from the start month you choose, the forecast's monthly trend (the average year-over-year change, which cancels seasonality) is cut by the chosen percentage, and the seasonal pattern is kept. A 30% reduction keeps 70% of the projected trend. The intervention only slows a rising trend: if business as usual already declines (as for MRSA), both lines coincide. It is computed directly from the business-as-usual forecast (no refit, no randomness), so it reproduces exactly. The reduction percentage is an assumption you set, not a measured effect of any specific programme. With 'Show 95% bands' on, the intervention band is the business-as-usual 95% interval shifted with the intervention mean (same forecast uncertainty). Starting later shows how much of the gain is lost by waiting.",
         "ACF/PACF PLOTS: The Autocorrelation Function (ACF) and Partial Autocorrelation Function (PACF) plots are diagnostic tools for evaluating time series structure. Each vertical bar shows the correlation between the series and a lagged version of itself (e.g., lag 12 = correlation with the value from 12 months ago). Bars extending beyond the horizontal blue dashed lines are statistically significant. In the ACF, a significant spike at lag 12 confirms annual seasonality. In the PACF, significant spikes indicate the number of direct autoregressive terms needed. For a well-fitted model, the residual ACF/PACF should show no significant spikes (all bars within the blue bands), indicating the model has captured all systematic patterns.",
         "AIC AND BIC: The Akaike Information Criterion (AIC) and Bayesian Information Criterion (BIC) are model selection metrics displayed in the diagnostics panel. Both balance goodness-of-fit against model complexity -- lower values indicate a better model. AIC tends to favor more complex models, while BIC penalizes complexity more heavily. These values are most useful for comparing alternative model specifications (e.g., different p, d, q orders) on the same dataset. An AIC/BIC difference of less than 2 between models suggests they perform similarly; differences greater than 10 indicate strong evidence for the lower-scoring model.",
         "RESIDUAL DIAGNOSTICS: The residuals chart shows the difference between the model's fitted values and the actual historical data at each time point. Good residuals should appear randomly scattered around zero with no visible trends, cycles, or patterns. Systematic patterns in residuals (e.g., consistently positive then negative, or seasonal waves) indicate the model is missing important structure in the data. The residual standard deviation, displayed above the chart, quantifies typical forecast error magnitude.",
@@ -233,14 +224,49 @@ layout = html.Div([
         ], className="chart-sources"),
     ], className="card"),
 
-    # Scenario comparison
+    # Scenario comparison (adjustable intervention)
     html.Div([
         chart_title_with_info(
             "Scenario Comparison",
-            "Overlay of two forecasts: baseline 'business as usual' (red) and an intervention scenario (green) assuming 30% reduction in resistance trend, simulating the effect of stewardship programs.",
-            "Business as usual vs. intervention (30% trend reduction)",
+            "Business as usual (red) is the SARIMA forecast above. The intervention (green) "
+            "cuts the forecast's monthly trend by the chosen percentage from the start month on, "
+            "keeping the seasonal pattern. "
+            "The reduction is your assumption, not a measured effect.",
+            "Business as usual vs. an adjustable intervention",
         ),
+        html.Div([
+            html.Div([
+                html.Label("Trend reduction", style={"fontWeight": "600", "display": "block", "marginBottom": "0.5rem"}),
+                dmc.Slider(
+                    id="ts-int-reduction", min=0, max=100, step=5, value=30, color="green",
+                    marks=[{"value": v, "label": f"{v}%"} for v in (0, 25, 50, 75, 100)],
+                ),
+            ], style={"flex": "1 1 280px", "minWidth": "240px", "paddingBottom": "1.2rem"}),
+            html.Div([
+                html.Label("Intervention starts", style={"fontWeight": "600", "display": "block", "marginBottom": "0.4rem"}),
+                dmc.SegmentedControl(
+                    id="ts-int-delay",
+                    data=[
+                        {"label": "Now", "value": "0"},
+                        {"label": "+6 m", "value": "6"},
+                        {"label": "+12 m", "value": "12"},
+                        {"label": "+24 m", "value": "24"},
+                    ],
+                    value="0", color="green", radius="md",
+                ),
+            ], style={"flex": "0 0 auto"}),
+            html.Div([
+                dmc.Switch(id="ts-int-band", label="Show 95% bands", checked=False, color="green"),
+            ], style={"flex": "0 0 auto", "paddingBottom": "0.4rem"}),
+        ], style={"display": "flex", "alignItems": "flex-end", "flexWrap": "wrap", "gap": "1.5rem",
+                  "margin": "0.8rem 0 1rem"}),
+        html.Div(id="ts-scenario-stats", className="stats-row"),
         dcc.Loading(dcc.Graph(id="ts-scenario-chart", config=SVG_CONFIG), type="default", color="#4fc3f7"),
+        html.Div([
+            html.Span("Sources: ", className="source-label"),
+            "Forecast: SARIMAX(1,1,1)(1,1,0,12) on the synthetic monthly series above. "
+            "Intervention: user-defined assumption (no published source).",
+        ], className="chart-sources"),
     ], className="card"),
 
     # Diagnostics row
@@ -282,7 +308,6 @@ _TS_CACHE = {}
     Output("ts-model-label", "children"),
     Output("ts-residuals-chart", "figure"),
     Output("ts-diag-stats", "children"),
-    Output("ts-scenario-chart", "figure"),
     Output("ts-acf-chart", "figure"),
     Output("ts-pacf-chart", "figure"),
     Input("ts-pathogen-dropdown", "value"),
@@ -299,14 +324,23 @@ def update_timeseries(pathogen, horizon):
     return result
 
 
-def _compute_timeseries(pathogen, horizon):
-    df = MONTHLY_DATA[pathogen].copy()
-    series = df.set_index("date")["resistance_rate"]
-    series.index = pd.DatetimeIndex(series.index, freq="MS")
-    color = PATHOGEN_COLORS.get(pathogen, "#4fc3f7")
+_FIT_CACHE = {}
 
-    # Fit SARIMA
-    result = fit_sarima(series, horizon)
+
+def _get_fit(pathogen, horizon):
+    """Series + SARIMA fit for (pathogen, horizon), fitted once and cached."""
+    key = (pathogen, horizon)
+    if key not in _FIT_CACHE:
+        df = MONTHLY_DATA[pathogen].copy()
+        series = df.set_index("date")["resistance_rate"]
+        series.index = pd.DatetimeIndex(series.index, freq="MS")
+        _FIT_CACHE[key] = (series, fit_sarima(series, horizon))
+    return _FIT_CACHE[key]
+
+
+def _compute_timeseries(pathogen, horizon):
+    series, result = _get_fit(pathogen, horizon)
+    color = PATHOGEN_COLORS.get(pathogen, "#4fc3f7")
 
     # Forecast dates
     last_date = series.index[-1]
@@ -419,64 +453,6 @@ def _compute_timeseries(pathogen, horizon):
         ),
     ])
 
-    # --- Scenario comparison ---
-    intervention_mean = fit_intervention_sarima(series, horizon)
-
-    fig_scenario = go.Figure()
-
-    # Historical (faded)
-    fig_scenario.add_trace(go.Scatter(
-        x=series.index,
-        y=series.values,
-        mode="lines",
-        line=dict(color="#9aa0a6", width=1.5),
-        name="Historical",
-        hovertemplate="%{x|%b %Y}<br>%{y:.1f}%<extra>Historical</extra>",
-    ))
-
-    # BAU forecast
-    fig_scenario.add_trace(go.Scatter(
-        x=forecast_dates,
-        y=result["mean"],
-        mode="lines",
-        line=dict(color="#ef5350", width=2.5, dash="dash"),
-        name="Business as usual",
-        hovertemplate="%{x|%b %Y}<br>%{y:.1f}%<extra>BAU</extra>",
-    ))
-
-    # Intervention forecast
-    fig_scenario.add_trace(go.Scatter(
-        x=forecast_dates,
-        y=intervention_mean,
-        mode="lines",
-        line=dict(color="#66bb6a", width=2.5, dash="dot"),
-        name="Intervention (-30%)",
-        hovertemplate="%{x|%b %Y}<br>%{y:.1f}%<extra>Intervention</extra>",
-    ))
-
-    # Vertical line at forecast start for scenario chart
-    fig_scenario.add_shape(
-        type="line", x0=last_date_str, x1=last_date_str, y0=0, y1=1,
-        yref="paper", line=dict(dash="dot", color="#9aa0a6", width=1.5),
-    )
-    fig_scenario.add_annotation(
-        x=last_date_str, y=1, yref="paper",
-        text="Forecast start", showarrow=False,
-        font=dict(size=11, color="#9aa0a6"), xanchor="left", yanchor="bottom",
-    )
-
-    fig_scenario.update_layout(
-        **CHART_LAYOUT,
-        title=dict(text=f"{pathogen} — BAU vs Intervention Scenario", font=dict(size=15)),
-        xaxis_title="Date",
-        yaxis_title="% Resistant Isolates",
-        xaxis_range=[x_range_start, x_range_end],
-        height=400,
-        margin=dict(l=60, r=30, t=55, b=50),
-        hovermode="x unified",
-        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=11)),
-    )
-
     # --- ACF / PACF ---
     nlags = min(36, len(series) // 3)
     acf_vals, pacf_vals = compute_acf_pacf(series.values, nlags=nlags)
@@ -528,7 +504,7 @@ def _compute_timeseries(pathogen, horizon):
         showlegend=False,
     )
 
-    return fig_main, model_label, fig_resid, diag_stats, fig_scenario, fig_acf, fig_pacf
+    return fig_main, model_label, fig_resid, diag_stats, fig_acf, fig_pacf
 
 
 def _hex_to_rgb(hex_color):
@@ -536,6 +512,122 @@ def _hex_to_rgb(hex_color):
     hex_color = hex_color.lstrip("#")
     r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
     return f"{r}, {g}, {b}"
+
+
+# ---------------------------------------------------------------------------
+# Scenario comparison: adjustable intervention (own callback, reuses the fit)
+# ---------------------------------------------------------------------------
+
+def _scenario_stat(value, label, cls):
+    return html.Div([
+        html.Div(value, className=f"stat-value {cls}", style={"fontSize": "1.6rem"}),
+        html.Div(label, className="stat-label"),
+    ], className="stat-card")
+
+
+@callback(
+    Output("ts-scenario-chart", "figure"),
+    Output("ts-scenario-stats", "children"),
+    Input("ts-pathogen-dropdown", "value"),
+    Input("ts-horizon-slider", "value"),
+    Input("ts-int-reduction", "value"),
+    Input("ts-int-delay", "value"),
+    Input("ts-int-band", "checked"),
+)
+def update_scenario(pathogen, horizon, reduction, delay, show_band):
+    horizon, delay = int(horizon), int(delay)  # SegmentedControl values are strings
+    series, result = _get_fit(pathogen, horizon)
+    red = reduction / 100.0
+    last_date = series.index[-1]
+    forecast_dates = pd.date_range(start=last_date + pd.DateOffset(months=1),
+                                   periods=horizon, freq="MS")
+    bau = np.asarray(result["mean"], dtype=float)
+    slope = forecast_trend(series.values, bau)
+    # An intervention slows a rising trend; it never slows an existing decline
+    interv = apply_intervention(bau, max(slope, 0.0), red, delay)
+    shift = interv - bau  # intervention band = BAU 95% CI shifted with the mean
+
+    history_months = {6: 24, 12: 36, 24: 48, 36: 60}.get(horizon, horizon * 2)
+    x_range_start = last_date - pd.DateOffset(months=history_months)
+    x_range_end = forecast_dates[-1] + pd.DateOffset(months=1)
+
+    fig = go.Figure()
+    if show_band:
+        for lo, hi, col, nm in (
+            (result["lower"], result["upper"], "239, 83, 80", "BAU 95% CI"),
+            (np.asarray(result["lower"]) + shift, np.asarray(result["upper"]) + shift,
+             "102, 187, 106", "Intervention 95% CI"),
+        ):
+            fig.add_trace(go.Scatter(
+                x=list(forecast_dates) + list(forecast_dates[::-1]),
+                y=list(hi) + list(lo[::-1]),
+                fill="toself", fillcolor=f"rgba({col}, 0.15)", line=dict(width=0),
+                name=nm, hoverinfo="skip",
+            ))
+    fig.add_trace(go.Scatter(
+        x=series.index, y=series.values, mode="lines",
+        line=dict(color="#9aa0a6", width=1.5), name="Historical",
+        hovertemplate="%{x|%b %Y}<br>%{y:.1f}%<extra>Historical</extra>",
+    ))
+    fig.add_trace(go.Scatter(
+        x=forecast_dates, y=bau, mode="lines",
+        line=dict(color="#ef5350", width=2.5, dash="dash"), name="Business as usual",
+        hovertemplate="%{x|%b %Y}<br>%{y:.1f}%<extra>BAU</extra>",
+    ))
+    fig.add_trace(go.Scatter(
+        x=forecast_dates, y=interv, mode="lines",
+        line=dict(color="#66bb6a", width=2.5, dash="dot"),
+        name=f"Intervention (-{reduction}% trend)",
+        hovertemplate="%{x|%b %Y}<br>%{y:.1f}%<extra>Intervention</extra>",
+    ))
+
+    last_date_str = last_date.isoformat()
+    fig.add_shape(type="line", x0=last_date_str, x1=last_date_str, y0=0, y1=1,
+                  yref="paper", line=dict(dash="dot", color="#9aa0a6", width=1.5))
+    fig.add_annotation(x=last_date_str, y=1, yref="paper", text="Forecast start",
+                       showarrow=False, font=dict(size=11, color="#9aa0a6"),
+                       xanchor="left", yanchor="bottom")
+    if 0 < delay < horizon:
+        start_str = forecast_dates[delay].isoformat()
+        fig.add_shape(type="line", x0=start_str, x1=start_str, y0=0, y1=1,
+                      yref="paper", line=dict(dash="dash", color="#66bb6a", width=1.2))
+        fig.add_annotation(x=start_str, y=0, yref="paper", text="Intervention starts",
+                           showarrow=False, font=dict(size=11, color="#66bb6a"),
+                           xanchor="left", yanchor="bottom", xshift=4)
+
+    fig.update_layout(
+        **CHART_LAYOUT,
+        title=dict(text=f"{pathogen}: business as usual vs intervention", font=dict(size=15)),
+        xaxis_title="Date", yaxis_title="% Resistant Isolates",
+        xaxis_range=[x_range_start, x_range_end],
+        height=420, margin=dict(l=60, r=30, t=55, b=50),
+        hovermode="x unified",
+        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=11)),
+    )
+
+    end_label = forecast_dates[-1].strftime("%b %Y")
+    if delay >= horizon:
+        stats = [html.P(
+            f"The intervention starts after the {horizon}-month horizon, so it has no "
+            "effect in this window. Choose a longer horizon or an earlier start.",
+            style={"fontSize": "0.82rem", "color": "var(--warning)", "margin": "0"},
+        )]
+    elif slope <= 0:
+        stats = [html.P(
+            f"Business as usual already projects a declining trend for {pathogen} "
+            f"({slope:+.2f} percentage points per month), so a trend reduction has "
+            "nothing to slow: both lines coincide.",
+            style={"fontSize": "0.82rem", "color": "var(--warning)", "margin": "0"},
+        )]
+    else:
+        diff = bau[-1] - interv[-1]
+        stats = [
+            _scenario_stat(f"{bau[-1]:.1f}%", f"Business as usual, {end_label}", "danger"),
+            _scenario_stat(f"{interv[-1]:.1f}%", f"Intervention, {end_label}", "success"),
+            _scenario_stat(f"-{diff:.1f} pp" if diff >= 0 else f"+{-diff:.1f} pp",
+                           "Difference at horizon (percentage points)", "accent"),
+        ]
+    return fig, stats
 
 
 # Warm the default view (MRSA, 12-month horizon) in the background at import, so
@@ -547,7 +639,7 @@ import threading as _threading
 
 def _warm_default_ts_cache():
     try:
-        _TS_CACHE[("MRSA", 12)] = _compute_timeseries("MRSA", 12)
+        _TS_CACHE[("MRSA", 12)] = _compute_timeseries("MRSA", 12)  # also fills _FIT_CACHE
     except Exception:
         pass
 

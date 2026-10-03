@@ -61,7 +61,11 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Page:** Pathogens (`/pathogens`) — directly below the heatmap
 
-**What it shows:** A research-mode "what-if" panel that lets you override any cell of the heatmap transiently. Two dropdowns (Pathogen, Antibiotic class), a slider (0–100% override value), and Apply / Reset buttons. A live preview line shows the currently selected cell with its default and proposed value. A status line below shows how many cells are currently modified.
+**What it shows:** A research-mode "what-if" panel that lets you change the heatmap transiently:
+- **Single cell:** two dropdowns (Pathogen, Antibiotic class), a slider (0-100% value), Apply / Reset. A live preview line shows the selected cell's default and proposed value.
+- **Bulk change:** one pathogen (row), one antibiotic class (column) or the whole matrix, scaled by a relative percentage (-50% to +100%) of each literature value, clipped to 0-100. Always computed from the literature value, so repeating a change gives the same result.
+- **Presets (illustrative):** Optimistic (all -20%), Pessimistic (all +25%), Literature (reset).
+- **View toggle above the heatmap:** "Resistance (%)" or "Difference vs literature" (diverging scale, percentage points), plus a summary row: cells modified, mean resistance (literature → scenario) and pathogen-drug pairs ≥ 50% resistant.
 
 **How to interpret it:**
 - Defaults are anchored to peer-reviewed surveillance data. Overrides are **transient** (per-session, reset on page reload) by design — preserves reproducibility for publication.
@@ -132,15 +136,16 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 **Page:** Time Series (`/timeseries`)
 
-**What it shows:** A comparison of two forecast scenarios for the selected pathogen. The historical data is shown in grey. The "Business as usual" (BAU) forecast is a dashed red line. The "Intervention (-30%)" scenario is a dotted green line showing the projected trajectory if interventions reduce the trend component by 30%.
+**What it shows:** A comparison of two forecast scenarios for the selected pathogen. The historical data is shown in grey. The "Business as usual" (BAU) forecast is a dashed red line. The "Intervention" scenario is a dotted green line showing the trajectory if the trend is reduced by the percentage you choose (30% by default, an illustrative assumption).
 
 **How to interpret it:**
 - The gap between the red and green lines represents the potential impact of effective stewardship and infection control interventions.
-- The intervention scenario applies a 30% reduction to the delta between each forecast point and the last observed value (see `models.md` for details).
+- Controls: trend reduction (0-100%), start month (now, +6, +12, +24 months) and a "Show 95% bands" switch. A summary row shows both values at the horizon and the difference in percentage points.
+- The intervention cuts the forecast's monthly trend (year-over-year change, which cancels seasonality) from the start month on, keeping the seasonal pattern (see `models.md`). It only slows a rising trend: if business as usual already declines (MRSA), both lines coincide and the page says so.
 - For pathogens with strong upward trends (CRE K. pneumoniae), the gap between scenarios is most dramatic.
 - This is a simplified scenario model — real interventions would have more complex dynamics.
 
-**Data sources:** Same synthetic monthly data as the SARIMA Forecast chart. BAU uses the standard SARIMA forecast; intervention uses `fit_intervention_sarima()`.
+**Data sources:** Same synthetic monthly data as the SARIMA Forecast chart. BAU uses the standard SARIMA forecast; intervention uses `forecast_trend()` + `apply_intervention()` on the cached BAU forecast (no refit).
 
 **Export:** Camera icon, SVG at 3x scale.
 

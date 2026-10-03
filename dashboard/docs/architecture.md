@@ -137,9 +137,9 @@ Browser (Plotly.js renders interactive charts with modebar)
 
 Most pages build their charts at import time (static figures). Three pages use Dash callbacks for interactivity:
 
-- **`timeseries.py`** — A single callback driven by the pathogen dropdown and horizon slider. It fits a SARIMA model on the fly, generates forecasts, computes residuals, and builds all six chart outputs (main forecast, scenario comparison, residuals, ACF, PACF) plus diagnostic statistics.
+- **`timeseries.py`** — Two callbacks. (1) `update_timeseries` (pathogen + horizon) fits SARIMA once per (pathogen, horizon) via `_get_fit()` (cached) and builds the main forecast, residuals, ACF and PACF plus diagnostic statistics. (2) `update_scenario` adds the trend-reduction slider, start-month selector and 95%-band switch, and builds the scenario comparison from the cached forecast with `forecast_trend()` + `apply_intervention()` (no refit).
 
-- **`pathogens.py`** — Three callbacks for the **Sensitivity Analysis** panel: (1) `update_overrides` consumes Apply/Reset clicks and writes to a `dcc.Store(storage_type="memory")`; (2) `render_heatmap` rebuilds the figure with the override dict applied (refusing intrinsic-R cells); (3) `render_preview` updates the live selection-preview line as dropdowns/slider change. The `memory` storage type ensures overrides reset on page reload, preserving reproducibility.
+- **`pathogens.py`** — Four callbacks for the **Sensitivity Analysis** panel: (1) `update_overrides` consumes single-cell Apply/Reset, bulk-change and preset clicks (via `bulk_overrides()`) and writes to a `dcc.Store(storage_type="memory")`; (1b) `update_bulk_target` swaps the bulk target list between pathogens and antibiotic classes; (2) `render_heatmap` rebuilds the figure (resistance or difference-vs-literature view) and the summary row with the override dict applied (refusing intrinsic-R cells); (3) `render_preview` updates the live selection-preview line as dropdowns/slider change. The `memory` storage type ensures overrides reset on page reload, preserving reproducibility.
 
 - **`export.py`** — A callback driven by chart selector and color scheme. It dispatches via `CHART_BUILDERS` (11 builders) using the selected theme and rebuilds the selected chart. Format/scale options apply at download time via the Plotly modebar.
 

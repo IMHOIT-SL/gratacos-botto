@@ -460,7 +460,7 @@ layout = html.Div([
                          html.Td("11×10 matrix with WHO priority + Magiorakos MDR/XDR/PDR badges")]),
                 html.Tr([html.Td("Sensitivity Analysis (companion)"),
                          html.Td(dcc.Link("Pathogens", href="/pathogens", style={"color": "var(--accent)"})),
-                         html.Td("What-if cell overrides (transient, reset on reload)")]),
+                         html.Td("What-if: single cells, whole rows/columns, presets, difference view (transient, reset on reload)")]),
                 html.Tr([html.Td("Regional Variation"),
                          html.Td(dcc.Link("Pathogens", href="/pathogens", style={"color": "var(--accent)"})),
                          html.Td("Resistance rates across 6 WHO regions for 4 key pathogens")]),

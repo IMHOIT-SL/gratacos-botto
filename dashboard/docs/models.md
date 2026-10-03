@@ -249,26 +249,28 @@ The fallback is indicated in the model label on the chart.
 
 ---
 
-## 4. Intervention Scenario
+## 4. Intervention Scenario (adjustable)
 
 ### Approach
 
-The intervention scenario models a hypothetical 30 % reduction in the resistance trend, representing the combined effect of stewardship, infection control, and new drug introductions.
+The Time Series scenario chart compares business as usual (the SARIMA forecast) with a user-adjustable intervention: a **trend reduction** (0-100 %), a **start month** (now, +6, +12 or +24 months) and optional 95 % bands. The reduction is a user assumption, not an evidence-based effect of any specific programme. The default (30 %) is illustrative.
 
 ### Implementation
 
 ```python
-bau_mean = forecast.predicted_mean.values
-last_val = series.iloc[-1]
-deltas = bau_mean - last_val
-intervention_mean = last_val + deltas * 0.7
+# monthly trend of the BAU forecast, free of seasonality:
+# mean year-over-year change across the forecast months / 12
+slope = mean(bau[i] - value_12_months_earlier[i]) / 12
+
+# from the start month on, the trend is cut by `reduction`, accumulating monthly
+months_active = clip(arange(horizon) - delay + 1, 0, None)
+intervention = bau - reduction * max(slope, 0) * months_active
 ```
 
-Applied to the magnitude of change rather than the direction. Both scenarios share the same starting point (last observed value).
-
-### Interpretation
-
-The 30 % figure is illustrative, not evidence-based. It demonstrates the principle that coordinated interventions can alter trajectories — not the exact impact of any specific policy.
+- Year-over-year differences cancel the 12-month season, so the intervention removes trend only and keeps the seasonal pattern.
+- The intervention only slows a rising trend. If business as usual already declines (MRSA in the synthetic series), both lines coincide and the page says so.
+- No jump at the start month; computed from the cached BAU forecast (no refit, no randomness).
+- The intervention 95 % band is the BAU band shifted with the intervention mean (same forecast uncertainty).
 
 ---
 
@@ -348,7 +350,7 @@ The ±3-year band on the resistance curve is a **temporal shift**, not a statist
 
 ### Intervention Scenario
 
-11. **Linear proportional reduction.** 30 % applied uniformly across the horizon. Real interventions have delayed onset and variable effectiveness.
+11. **Constant proportional trend reduction.** Once started, the chosen reduction applies at full strength every month (no ramp-up). The start month can be delayed, but real interventions also have variable effectiveness.
 12. **No feedback effects.** The intervention scenario does not model behavioural response (reduced investment if resistance appears to be declining).
 
 ### Carbapenem Spotlight

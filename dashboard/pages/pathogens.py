@@ -57,6 +57,95 @@ def _apply_overrides(matrix, overrides):
     return out
 
 
+# Illustrative scenario presets: relative change applied to every non-intrinsic
+# cell of the literature matrix. Hypothetical, not taken from any projection.
+SCENARIO_PRESETS = {
+    "optimistic":  -20,
+    "pessimistic": +25,
+}
+
+
+def bulk_overrides(scope, target, pct, overrides):
+    """Scale literature defaults by (1 + pct/100) over a row, a column or the
+    whole matrix, clipped to 0-100. Always computed from the literature value
+    (not from earlier overrides), so applying the same change twice gives the
+    same result. Intrinsic-R (NaN) cells are never touched."""
+    out = dict(overrides or {})
+    rows = range(RESISTANCE_MATRIX.shape[0])
+    cols = range(RESISTANCE_MATRIX.shape[1])
+    if scope == "pathogen":
+        rows = [int(target)]
+    elif scope == "antibiotic":
+        cols = [int(target)]
+    for p in rows:
+        for a in cols:
+            base = RESISTANCE_MATRIX[p, a]
+            if np.isnan(base):
+                continue
+            new = float(np.clip(round(base * (1 + pct / 100.0)), 0, 100))
+            key = f"{p},{a}"
+            if new == base:
+                out.pop(key, None)
+            else:
+                out[key] = new
+    return out
+
+
+def build_delta_heatmap(overrides):
+    """Scenario minus literature, in percentage points (diverging scale)."""
+    matrix = _apply_overrides(RESISTANCE_MATRIX, overrides or {})
+    delta = matrix - RESISTANCE_MATRIX
+    text, hover = [], []
+    for i, pathogen in enumerate(PATHOGENS):
+        trow, hrow = [], []
+        for j, abx in enumerate(ANTIBIOTIC_CLASSES):
+            abx_clean = abx.replace("\n", " ")
+            if np.isnan(RESISTANCE_MATRIX[i, j]):
+                trow.append("—")
+                hrow.append(f"{pathogen}<br>{abx_clean}<br>N/A (intrinsic R or not tested)")
+                continue
+            d = delta[i, j]
+            trow.append("" if d == 0 else f"{d:+.0f}")
+            hrow.append(f"{pathogen}<br>{abx_clean}<br>literature {RESISTANCE_MATRIX[i, j]:.0f}% "
+                        f"→ scenario {matrix[i, j]:.0f}%<br><b>{d:+.0f} pp</b>")
+        text.append(trow)
+        hover.append(hrow)
+    lim = max(10.0, float(np.nanmax(np.abs(delta))) if np.any(~np.isnan(delta)) else 10.0)
+    fig = go.Figure(data=go.Heatmap(
+        z=delta, x=ANTIBIOTIC_CLASSES,
+        y=[f"{p}  [{WHO_PRIORITY[p]} · {MDR_XDR_PDR.get(p, '')}]" for p in PATHOGENS],
+        text=text, texttemplate="%{text}", textfont=dict(size=11, color="white"),
+        hovertext=hover, hovertemplate="%{hovertext}<extra></extra>",
+        colorscale=[[0, "#2e7d32"], [0.5, "#2d2f3a"], [1, "#c62828"]],
+        zmin=-lim, zmax=lim, zmid=0,
+        colorbar=dict(title=dict(text="Δ pp vs literature", font=dict(size=11)), len=0.9),
+        xgap=2, ygap=2,
+    ))
+    fig.update_layout(
+        **CHART_LAYOUT,
+        title=dict(text="Scenario minus literature (percentage points)", font=dict(size=15)),
+        xaxis=dict(side="bottom", tickangle=-35, tickfont=dict(size=10)),
+        yaxis=dict(autorange="reversed", tickfont=dict(size=10)),
+        height=580, margin=dict(l=260, r=80, t=60, b=100),
+    )
+    return fig
+
+
+def scenario_summary(overrides):
+    """Headline numbers: literature vs scenario."""
+    lit = RESISTANCE_MATRIX
+    scen = _apply_overrides(lit, overrides or {})
+    mask = ~np.isnan(lit)
+    return {
+        "modified": len(overrides or {}),
+        "mean_lit": float(np.mean(lit[mask])),
+        "mean_scen": float(np.mean(scen[mask])),
+        "ge50_lit": int(np.sum(lit[mask] >= 50)),
+        "ge50_scen": int(np.sum(scen[mask] >= 50)),
+        "cells": int(mask.sum()),
+    }
+
+
 def build_heatmap(overrides=None):
     """Pathogen × antibiotic resistance heatmap. overrides: dict {'p,a': value}."""
     matrix = _apply_overrides(RESISTANCE_MATRIX, overrides or {})
@@ -327,6 +416,56 @@ def build_sensitivity_panel():
             "marginBottom": "0.75rem",
         }),
 
+        # Bulk changes: whole row / column / matrix, plus presets
+        html.Div([
+            html.Div("Bulk change", style={"fontWeight": "600", "marginBottom": "0.5rem"}),
+            html.Div([
+                html.Div([
+                    html.Label("Apply to", style={"fontSize": "0.875rem", "color": "#c1c2c5", "display": "block", "marginBottom": "0.4rem"}),
+                    dmc.SegmentedControl(
+                        id="sens-bulk-scope",
+                        data=[
+                            {"label": "One pathogen", "value": "pathogen"},
+                            {"label": "One antibiotic class", "value": "antibiotic"},
+                            {"label": "Whole matrix", "value": "all"},
+                        ],
+                        value="antibiotic", color="cyan", radius="md",
+                    ),
+                ], style={"flex": "0 0 auto"}),
+                html.Div([
+                    dmc.Select(
+                        id="sens-bulk-target", label="Which one", data=abx_options, value="2",
+                        searchable=True, allowDeselect=False,
+                        comboboxProps={"withinPortal": False},
+                    ),
+                ], style={"flex": "1 1 220px", "minWidth": "200px"}),
+                html.Div([
+                    html.Label("Relative change vs literature",
+                               style={"fontSize": "0.875rem", "color": "#c1c2c5", "display": "block", "marginBottom": "0.55rem"}),
+                    dmc.Slider(
+                        id="sens-bulk-pct", min=-50, max=100, step=5, value=25, color="cyan",
+                        marks=[{"value": v, "label": f"{v:+d}%" if v else "0"} for v in (-50, 0, 50, 100)],
+                    ),
+                ], style={"flex": "1 1 280px", "minWidth": "240px", "paddingBottom": "0.4rem"}),
+                html.Div([
+                    dmc.Button("Apply bulk change", id="sens-bulk-apply", n_clicks=0,
+                               color="cyan", variant="light"),
+                ], style={"flex": "0 0 auto", "alignSelf": "flex-end"}),
+            ], style={"display": "flex", "flexWrap": "wrap", "gap": "1.25rem", "alignItems": "flex-end"}),
+            html.Div([
+                html.Span("Scenario presets (illustrative): ", style={"fontSize": "0.8rem", "color": "var(--text-secondary)"}),
+                dmc.Button("Optimistic (all -20%)", id="sens-preset-optimistic", n_clicks=0,
+                           color="green", variant="light", size="xs"),
+                dmc.Button("Pessimistic (all +25%)", id="sens-preset-pessimistic", n_clicks=0,
+                           color="red", variant="light", size="xs"),
+                dmc.Button("Literature (reset)", id="sens-preset-reset", n_clicks=0,
+                           color="gray", variant="subtle", size="xs"),
+            ], style={"display": "flex", "flexWrap": "wrap", "gap": "0.5rem", "alignItems": "center", "marginTop": "0.9rem"}),
+            html.P("Bulk changes scale each literature value by the chosen percentage (clipped to 0-100) "
+                   "and skip intrinsic-resistance cells. They are hypothetical, not projections.",
+                   style={"fontSize": "0.75rem", "color": "var(--text-secondary)", "margin": "0.6rem 0 0"}),
+        ], style={"borderTop": "1px solid var(--border)", "paddingTop": "0.9rem", "marginBottom": "0.9rem"}),
+
         # Live selection preview — updates as dropdowns/slider change
         html.Div(id="sens-preview",
                  style={
@@ -358,17 +497,33 @@ def build_sensitivity_panel():
     Output("sens-overrides", "data"),
     Input("sens-apply", "n_clicks"),
     Input("sens-reset", "n_clicks"),
+    Input("sens-bulk-apply", "n_clicks"),
+    Input("sens-preset-optimistic", "n_clicks"),
+    Input("sens-preset-pessimistic", "n_clicks"),
+    Input("sens-preset-reset", "n_clicks"),
     State("sens-pathogen", "value"),
     State("sens-antibiotic", "value"),
     State("sens-value", "value"),
+    State("sens-bulk-scope", "value"),
+    State("sens-bulk-target", "value"),
+    State("sens-bulk-pct", "value"),
     State("sens-overrides", "data"),
     prevent_initial_call=True,
 )
-def update_overrides(_apply, _reset, p_idx, a_idx, val, overrides):
+def update_overrides(_apply, _reset, _bulk, _opt, _pess, _lit,
+                     p_idx, a_idx, val, scope, target, pct, overrides):
     overrides = dict(overrides or {})
     triggered = ctx.triggered_id
-    if triggered == "sens-reset":
+    if triggered in ("sens-reset", "sens-preset-reset"):
         return {}
+    if triggered == "sens-preset-optimistic":
+        return bulk_overrides("all", None, SCENARIO_PRESETS["optimistic"], {})
+    if triggered == "sens-preset-pessimistic":
+        return bulk_overrides("all", None, SCENARIO_PRESETS["pessimistic"], {})
+    if triggered == "sens-bulk-apply":
+        if scope != "all" and target is None:
+            return overrides
+        return bulk_overrides(scope, target, pct, overrides)
     if triggered == "sens-apply" and p_idx is not None and a_idx is not None:
         # dmc.Select returns the value as a string; matrix indices are ints.
         p_idx, a_idx = int(p_idx), int(a_idx)
@@ -380,13 +535,28 @@ def update_overrides(_apply, _reset, p_idx, a_idx, val, overrides):
 
 
 @callback(
+    Output("sens-bulk-target", "data"),
+    Output("sens-bulk-target", "value"),
+    Output("sens-bulk-target", "disabled"),
+    Input("sens-bulk-scope", "value"),
+)
+def update_bulk_target(scope):
+    if scope == "pathogen":
+        return [{"label": p, "value": str(i)} for i, p in enumerate(PATHOGENS)], "2", False
+    abx = [{"label": a.replace("\n", " "), "value": str(j)} for j, a in enumerate(ANTIBIOTIC_CLASSES)]
+    return abx, "2", scope == "all"
+
+
+@callback(
     Output("pathogen-heatmap", "figure"),
     Output("sens-status", "children"),
+    Output("sens-summary", "children"),
     Input("sens-overrides", "data"),
+    Input("sens-view", "value"),
 )
-def render_heatmap(overrides):
+def render_heatmap(overrides, view):
     overrides = overrides or {}
-    fig = build_heatmap(overrides)
+    fig = build_delta_heatmap(overrides) if view == "delta" else build_heatmap(overrides)
     if not overrides:
         status = "Defaults active. 0 cells modified."
     else:
@@ -394,7 +564,20 @@ def render_heatmap(overrides):
             f"⚙ {len(overrides)} cell(s) modified vs literature defaults. "
             "Overrides reset on page reload (preserves reproducibility)."
         )
-    return fig, status
+    sm = scenario_summary(overrides)
+
+    def stat(value, label, cls):
+        return html.Div([
+            html.Div(value, className=f"stat-value {cls}", style={"fontSize": "1.5rem"}),
+            html.Div(label, className="stat-label"),
+        ], className="stat-card")
+
+    summary = [
+        stat(f"{sm['modified']} / {sm['cells']}", "Cells modified", "accent"),
+        stat(f"{sm['mean_lit']:.1f}% → {sm['mean_scen']:.1f}%", "Mean resistance (literature → scenario)", "warning"),
+        stat(f"{sm['ge50_lit']} → {sm['ge50_scen']}", "Pathogen-drug pairs ≥ 50% resistant", "danger"),
+    ]
+    return fig, status, summary
 
 
 @callback(
@@ -461,9 +644,10 @@ layout = html.Div([
         "MDR / XDR / PDR PHENOTYPE BADGES (Magiorakos 2012): Each row is also labelled with the strongest documented isolate-level phenotype reported in peer-reviewed literature. MDR = non-susceptible to ≥1 agent in ≥3 antibiotic classes. XDR = susceptible to agents in ≤2 classes. PDR = resistant to all tested agents. CRITICAL: these classifications are isolate-level, not species-level — saying 'A. baumannii is PDR' is shorthand for 'PDR strains of A. baumannii are documented in the literature'. Most clinical isolates of any species are still susceptible to at least some drugs.",
         "INTRINSIC RESISTANCE (GREY CELLS): Cells displayed as a dash ('—') indicate intrinsic resistance — the organism is naturally resistant due to fundamental biology, not acquired mechanisms. Gram-negative bacteria are intrinsically resistant to vancomycin (drug cannot penetrate the outer membrane). S. maltophilia carries metallo-β-lactamases that hydrolyze every carbapenem. These cells are excluded from the colour scale because the resistance is not clinically meaningful in the same way as acquired resistance.",
         "SENSITIVITY ANALYSIS PANEL (research-mode what-if): Below the heatmap, a transient panel lets you override individual cell values to explore 'what if resistance for this pathogen-drug pair were X% instead?'. Defaults are anchored to peer-reviewed surveillance medians and are restored on every page reload — overrides are not persisted, by design, to preserve reproducibility for publication. The panel refuses to override intrinsic-R (NaN) cells: those reflect biology, not surveillance data, and forcing a number on them would be misleading.",
+        "BULK CHANGES AND SCENARIOS: The panel also changes a whole pathogen (row), a whole antibiotic class (column) or the entire matrix at once, by a relative percentage of each literature value (clipped to 0-100). Bulk changes are always computed from the literature value, so applying the same change twice gives the same result. The Optimistic (-20%) and Pessimistic (+25%) presets are illustrative assumptions, not projections. Switch the heatmap to 'Difference vs literature' to see exactly which cells changed and by how many percentage points; the summary row compares the mean resistance and the number of pathogen-drug pairs at or above 50% resistant.",
         "REGIONAL VARIATION: The grouped bar chart shows resistance rates across six WHO regions for four key pathogens. Geographic differences are driven by antibiotic access patterns (over-the-counter availability without prescription in many low- and middle-income countries), antimicrobial stewardship maturity, infection prevention practices, and surveillance capacity. Higher rates in Africa, South-East Asia, and the Eastern Mediterranean reflect both genuine higher burden and differential access to healthcare.",
         "TEMPORAL TRENDS: MRSA shows a declining trend in many regions (targeted screening, hand hygiene, decolonization protocols). 3GC-R E. coli and CRE K. pneumoniae show concerning upward trends, driven by ESBL and carbapenemase-producing genes (KPC, NDM, OXA-48) spreading via plasmid-mediated horizontal transfer. The divergent trajectories demonstrate that targeted interventions can work but must be sustained and adapted per pathogen.",
-        "CLINICAL IMPLICATIONS: When resistance exceeds 10–20% for a pathogen-drug combination, guidelines typically recommend against using that drug for empiric therapy. Cells at 50%+ indicate the antibiotic class is unreliable for more than half of infections — clinicians must wait 48–72 h for culture results, during which patients receive suboptimal treatment. For Critical-priority pathogens with documented PDR phenotypes (A. baumannii, P. aeruginosa, K. pneumoniae, S. maltophilia), therapeutic options narrow to last-resort agents such as colistin (significant nephrotoxicity) or salvage combinations.",
+        "CLINICAL IMPLICATIONS: When resistance exceeds 10–20% for a pathogen-drug combination, guidelines typically recommend against using that drug for empiric therapy. Cells at 50%+ indicate the antibiotic class is unreliable for more than half of infections — clinicians must wait 48–72 h for culture results, during which patients receive suboptimal treatment. For Critical-priority pathogens with documented PDR phenotypes (A. baumannii, P. aeruginosa, K. pneumoniae), therapeutic options narrow to last-resort agents such as colistin (significant nephrotoxicity) or salvage combinations.",
     ]),
 
     # WHO Priority summary
@@ -476,6 +660,17 @@ layout = html.Div([
             "Resistance percentage for each pathogen × antibiotic pair. Values are approximate global medians from WHO GLASS, ECDC EARS-Net, and CDC. Y-labels include WHO priority and Magiorakos isolate-level phenotype badge.",
             "Global median % resistant isolates — ESKAPEE + S. maltophilia + reference pathogens. Grey cells = intrinsic R or insufficient data.",
         ),
+        html.Div([
+            dmc.SegmentedControl(
+                id="sens-view",
+                data=[
+                    {"label": "Resistance (%)", "value": "matrix"},
+                    {"label": "Difference vs literature", "value": "delta"},
+                ],
+                value="matrix", color="cyan", radius="md", size="xs",
+            ),
+        ], style={"marginBottom": "0.6rem"}),
+        html.Div(id="sens-summary", className="stats-row"),
         dcc.Graph(id="pathogen-heatmap", figure=build_heatmap(), config=SVG_CONFIG),
         build_phenotype_legend(),
         html.Div([
