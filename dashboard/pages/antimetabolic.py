@@ -137,15 +137,17 @@ def references_card():
 
 
 _layout = html.Div([
-    help_section("Metabolic route", [
-        "PAGE PURPOSE: This page presents the 'possible metabolic escape route' in the paper's title exactly as the published paper states it, in the section 'Antimetabolites in the treatment of infections', with links to its references 39-55.",
-        "WHAT THIS PAGE IS NOT: It does not add data, charts, forecasts or interpretations of its own. The paper presents the route as a working hypothesis to be tested clinically and does not model it quantitatively.",
-        "QUOTES: Texts in quotation marks are the paper's own words. In the Spanish version they are translations of the English original.",
-    ]),
-    hypothesis_banner(),
-    abstract_card(),
-    section_card(),
-    references_card(),
+    html.Div([
+        help_section("Metabolic route", [
+            "PAGE PURPOSE: This page presents the 'possible metabolic escape route' in the paper's title exactly as the published paper states it, in the section 'Antimetabolites in the treatment of infections', with links to its references 39-55.",
+            "WHAT THIS PAGE IS NOT: It does not add data, charts, forecasts or interpretations of its own. The paper presents the route as a working hypothesis to be tested clinically and does not model it quantitatively.",
+            "QUOTES: Texts in quotation marks are the paper's own words. In the Spanish version they are translations of the English original.",
+        ]),
+        hypothesis_banner(),
+        abstract_card(),
+        section_card(),
+        references_card(),
+    ], className="meta-page"),
 ])
 
 

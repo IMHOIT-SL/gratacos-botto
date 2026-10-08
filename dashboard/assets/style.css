@@ -756,7 +756,9 @@ input.dash-range-slider-input,
 .meta-point:first-of-type { border-top: 0; }
 .meta-point-title { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent);
     font-weight: 600; margin-bottom: 0.35rem; }
-.meta-quote { color: var(--text-primary); font-size: 0.9rem; line-height: 1.7; margin: 0; max-width: 85ch; }
+/* Reading column: the whole page shares one comfortable measure */
+.meta-page { max-width: 920px; margin: 0 auto; }
+.meta-quote { color: var(--text-primary); font-size: 0.95rem; line-height: 1.75; margin: 0; }
 .meta-quote-lead { font-style: italic; border-left: 3px solid var(--accent); padding-left: 1rem; }
 .meta-attrib { font-size: 0.78rem; color: var(--text-secondary); margin: 0.6rem 0 0; }
 .ref-link { color: var(--accent); font-family: var(--font-mono); font-size: 0.82rem; text-decoration: none; }
