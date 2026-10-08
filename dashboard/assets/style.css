@@ -746,3 +746,22 @@ input.dash-range-slider-input,
 /* Navigation: 13 sections, keep labels on one line and wrap the row instead */
 .nav-bar { flex-wrap: wrap; gap: 0.25rem; }
 .nav-link { white-space: nowrap; padding: 0.45rem 0.75rem; }
+
+/* Metabolic page: the paper's own text, quoted */
+.meta-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 0.7rem; border-left: 4px solid var(--warning); }
+.meta-badge { background: var(--warning); color: var(--bg-card); padding: 0.25rem 0.7rem; border-radius: 4px;
+    font: 700 0.7rem var(--font-mono); letter-spacing: 0.05em; }
+.meta-banner-text { color: var(--text-primary); font-size: 0.85rem; flex: 1 1 320px; min-width: 0; }
+.meta-point { padding: 0.8rem 0; border-top: 1px solid var(--border); }
+.meta-point:first-of-type { border-top: 0; }
+.meta-point-title { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent);
+    font-weight: 600; margin-bottom: 0.35rem; }
+.meta-quote { color: var(--text-primary); font-size: 0.9rem; line-height: 1.7; margin: 0; max-width: 85ch; }
+.meta-quote-lead { font-style: italic; border-left: 3px solid var(--accent); padding-left: 1rem; }
+.meta-attrib { font-size: 0.78rem; color: var(--text-secondary); margin: 0.6rem 0 0; }
+.ref-link { color: var(--accent); font-family: var(--font-mono); font-size: 0.82rem; text-decoration: none; }
+.ref-link:hover { text-decoration: underline; }
+.meta-ref-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.45rem; font-size: 0.82rem; }
+.meta-ref-n { font-family: var(--font-mono); color: var(--accent); }
+.meta-ref { color: var(--text-primary); text-decoration: none; }
+.meta-ref:hover { color: var(--accent); }

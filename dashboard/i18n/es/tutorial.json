@@ -149,5 +149,7 @@
  "Zoom Out can reveal data points that were clipped by previous zoom operations.": "Alejar puede revelar puntos de datos que quedaron recortados por operaciones de zoom anteriores.",
  "Zoom in/out": "Ampliar/alejar",
  "with three publication-ready themes (Dashboard Dark, Publication Light, Print B&W). For the full bibliography of every source cited in any chart, see the": "con tres temas listos para publicación (Dashboard Dark, Publicación (claro), Impresión B/N). Para la bibliografía completa de todas las fuentes citadas en cualquier gráfico, consulta las",
- "~253K cumulative publications 1990-2025": "~253.000 publicaciones acumuladas 1990-2025"
+ "~253K cumulative publications 1990-2025": "~253.000 publicaciones acumuladas 1990-2025",
+ "PUBLICATION-QUALITY EXPORT: Every chart can be exported from its own toolbar as SVG (vector), PNG at 3x resolution, or CSV with its data. For more control (light/B&W themes, drug-class panel, etc.), use the dedicated Export Studio page (`/export`) — it surfaces 10 charts with theme switching.": "EXPORTACIÓN CON CALIDAD DE PUBLICACIÓN: Cada gráfico se puede exportar desde su propia barra de herramientas como SVG (vectorial), PNG a resolución 3x o CSV con sus datos. Para más control (temas claro/BN, panel por clase de fármaco, etc.), usa la página Estudio de exportación (`/export`): reúne 10 gráficos con cambio de tema.",
+ "The Overview, Pathogens and Industry charts are also available in the": "Los gráficos de Resumen, Patógenos e Industria también están disponibles en el"
 }

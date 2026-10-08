@@ -162,7 +162,7 @@ _layout = html.Div([
     help_section("Tutorial", [
         "This page teaches you how to use the interactive chart controls available on every chart in the dashboard.",
         "DASHBOARD MAP: The current build has 11 pages with 11 distinct charts in total (plus auxiliary panels). The Plotly toolbar described below works identically on every chart — once you learn the controls here, they apply everywhere. The 'Where to find each chart' section at the bottom of this page lists which page hosts which chart.",
-        "PUBLICATION-QUALITY EXPORT: Every chart can be exported from its own toolbar as SVG (vector), PNG at 3x resolution, or CSV with its data. For more control (light/B&W themes, drug-class panel, etc.), use the dedicated Export Studio page (`/export`) — it surfaces all 11 charts with theme switching.",
+        "PUBLICATION-QUALITY EXPORT: Every chart can be exported from its own toolbar as SVG (vector), PNG at 3x resolution, or CSV with its data. For more control (light/B&W themes, drug-class panel, etc.), use the dedicated Export Studio page (`/export`) — it surfaces 10 charts with theme switching.",
     ]),
 
     # Demo chart
@@ -448,16 +448,13 @@ _layout = html.Div([
                 html.Tr([html.Td("Awareness vs Effectiveness divergence"),
                          html.Td(dcc.Link("Industry", href="/industry", style={"color": "var(--accent)"})),
                          html.Td("Log-scale 1990=1 — awareness 500× vs effectiveness 0.34× (paper bibliometrics & industry note)")]),
-                html.Tr([html.Td("Paradigm Comparison"),
-                         html.Td(dcc.Link("Metabolic", href="/metabolic", style={"color": "var(--accent)"})),
-                         html.Td("Classical (data-driven) + qualitative antimetabolic envelope (working hypothesis)")]),
                 html.Tr([html.Td("Data Coverage Timeline"),
                          html.Td(dcc.Link("Data Sources", href="/datasources", style={"color": "var(--accent)"})),
                          html.Td("Gantt-style temporal coverage of every data source")]),
             ]),
         ], className="data-table", style={"width": "100%"}),
         html.P([
-            "All 11 charts are also available in the ",
+            "The Overview, Pathogens and Industry charts are also available in the ",
             dcc.Link("Export Studio", href="/export", style={"color": "var(--accent)"}),
             " with three publication-ready themes (Dashboard Dark, Publication Light, Print B&W). For the full bibliography of every source cited in any chart, see the ",
             dcc.Link("References", href="/references", style={"color": "var(--accent)"}),

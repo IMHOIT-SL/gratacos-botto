@@ -103,11 +103,11 @@ Once the dashboard is running at `http://localhost:8082`:
 | Pathogens    | http://localhost:8082/pathogens   | ESKAPEE heatmap + Sensitivity Analysis + regional + trends |
 | Time Series  | http://localhost:8082/timeseries  | SARIMA forecasting with interactive controls   |
 | Industry     | http://localhost:8082/industry    | PubMed scientometric + market CAGR + drug class + divergence |
-| Metabolic    | http://localhost:8082/metabolic   | Antimetabolic solution scaffold (working hypothesis) |
+| Metabolic    | http://localhost:8082/metabolic   | The paper's metabolic route, quoted with refs 39-55 (working hypothesis) |
 | Methods      | http://localhost:8082/methods     | Materials & Methods + reproducibility + citation |
 | Data Sources | http://localhost:8082/datasources | Data source catalog and coverage timeline      |
 | References   | http://localhost:8082/references  | 60 peer-reviewed citations grouped by paper section |
-| Export       | http://localhost:8082/export      | Export Studio (11 charts × 3 themes)           |
+| Export       | http://localhost:8082/export      | Export Studio (10 charts × 3 themes)           |
 | Docs         | http://localhost:8082/docs        | This documentation viewer                      |
 | Tutorial     | http://localhost:8082/tutorial    | Interactive guide for Plotly chart controls    |
 

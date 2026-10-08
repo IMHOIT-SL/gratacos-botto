@@ -52,14 +52,14 @@ Gratacos-Botto/
     │   ├── timeseries.py        # "/timeseries" — SARIMA forecasting with diagnostics
     │   ├── bibliometrics.py     # "/industry" — PubMed scientometric, market growth,
     │   │                        #   drug-class breakdown, awareness/effectiveness divergence
-    │   ├── antimetabolic.py     # "/metabolic" — paper's metabolic-solution scaffold:
-    │   │                        #   WORKING HYPOTHESIS banner, paradigm comparison
+    │   ├── antimetabolic.py     # "/metabolic" — the paper's metabolic route, quoted
+    │   │                        #   verbatim with links to refs 39-55 (working hypothesis)
     │   ├── methods.py           # "/methods" — Materials & Methods: line-icon points,
     │   │                        #   reproducibility + Zenodo/paper citation blocks
     │   ├── datasources.py       # "/datasources" — Data source catalog + Gantt timeline
     │   ├── references.py        # "/references" — 60 peer-reviewed citations grouped
     │   │                        #   by paper section
-    │   ├── export.py            # "/export" — Export Studio (11 charts × 3 themes)
+    │   ├── export.py            # "/export" — Export Studio (10 charts × 3 themes)
     │   ├── documentation.py     # "/docs" — In-app markdown viewer for these docs
     │   └── tutorial.py          # "/tutorial" — Interactive guide for chart controls
     └── docs/                    # This documentation folder
@@ -141,7 +141,7 @@ Most pages build their charts at import time (static figures). Three pages use D
 
 - **`pathogens.py`** — Four callbacks for the **Sensitivity Analysis** panel: (1) `update_overrides` consumes single-cell Apply/Reset, bulk-change and preset clicks (via `bulk_overrides()`) and writes to a `dcc.Store(storage_type="memory")`; (1b) `update_bulk_target` swaps the bulk target list between pathogens and antibiotic classes; (2) `render_heatmap` rebuilds the figure (resistance or difference-vs-literature view) and the summary row with the override dict applied (refusing intrinsic-R cells); (3) `render_preview` updates the live selection-preview line as dropdowns/slider change. The `memory` storage type ensures overrides reset on page reload, preserving reproducibility.
 
-- **`export.py`** — A callback driven by chart selector and color scheme. It dispatches via `CHART_BUILDERS` (11 builders) using the selected theme and rebuilds the selected chart. Format/scale options apply at download time via the Plotly modebar.
+- **`export.py`** — A callback driven by chart selector and color scheme. It dispatches via `CHART_BUILDERS` (10 builders) using the selected theme and rebuilds the selected chart. Format/scale options apply at download time via the Plotly modebar.
 
 ## CSS Theming Approach
 

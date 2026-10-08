@@ -286,32 +286,15 @@ This document describes every chart in the dashboard: what it shows, how to read
 
 ---
 
-## 16. Paradigm Comparison (classical vs antimetabolic)
-
-**Page:** Metabolic (`/metabolic`)
-
-**What it shows:** Conceptual chart contrasting two trajectories. The red curve is the data-driven classical antibiotic effectiveness (100 − super-exp resistance index). The blue band is a **qualitative working-hypothesis envelope** — explicitly NOT a forecast — representing the paper's claim that an antimetabolic line of treatment could sustain effectiveness. A note inside the figure marks this as qualitative.
-
-**How to interpret it:**
-- This is the **only** chart in the dashboard that includes a non-empirical series. The convention is enforced everywhere else.
-- The blue band is intended only to visualise the paradigm shift the paper proposes (subtitle, Abstract and Antimetabolites section). Once authors specify the molecular mechanism and supply quantitative inputs, this band can be replaced with a quantitative trajectory.
-
-**Data sources:** `compute_super_exponential_curve()` for the classical curve; the qualitative band is hand-drawn (years 2025–2060, fixed bounds 55–75).
-
-**Export:** Toolbar → SVG, PNG 3x or data (CSV). Also in Export Studio.
-
----
-
 ## Export Studio
 
 **Page:** Export (`/export`)
 
-The Export Studio page provides a unified interface for exporting any of the **11 charts** in the dashboard with customisable settings, grouped by source page in the dropdown:
+The Export Studio page provides a unified interface for exporting any of the **10 charts** listed below with customisable settings, grouped by source page in the dropdown:
 
 - **Overview** — Resistance Pressure Trajectory (super-exp), Mortality Projections (Murray + Tai 2025), Carbapenem 2035 Spotlight
 - **Pathogens** — ESKAPEE Resistance Heatmap, Regional Variation, Temporal Trends
 - **Industry** — PubMed Scientometric, Market Growth (CAGR 5.4%), Drug Class Breakdown, Awareness vs Effectiveness divergence
-- **Metabolic** — Paradigm Comparison
 
 Settings:
 

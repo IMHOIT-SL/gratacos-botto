@@ -65,8 +65,6 @@ CHART_OPTIONS = [
     {"label": "Market Growth (CAGR 5.4%)",                  "value": "market"},
     {"label": "Drug Class Breakdown",                       "value": "drug_class"},
     {"label": "Awareness vs Effectiveness (divergence)",    "value": "divergence"},
-    {"label": "── Metabolic ──", "value": "_sep_me", "disabled": True},
-    {"label": "Paradigm Comparison (classical vs antimet.)","value": "paradigm"},
 ]
 
 FORMAT_OPTIONS = [
@@ -620,68 +618,6 @@ def build_divergence(theme):
     return fig
 
 
-def build_paradigm(theme):
-    """Paradigm comparison — classical curve + qualitative antimetabolic band."""
-    curve = compute_super_exponential_curve(1990, 2060)
-    classical_eff = 100.0 - curve["resistance_index"]
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatter(
-        x=curve["year"], y=classical_eff,
-        mode="lines",
-        line=dict(color=theme["accent2"], width=3),
-        name="Classical antibiotic effectiveness (data-driven)",
-    ))
-
-    years = curve["year"].values
-    upper = [None if y < 2025 else 75 for y in years]
-    lower = [None if y < 2025 else 55 for y in years]
-    fig.add_trace(go.Scatter(
-        x=years, y=upper, mode="lines", line=dict(width=0),
-        showlegend=False, hoverinfo="skip",
-    ))
-    band_rgba = f"rgba({_hex_to_rgb(theme['accent1'])}, 0.18)"
-    fig.add_trace(go.Scatter(
-        x=years, y=lower, mode="lines", line=dict(width=0),
-        fill="tonexty", fillcolor=band_rgba,
-        name="Antimetabolic hypothesis (qualitative — not a forecast)",
-        hoverinfo="skip",
-    ))
-
-    fig.add_vline(
-        x=2026, line_dash="dot", line_color=theme["muted"], line_width=1,
-        annotation_text="2026 (paper context)",
-        annotation_position="top",
-        annotation_font=dict(color=theme["muted"], size=10),
-    )
-
-    fig.update_layout(
-        **_base_layout(theme),
-        title=dict(text="Paradigm comparison — classical vs antimetabolic (conceptual)",
-                   font=dict(size=14)),
-        xaxis_title="Year",
-        xaxis=dict(gridcolor=theme["gridcolor"]),
-        yaxis_title="Therapeutic effectiveness (100 = full)",
-        yaxis=dict(gridcolor=theme["gridcolor"]),
-        height=420,
-        margin=dict(l=60, r=30, t=50, b=80),
-        hovermode="x unified",
-        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(size=11)),
-        annotations=[
-            dict(
-                xref="paper", yref="paper", x=0.5, y=-0.27,
-                showarrow=False,
-                text=("⚠ The shaded band is a qualitative working-hypothesis envelope, "
-                      "not a quantitative forecast."),
-                font=dict(color=theme["accent3"], size=11),
-                xanchor="center",
-            ),
-        ],
-    )
-    fig.update_yaxes(range=[0, 100])
-    return fig
-
-
 CHART_BUILDERS = {
     "main_curve": build_main_curve,
     "mortality":  build_mortality,
@@ -693,7 +629,6 @@ CHART_BUILDERS = {
     "market":     build_market,
     "drug_class": build_drug_class,
     "divergence": build_divergence,
-    "paradigm":   build_paradigm,
 }
 
 # ---------------------------------------------------------------------------
@@ -705,7 +640,7 @@ _layout = html.Div([
         "FORMAT SELECTION -- SVG VS PNG VS PDF: SVG (Scalable Vector Graphics) is recommended for journal submissions and any context where the figure may be resized. SVG files are resolution-independent, produce crisp text and lines at any zoom level, and are accepted by most major publishers (Nature, Lancet, PLOS, BMJ, JAMA). PNG is best for presentations and web; use 2x or 3x scale for clarity. For PDF, export as SVG and convert with Inkscape (free) or Adobe Illustrator.",
         "RESOLUTION GUIDE: 1x is screen-only. 2x (~150 dpi) is appropriate for slide presentations, posters, and internal reports. 3x (~300 dpi) meets the minimum for print publication in peer-reviewed journals. When in doubt, export at 3x.",
         "COLOR THEME GUIDE: 'Dashboard Dark' is for on-screen analysis only — not for publication. 'Publication Light' uses a white background with high-contrast publication colors — recommended for journal submission, reports, and supplementary files. 'Print B&W' uses a white background with grayscale-only encoding for journals that print B&W or charge extra for color.",
-        "AVAILABLE CHARTS — 11 total, grouped by source page: Overview (Resistance Trajectory super-exp, Mortality with Tai 2025 overlay, Carbapenem 2035 Spotlight); Pathogens (ESKAPEE Heatmap, Regional Variation, Temporal Trends); Industry (PubMed Scientometric, Market Growth CAGR 5.4%, Drug Class Breakdown, Awareness vs Effectiveness divergence); Metabolic (Paradigm Comparison classical-vs-antimetabolic). Each chart respects the selected color theme.",
+        "AVAILABLE CHARTS: 10 in total, grouped by source page: Overview (Resistance Trajectory super-exp, Mortality with Tai 2025 overlay, Carbapenem 2035 Spotlight); Pathogens (ESKAPEE Heatmap, Regional Variation, Temporal Trends); Industry (PubMed Scientometric, Market Growth CAGR 5.4%, Drug Class Breakdown, Awareness vs Effectiveness divergence). Each chart respects the selected color theme.",
         "POST-PROCESSING SVG EXPORTS: Open in Adobe Illustrator, Inkscape, or Affinity Designer to fine-tune. Common tasks: adjust font sizes, reposition legends, add annotations, combine panels into a composite figure, convert text to outlines.",
         "CITING THE DASHBOARD: Suggested citation: 'Figure generated using the AMR Research Dashboard (Gratacós-Botto, Br J Med Health Res 2026), based on data from [list relevant primary sources for the chart].' Each Overview/Pathogens/Industry chart lists its specific data sources below the visualization on the source page.",
     ]),
@@ -714,7 +649,7 @@ _layout = html.Div([
     html.Div([
         chart_title_with_info(
             "Export Studio",
-            "Configure chart appearance and export settings. 11 charts available, 3 themes (dark/light/bw), 2 formats (SVG/PNG), 3 resolutions (1x/2x/3x).",
+            "Configure chart appearance and export settings. 10 charts available, 3 themes (dark/light/bw), 2 formats (SVG/PNG), 3 resolutions (1x/2x/3x).",
             "Preview charts with publication-ready color schemes, then export with the Download button or the chart toolbar.",
         ),
         html.Div([
