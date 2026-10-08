@@ -24,6 +24,7 @@ from data.bibliometrics_data import (
 from components import help_section, chart_title_with_info, graph_config
 
 from i18n import translate, translated, current_lang
+from model_cards import model_card, live_equation
 
 dash.register_page(__name__, path="/industry", name="Industry")
 
@@ -260,6 +261,7 @@ _layout = html.Div([
             html.A("Gratacós & Botto, Br J Med Health Res 2026 (bibliometrics & industry note)",
                    href="https://doi.org/10.5281/zenodo.21898960", target="_blank"),
         ], className="chart-sources"),
+        model_card("pubmed"),
     ], className="card"),
 
     # Market + Drug class side by side
@@ -277,6 +279,7 @@ _layout = html.Div([
                        href="https://univdatos.com/reports/antibiotic-resistance-market",
                        target="_blank"),
             ], className="chart-sources"),
+            model_card("market"),
         ], className="card"),
         html.Div([
             chart_title_with_info(
@@ -291,6 +294,7 @@ _layout = html.Div([
                        href="https://univdatos.com/reports/antibiotic-resistance-market",
                        target="_blank"),
             ], className="chart-sources"),
+            model_card("classes"),
         ], className="card"),
     ], className="chart-grid-2"),
 
@@ -316,6 +320,7 @@ _layout = html.Div([
                    href="https://doi.org/10.1016/j.ijantimicag.2025.107636",
                    target="_blank"),
         ], className="chart-sources"),
+        model_card("divergence"),
     ], className="card"),
 
     # Summary card

@@ -92,6 +92,8 @@ def T(text, lang=None):
         return lead + hit + trail
     for rx, template in _PATTERNS.get(lang, []):
         m = rx.fullmatch(core)
+        if m and template == "@decimal_comma":
+            return lead + re.sub(r"(\d)\.(\d)", r"\1,\2", core) + trail
         if m:
             groups = {k: (T(v, lang) if k.startswith("t_") and v else (v or ""))
                       for k, v in m.groupdict().items()}

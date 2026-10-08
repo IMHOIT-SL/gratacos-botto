@@ -18,6 +18,7 @@ from data.timeseries_data import PATHOGEN_CHOICES, MONTHLY_DATA
 from components import help_section, chart_title_with_info, graph_config
 
 from i18n import translate, translated, current_lang
+from model_cards import model_card, live_equation
 
 dash.register_page(__name__, path="/timeseries", name="Time Series")
 
@@ -221,6 +222,7 @@ _layout = html.Div([
             " · ",
             html.A("Arepyeva et al. 2017", href="https://pubmed.ncbi.nlm.nih.gov/28167308/", target="_blank"),
         ], className="chart-sources"),
+        model_card("sarima"),
     ], className="card"),
 
     # Scenario comparison (adjustable intervention)
@@ -266,6 +268,7 @@ _layout = html.Div([
             "Forecast: SARIMAX(1,1,1)(1,1,0,12) on the synthetic monthly series above. "
             "Intervention: user-defined assumption (no published source).",
         ], className="chart-sources"),
+        model_card("ts_scenario"),
     ], className="card"),
 
     # Diagnostics row
@@ -277,6 +280,7 @@ _layout = html.Div([
             ),
             html.Div(id="ts-diag-stats", style={"marginBottom": "0.5rem"}),
             dcc.Graph(id="ts-residuals-chart", config=SVG_CONFIG),
+            model_card("diagnostics"),
         ], className="card"),
         html.Div([
             chart_title_with_info(
@@ -286,6 +290,7 @@ _layout = html.Div([
             ),
             dcc.Graph(id="ts-acf-chart", config=SVG_CONFIG),
             dcc.Graph(id="ts-pacf-chart", config=SVG_CONFIG),
+            model_card("correlogram"),
         ], className="card"),
     ], className="chart-grid-2"),
 ])
@@ -528,6 +533,7 @@ def _scenario_stat(value, label, cls):
 @callback(
     Output("ts-scenario-chart", "figure"),
     Output("ts-scenario-stats", "children"),
+    Output({"type": "mc-live", "card": "ts_scenario"}, "children"),
     Input("ts-pathogen-dropdown", "value"),
     Input("ts-horizon-slider", "value"),
     Input("ts-int-reduction", "value"),
@@ -628,7 +634,14 @@ def update_scenario(pathogen, horizon, reduction, delay, show_band):
             _scenario_stat(f"-{diff:.1f} pp" if diff >= 0 else f"+{-diff:.1f} pp",
                            "Difference at horizon (percentage points)", "accent"),
         ]
-    return fig, stats
+    # Live equation for the model card
+    months = max(horizon - delay, 0)
+    m_used = max(slope, 0.0)
+    live = live_equation(
+        rf"$$m={slope:.3f}\;\text{{pp}}\qquad \max(m,0)={m_used:.3f}\qquad s={red:.2f}\qquad t_0=+{delay}$$"
+        rf"$$\hat y'_T=\hat y_T-{red:.2f}\cdot{m_used:.3f}\cdot{months}={bau[-1]:.1f}-{red * m_used * months:.2f}={interv[-1]:.1f}$$",
+        current_lang())
+    return fig, stats, live
 
 
 # Warm the default view (MRSA, 12-month horizon) in the background at import, so

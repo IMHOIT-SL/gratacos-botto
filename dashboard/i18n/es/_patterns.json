@@ -35,6 +35,18 @@
   [
    "^⚙ (?P<n>\\d+) cell\\(s\\) modified vs literature defaults\\. Overrides reset on page reload \\(preserves reproducibility\\)\\.$",
    "⚙ {n} celda(s) modificada(s) frente a los valores de la literatura. Las modificaciones se restablecen al recargar la página (preserva la reproducibilidad)."
+  ],
+  [
+   "^[-+]?[\\d.]+(\\s*[%→,/×≈(),\\-–]\\s*[-+]?[\\d.]+)*\\s*%?(\\s*\\(\\d{4}\\s*→\\s*\\d{4}\\))?$",
+   "@decimal_comma"
+  ],
+  [
+   "^Business as usual, (?P<t_m>[A-Z][a-z]{2}) (?P<y>\\d{4})$",
+   "Tendencia actual, {t_m} {y}"
+  ],
+  [
+   "^Intervention, (?P<t_m>[A-Z][a-z]{2}) (?P<y>\\d{4})$",
+   "Intervención, {t_m} {y}"
   ]
  ]
 }

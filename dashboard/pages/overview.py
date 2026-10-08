@@ -24,6 +24,7 @@ from data.amr_data import (
 from components import help_section, chart_title_with_info, graph_config
 
 from i18n import translate, translated, current_lang
+from model_cards import model_card, live_equation
 
 dash.register_page(__name__, path="/", name="Overview")
 
@@ -532,6 +533,7 @@ _layout = html.Div([
             " · ",
             html.A("IHME GBD AMR", href="https://www.healthdata.org/research-analysis/diseases-injuries-risks/factsheets/2021-amr-factsheet", target="_blank"),
         ], className="chart-sources"),
+        model_card("trajectory", open=True),
     ], className="card"),
 
     # Second row
@@ -553,6 +555,7 @@ _layout = html.Div([
                 " · ",
                 html.A("Tai et al., IJAA 2025", href="https://doi.org/10.1016/j.ijantimicag.2025.107636", target="_blank"),
             ], className="chart-sources"),
+            model_card("mortality"),
         ], className="card"),
         html.Div([
             chart_title_with_info(
@@ -589,6 +592,7 @@ _layout = html.Div([
             " · ",
             html.A("Lancet GBD / Murray et al. 2022", href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)02724-0/fulltext", target="_blank"),
         ], className="chart-sources"),
+        model_card("validation"),
     ], className="card"),
 
     # Carbapenem spotlight (Tai 2025, paper ref 10, Introduction, global burden)
@@ -611,6 +615,7 @@ _layout = html.Div([
             " · ",
             html.A("Gratacós & Botto, Br J Med Health Res 2026 (Introduction)", href="https://doi.org/10.5281/zenodo.21898960", target="_blank"),
         ], className="chart-sources"),
+        model_card("carbapenem"),
     ], className="card"),
 ])
 

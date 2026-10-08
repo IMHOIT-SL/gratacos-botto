@@ -19,6 +19,7 @@ import plotly.graph_objects as go
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from data.amr_data import (
+    SUPER_EXP_PARAMS,
     OBSERVED_DATA,
     CRITICAL_THRESHOLD,
     compute_scenario_curve,
@@ -27,6 +28,7 @@ from data.amr_data import (
 from components import help_section, chart_title_with_info, graph_config
 
 from i18n import translate, translated, current_lang
+from model_cards import model_card, live_equation
 
 dash.register_page(__name__, path="/scenarios", name="Scenario Lab")
 
@@ -144,6 +146,7 @@ _layout = html.Div([
                    href=PAPER_URL, target="_blank"),
             " · Interventions: user-defined assumptions (no published source)",
         ], className="chart-sources"),
+        model_card("scenario", open=True),
     ], className="card"),
 
     html.Div([
@@ -160,6 +163,7 @@ _layout = html.Div([
             html.A("Prieto Gratacós & Botto, Br J Med Health Res 2026 (Discussion)",
                    href=PAPER_URL, target="_blank"),
         ], className="chart-sources"),
+        model_card("rate", open=True),
     ], className="card"),
 ])
 
@@ -187,6 +191,8 @@ def _stat(value, label, cls):
     Output("scn-curve", "figure"),
     Output("scn-rate", "figure"),
     Output("scn-stats", "children"),
+    Output({"type": "mc-live", "card": "scenario"}, "children"),
+    Output({"type": "mc-live", "card": "rate"}, "children"),
     Input("scn-stewardship", "value"),
     Input("scn-pipeline", "value"),
     Input("scn-start", "value"),
@@ -220,18 +226,18 @@ def update_scenario(stewardship, pipeline, start_year):
     fig.add_trace(go.Scatter(
         x=df["year"], y=df["baseline"], name="No intervention (paper's model)",
         line=dict(color=BASE_COLOR, width=3),
-        hovertemplate="%{x}: %{y:.1f}<extra>No intervention</extra>",
+        hovertemplate="%{y:.1f}<extra></extra>",
     ))
     fig.add_trace(go.Scatter(
         x=df["year"], y=df["scenario"], name="Your scenario",
         line=dict(color=SCEN_COLOR, width=3),
-        hovertemplate="%{x}: %{y:.1f}<extra>Scenario</extra>",
+        hovertemplate="%{y:.1f}<extra></extra>",
     ))
     fig.add_trace(go.Scatter(
         x=OBSERVED_DATA["year"], y=OBSERVED_DATA["resistance_index"],
         name="Observed anchors (1990-2025)", mode="markers",
         marker=dict(color=BASE_COLOR, size=7, line=dict(color="#e8eaed", width=1)),
-        hovertemplate="%{x}: %{y}<extra>%{text}</extra>", text=OBSERVED_DATA["source"],
+        hovertemplate="%{y} (%{text})<extra></extra>", text=OBSERVED_DATA["source"],
     ))
     for yr, col, nm in ((base_year, BASE_COLOR, "No intervention"), (scen_year, SCEN_COLOR, "Scenario")):
         if yr is not None:
@@ -264,12 +270,12 @@ def update_scenario(stewardship, pipeline, start_year):
     rate.add_trace(go.Scatter(
         x=df["year"], y=df["rate_baseline"], name="No intervention",
         line=dict(color=BASE_COLOR, width=3),
-        hovertemplate="%{x}: %{y:.4f}<extra>No intervention</extra>",
+        hovertemplate="%{y:.4f}<extra></extra>",
     ))
     rate.add_trace(go.Scatter(
         x=df["year"], y=df["rate_scenario"], name="Your scenario",
         line=dict(color=SCEN_COLOR, width=3),
-        hovertemplate="%{x}: %{y:.4f}<extra>Scenario</extra>",
+        hovertemplate="%{y:.4f}<extra></extra>",
     ))
     rate.add_shape(type="line", x0=start_year, x1=start_year, y0=0, y1=1, yref="paper",
                    line=dict(color=SCEN_COLOR, width=1, dash="dash"))
@@ -280,7 +286,23 @@ def update_scenario(stewardship, pipeline, start_year):
         legend=dict(orientation="h", y=-0.22, x=0),
         hovermode="x unified",
     )
-    return fig, rate, stats
+    # Live equations for the model cards (numbers of the current scenario)
+    lang = current_lang()
+    P = SUPER_EXP_PARAMS
+    r2, b2 = P["r"] * (1 - s), P["b"] * (1 - p)
+    tau_s = start_year - P["t0"]
+    year_tex = str(scen_year) if scen_year is not None else r"> " + str(END_YEAR)
+    live_scn = live_equation(
+        rf"$$r'=r\,(1-s)={P['r']:.4f}\,(1-{s:.2f})={r2:.4f}\qquad "
+        rf"b'=b\,(1-p)={P['b']:.6f}\,(1-{p:.2f})={b2:.6f}$$"
+        rf"$$\tau_s={tau_s}\;({start_year})\qquad \tau_{{95}}\;\Rightarrow\;{year_tex}$$", lang)
+    tau40 = 2040 - P["t0"]
+    reff0 = P["r"] + 2 * P["b"] * tau40
+    reff1 = (r2 + 2 * b2 * tau40) if 2040 >= start_year else reff0
+    live_rate = live_equation(
+        rf"$$r_{{\mathrm{{ef}}}}(2040)=r+2b\,\tau={P['r']:.4f}+2\cdot{P['b']:.6f}\cdot{tau40}={reff0:.4f}$$"
+        rf"$$r'_{{\mathrm{{ef}}}}(2040)={r2:.4f}+2\cdot{b2:.6f}\cdot{tau40}={reff1:.4f}$$", lang)
+    return fig, rate, stats, live_scn, live_rate
 
 
 def layout(lang=None, **_query):

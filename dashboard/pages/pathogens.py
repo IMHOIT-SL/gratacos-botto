@@ -18,6 +18,7 @@ from data.pathogen_data import (
 from components import help_section, chart_title_with_info, graph_config
 
 from i18n import translate, translated, current_lang
+from model_cards import model_card, live_equation
 
 dash.register_page(__name__, path="/pathogens", name="Pathogens")
 
@@ -688,6 +689,7 @@ _layout = html.Div([
             " · ",
             html.A("Magiorakos et al., Clin Microbiol Infect 2012", href="https://www.clinicalmicrobiologyandinfection.com/article/S1198-743X(14)61632-3/fulltext", target="_blank"),
         ], className="chart-sources"),
+        model_card("heatmap"),
     ], className="card"),
 
     # Sensitivity panel
@@ -706,6 +708,7 @@ _layout = html.Div([
                 html.Span("Sources: ", className="source-label"),
                 html.A("WHO GLASS Report 2022", href="https://www.who.int/publications/i/item/9789240062702", target="_blank"),
             ], className="chart-sources"),
+            model_card("regional"),
         ], className="card"),
         html.Div([
             chart_title_with_info(
@@ -722,6 +725,7 @@ _layout = html.Div([
                 " · ",
                 html.A("CDC NARMS", href="https://www.cdc.gov/narms/index.html", target="_blank"),
             ], className="chart-sources"),
+            model_card("trends"),
         ], className="card"),
     ], className="chart-grid-2"),
 

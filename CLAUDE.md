@@ -25,6 +25,7 @@ Everything runs from `dashboard/`:
 - `dashboard/docs/` — in-app markdown documentation (`architecture`, `setup`, `charts_guide`, `models`, `data_sources`), rendered by the Documentation page.
 - `dashboard/i18n/` — English/Spanish. `translate()` swaps any rendered string found in `i18n/es/*.json` ({English: Spanish}; `__patterns__` for run-time strings). Language = `?lang=` > `amr_lang` cookie > browser. Callbacks that return text/figures use `@translated`.
 - `dashboard/components.py` — `help_section`, `chart_title_with_info`, `graph_config()` (curated chart toolbar; every `dcc.Graph` must use it).
+- `dashboard/model_cards.py` — `CARDS` (equation + terms, or data provenance, for every chart) and `model_card(key)`, placed under each chart. Every new chart needs a card: equations in TeX with symbols only (no words, no decimals; numbers go in `numeric` or `live_equation`), all prose in English for the i18n catalog.
 - `dashboard/assets/` — `style.css` (dark theme), `export_download.js`, `graph_toolbar.js` (SVG/PNG/CSV/full-screen buttons), `i18n.js` (EN/ES switch), `plotly-locale-es.js`, `press/` (poster PDF + preview).
 - Deploy: `Procfile`, `.do/app.yaml` (DigitalOcean App Platform), `deploy/systemd/` (self-host fallback), `run-api.sh` / `run-web.sh`. See `DEPLOY.md`.
 - Citation/metadata: `CITATION.cff`, `.zenodo.json`, `LICENSE` (MIT).

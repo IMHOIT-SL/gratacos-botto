@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from components import help_section, chart_title_with_info, graph_config
 
 from i18n import translate, translated, current_lang
+from model_cards import model_card, live_equation
 
 dash.register_page(__name__, path="/datasources", name="Data Sources")
 
@@ -259,6 +260,7 @@ _layout = html.Div([
             figure=build_coverage_timeline(),
             config=SVG_CONFIG,
         ),
+        model_card("coverage"),
     ], className="card"),
 ])
 

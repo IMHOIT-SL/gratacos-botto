@@ -165,6 +165,13 @@ def gather():
         exp.append(export.update_preview.__wrapped__(value, "dark"))
     page("export", export, exp)
     page("documentation", documentation)
+    import model_cards
+    mc = []
+    for key, card in model_cards.CARDS.items():
+        for t in card.get("terms", []):
+            mc.append(model_cards.show_term.__wrapped__(t["key"], {"type": "mc-term", "card": key}))
+    page("model_cards", model_cards, mc) if hasattr(model_cards, "_layout") else pages.__setitem__(
+        "model_cards", (lambda o: (collect(mc, o), o)[1])(set()))
     page("tutorial", tutorial)
     return pages
 

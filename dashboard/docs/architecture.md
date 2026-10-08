@@ -249,3 +249,13 @@ The app is authored in English and rendered in Spanish on demand, without changi
 - Plotly's own texts, dates and number format use `assets/plotly-locale-es.js`; the chart toolbar labels follow the same cookie.
 - `python -m i18n.extract` renders every page and callback, lists strings with no Spanish entry, and `--dump DIR` writes them as JSON for translation.
 - Technical documents under `docs/` are English-only; the Documentation page tells Spanish visitors so.
+
+---
+
+## Model cards (equation and terms under every chart)
+
+`model_cards.py` holds one entry per chart in `CARDS` and renders it with `model_card(key)` as a collapsible card under the chart:
+
+- **Model / statistical charts:** the equation(s) rendered with MathJax (`dcc.Markdown(mathjax=True)`), the same equation with numbers (static `numeric`, or `live` for pages with controls: the page callback outputs `{"type": "mc-live", "card": key}` via `live_equation()`), a term picker (`{"type": "mc-term"}` → `{"type": "mc-help"}`, one MATCH callback) and the full terms table (symbol, meaning, value, origin, effect of the control).
+- **Data-only charts:** a data card (what the numbers are, years, how they were obtained, sources with links).
+- **i18n:** equations use symbols only; numeric equations are rendered in both decimal styles and CSS (`html[lang]`, set by `assets/i18n.js`) shows one. Prose goes through the catalog; numeric value strings use the `@decimal_comma` pattern.
