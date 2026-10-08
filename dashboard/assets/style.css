@@ -821,3 +821,20 @@ html:not([lang="es"]) .only-es { display: none; }
 .mc-sources a { color: var(--accent); }
 .mc-chips label, .mc-chips .mc-chip { margin: 0 !important; }
 .mc-help-sep { color: var(--text-secondary); padding: 0 0.15rem; }
+
+/* Global "Chart details" switch in the header */
+.mc-toggle { display: inline-flex; align-items: center; gap: 0.45rem; background: transparent; border: 1px solid var(--border);
+    border-radius: 999px; padding: 0.25rem 0.55rem 0.25rem 0.35rem; color: var(--text-secondary); font: 600 0.75rem var(--font-body); cursor: pointer; }
+.mc-toggle:hover { color: var(--text-primary); }
+.mc-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mc-toggle-badge { font: 700 0.72rem var(--font-mono); background: var(--bg-card); color: var(--text-secondary); border-radius: 5px; padding: 0.05rem 0.35rem; }
+.mc-toggle-track { position: relative; width: 28px; height: 16px; border-radius: 999px; background: var(--border); transition: background 0.15s; }
+.mc-toggle-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--text-secondary); transition: transform 0.15s, background 0.15s; }
+.mc-toggle.on { color: var(--text-primary); border-color: var(--accent); }
+.mc-toggle.on .mc-toggle-badge { background: var(--accent); color: var(--bg-primary); }
+.mc-toggle.on .mc-toggle-track { background: rgba(79, 195, 247, 0.35); }
+.mc-toggle.on .mc-toggle-track::after { transform: translateX(12px); background: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .mc-toggle-track, .mc-toggle-track::after { transition: none; } }
+.header-actions { flex-wrap: wrap; justify-content: flex-end; }
+.mc-toggle-label { font-size: 0.78rem; font-weight: 600; }

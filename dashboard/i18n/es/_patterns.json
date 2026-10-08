@@ -1,6 +1,10 @@
 {
  "__patterns__": [
   [
+   "^(?P<n_v>\\d{1,3}(,\\d{3})+)$",
+   "{n_v}"
+  ],
+  [
    "^(?P<p>.+?)<br>(?P<t_abx>[^<]+)<br><b>(?P<v>-?\\d+)%</b> resistant(?P<mod>  ⚙ modified)?$",
    "{p}<br>{t_abx}<br><b>{v}%</b> resistente{mod}"
   ],
@@ -47,6 +51,18 @@
   [
    "^Intervention, (?P<t_m>[A-Z][a-z]{2}) (?P<y>\\d{4})$",
    "Intervención, {t_m} {y}"
+  ],
+  [
+   "^\\$(?P<n_v>[\\d.]+)B$",
+   "{n_v} mil M USD"
+  ],
+  [
+   "^\\$(?P<n_v>[\\d.]+)B by (?P<y>\\d{4})$",
+   "{n_v} mil M USD en {y}"
+  ],
+  [
+   "^(?P<n_v>[\\d.]+)×$",
+   "{n_v}×"
   ]
  ]
 }

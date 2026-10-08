@@ -341,7 +341,7 @@ def _sources(sources):
     return html.Div(parts, className="mc-sources")
 
 
-def model_card(key, open=False):
+def model_card(key, open=True):
     """Collapsible card with the equation and terms of chart `key`."""
     c = CARDS[key]
     kind = c["kind"]

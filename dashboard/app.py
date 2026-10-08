@@ -62,6 +62,16 @@ _app_body = html.Div(
                             title=PAPER_CITATION,
                             className="paper-pill",
                         ),
+                        # Global switch: open / close every chart's equation-and-data card
+                        # (assets/model_cards_toggle.js; remembered per browser)
+                        html.Button(
+                            [html.Span("ƒ(x)", className="mc-toggle-badge"),
+                             html.Span("Chart details", className="mc-toggle-label"),
+                             html.Span(className="mc-toggle-track")],
+                            id="mc-toggle", className="mc-toggle on", type="button",
+                            title="Show or hide the equation and data cards under every chart",
+                            **{"aria-pressed": "true"},
+                        ),
                         html.Div(id="lang-switch", className="lang-switch"),
                     ],
                     className="header-actions",

@@ -20,7 +20,8 @@ A catalog may also hold "__patterns__": [[regex, template], ...] for strings
 built at run time (numbers, years, pathogen x antibiotic tooltips) that cannot
 be listed verbatim. The regex uses named groups and the template is a
 str.format string over them; a group named t_<name> is itself translated
-before substitution, e.g.
+before substitution, and a group named n_<name> is a number converted to
+Spanish separators (1,234.5 -> 1.234,5), e.g.
     ["^(?P<p>.+?)<br>(?P<t_abx>.+?)<br><b>(?P<v>\\d+)%</b> resistant$",
      "{p}<br>{t_abx}<br><b>{v}%</b> resistente"]
 """
@@ -95,8 +96,14 @@ def T(text, lang=None):
         if m and template == "@decimal_comma":
             return lead + re.sub(r"(\d)\.(\d)", r"\1,\2", core) + trail
         if m:
-            groups = {k: (T(v, lang) if k.startswith("t_") and v else (v or ""))
-                      for k, v in m.groupdict().items()}
+            groups = {}
+            for k, v in m.groupdict().items():
+                v = v or ""
+                if k.startswith("t_") and v:      # translate the group itself
+                    v = T(v, lang)
+                elif k.startswith("n_"):          # number: 1,234.5 -> 1.234,5
+                    v = v.replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+                groups[k] = v
             return lead + template.format(**groups) + trail
     return text
 
