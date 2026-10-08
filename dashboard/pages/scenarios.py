@@ -28,7 +28,7 @@ from data.amr_data import (
 from components import help_section, chart_title_with_info, graph_config
 
 from i18n import translate, translated, current_lang
-from model_cards import model_card, live_equation
+from model_cards import model_card, live_equation, fill
 
 dash.register_page(__name__, path="/scenarios", name="Scenario Lab")
 
@@ -292,16 +292,16 @@ def update_scenario(stewardship, pipeline, start_year):
     r2, b2 = P["r"] * (1 - s), P["b"] * (1 - p)
     tau_s = start_year - P["t0"]
     year_tex = str(scen_year) if scen_year is not None else r"> " + str(END_YEAR)
-    live_scn = live_equation(
-        rf"$$r'=r\,(1-s)={P['r']:.4f}\,(1-{s:.2f})={r2:.4f}\qquad "
-        rf"b'=b\,(1-p)={P['b']:.6f}\,(1-{p:.2f})={b2:.6f}$$"
-        rf"$$\tau_s={tau_s}\;({start_year})\qquad \tau_{{95}}\;\Rightarrow\;{year_tex}$$", lang)
+    live_scn = live_equation(fill(
+        rf"$$⟨r⟩'=⟨r⟩\,(1-⟨s⟩)=⟨#r:{P['r']:.4f}⟩\,(1-⟨#s:{s:.2f}⟩)=⟨#r:{r2:.4f}⟩\qquad "
+        rf"⟨b⟩'=⟨b⟩\,(1-⟨p⟩)=⟨#b:{P['b']:.6f}⟩\,(1-⟨#p:{p:.2f}⟩)=⟨#b:{b2:.6f}⟩$$"
+        rf"$$⟨ts⟩=⟨#ts:{tau_s}⟩\;({start_year})\qquad ⟨t95⟩\;\Rightarrow\;⟨#gstar:{year_tex}⟩$$"), lang)
     tau40 = 2040 - P["t0"]
     reff0 = P["r"] + 2 * P["b"] * tau40
     reff1 = (r2 + 2 * b2 * tau40) if 2040 >= start_year else reff0
-    live_rate = live_equation(
-        rf"$$r_{{\mathrm{{ef}}}}(2040)=r+2b\,\tau={P['r']:.4f}+2\cdot{P['b']:.6f}\cdot{tau40}={reff0:.4f}$$"
-        rf"$$r'_{{\mathrm{{ef}}}}(2040)={r2:.4f}+2\cdot{b2:.6f}\cdot{tau40}={reff1:.4f}$$", lang)
+    live_rate = live_equation(fill(
+        rf"$$⟨reff⟩(2040)=⟨r⟩+2⟨b⟩\,\tau=⟨#r:{P['r']:.4f}⟩+2\cdot⟨#b:{P['b']:.6f}⟩\cdot{tau40}=⟨#reff:{reff0:.4f}⟩$$"
+        rf"$$⟨reff⟩'(2040)=⟨#r:{r2:.4f}⟩+2\cdot⟨#b:{b2:.6f}⟩\cdot{tau40}=⟨#reff:{reff1:.4f}⟩$$"), lang)
     return fig, rate, stats, live_scn, live_rate
 
 

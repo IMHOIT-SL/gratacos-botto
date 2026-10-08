@@ -18,7 +18,7 @@ from data.timeseries_data import PATHOGEN_CHOICES, MONTHLY_DATA
 from components import help_section, chart_title_with_info, graph_config
 
 from i18n import translate, translated, current_lang
-from model_cards import model_card, live_equation
+from model_cards import model_card, live_equation, fill
 
 dash.register_page(__name__, path="/timeseries", name="Time Series")
 
@@ -637,9 +637,9 @@ def update_scenario(pathogen, horizon, reduction, delay, show_band):
     # Live equation for the model card
     months = max(horizon - delay, 0)
     m_used = max(slope, 0.0)
-    live = live_equation(
-        rf"$$m={slope:.3f}\;\text{{pp}}\qquad \max(m,0)={m_used:.3f}\qquad s={red:.2f}\qquad t_0=+{delay}$$"
-        rf"$$\hat y'_T=\hat y_T-{red:.2f}\cdot{m_used:.3f}\cdot{months}={bau[-1]:.1f}-{red * m_used * months:.2f}={interv[-1]:.1f}$$",
+    live = live_equation(fill(
+        rf"$$⟨m⟩=⟨#m:{slope:.3f}⟩\;\text{{pp}}\qquad \max(⟨m⟩,0)=⟨#m:{m_used:.3f}⟩\qquad ⟨s⟩=⟨#s:{red:.2f}⟩\qquad ⟨t0⟩=+⟨#t0:{delay}⟩$$"
+        rf"$$\hat y'_T=⟨#yhat:{bau[-1]:.1f}⟩-⟨#s:{red:.2f}⟩\cdot⟨#m:{m_used:.3f}⟩\cdot{months}=⟨#yprime:{interv[-1]:.1f}⟩$$"),
         current_lang())
     return fig, stats, live
 

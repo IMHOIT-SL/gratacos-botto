@@ -838,3 +838,16 @@ html:not([lang="es"]) .only-es { display: none; }
 @media (prefers-reduced-motion: reduce) { .mc-toggle-track, .mc-toggle-track::after { transition: none; } }
 .header-actions { flex-wrap: wrap; justify-content: flex-end; }
 .mc-toggle-label { font-size: 0.78rem; font-weight: 600; }
+
+/* Term highlighting (assets/model_cards_highlight.js) */
+:root { --term-hl: #ffd54f; }
+.model-card g.mc-hl { color: var(--term-hl); }
+.model-card tr.mc-hl td { background: rgba(255, 213, 79, 0.12); }
+.model-card tr.mc-hl td.mc-sym { color: var(--term-hl); }
+.mc-chip:has(input:checked) { background: var(--term-hl); color: #21232d; border-color: var(--term-hl); }
+.mc-help { border-left-color: var(--term-hl); }
+.mc-help-sym { color: var(--term-hl); }
+/* Dash 4 RadioItems: the text span carries .mc-chip, the <label> carries the state */
+.mc-chips label[aria-selected="true"] .mc-chip { background: var(--term-hl); color: #21232d; border-color: var(--term-hl); }
+.mc-chips label:focus-within .mc-chip { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mc-chips .dash-options-list-option-wrapper { position: absolute; width: 1px; height: 1px; overflow: hidden; }

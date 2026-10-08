@@ -292,6 +292,121 @@ CARDS = {
     ),
 }
 
+# ---------------------------------------------------------------------------
+# Tagged equations: every symbol of a term carries the CSS class t-<term key>
+# (via \mmlToken, part of MathJax's base TeX, so no extension is fetched).
+# assets/model_cards_highlight.js paints the selected term yellow everywhere
+# it appears (symbolic, numeric and live equations, terms table).
+# Template syntax: ⟨name⟩ = a symbol from SYMS; ⟨#key:0.0705⟩ = a number
+# tagged with term `key`.
+# ---------------------------------------------------------------------------
+import re as _re
+
+
+def _tok(key, text, node="mi"):
+    return r"\mmlToken{%s}[class=t-%s]{%s}" % (node, key, text)
+
+
+def _sym(key, base, sub=None, sup=None, hat=False, prime=False):
+    t = _tok(key, base)
+    if hat:
+        t = r"\hat{%s}" % t
+    if prime:
+        t += "'"
+    if sub:
+        t += "_{%s}" % _tok(key, sub)
+    if sup:
+        t += "^{%s}" % _tok(key, sup, "mo")
+    return t
+
+
+SYMS = {
+    "y": _sym("y", "y"), "tau": _sym("tau", "τ"), "K": _sym("K", "K"), "A": _sym("A", "A"),
+    "r": _sym("r", "r"), "b": _sym("b", "b"), "reff": _sym("reff", "r", "ef"),
+    "s": _sym("s", "s"), "p": _sym("p", "p"), "ts": _sym("ts", "τ", "s"),
+    "gstar": _sym("gstar", "g", sup="*"), "t95": _sym("gstar", "τ", "95"),
+    "r2": _sym("r2", "r"), "b2": _sym("r2", "b"), "vi": _sym("vi", "v", "i"),
+    "yj": _sym("yj", "y", "j"), "yhatj": _sym("yj", "y", "j", hat=True), "mae": _sym("mae", "MAE"),
+    "v": _sym("v", "v"), "d": _sym("d", "Δ"), "vp": _sym("vp", "v", prime=True),
+    "yt": _sym("yt", "y", "t"), "B": _sym("B", "B"), "phi": _sym("phi", "φ"), "Phi": _sym("phi", "Φ"),
+    "theta": _sym("theta", "θ"), "eps": _sym("eps", "ε", "t"), "T": _sym("T", "T"),
+    "m": _sym("m", "m"), "yhat": _sym("yhat", "y", "t", hat=True), "t0": _sym("t0", "t", "0"),
+    "yprime": _sym("yprime", "y", "t", hat=True, prime=True),
+    "e": _sym("e", "e", "t"), "k": _sym("k", "k"), "L": _sym("L", "L"), "n": _sym("n", "n"),
+    "rho": _sym("rho", "ρ", "k"), "lag": _sym("lag", "k"),
+    "N": _sym("N", "N"), "N0": _sym("N0", "N", "0"), "g": _sym("g", "g"),
+    "M": _sym("M", "M"), "M0": _sym("M0", "M", "2023"), "c": _sym("c", "c"),
+    "Mc": _sym("Mc", "M", "c"), "sc": _sym("share", "s", "c"),
+    "C": _sym("C", "C"), "E": _sym("E", "E"),
+}
+
+
+def fill(tex):
+    """Expand ⟨name⟩ and ⟨#key:number⟩ placeholders into tagged TeX."""
+    def sub(m):
+        name = m.group(1)
+        if name.startswith("#"):
+            key, num = name[1:].split(":", 1)
+            return _tok(key, num, "mn")
+        return SYMS[name]
+    return _re.sub(r"⟨([^⟩]+)⟩", sub, tex)
+
+
+def to_es(tex):
+    """Spanish decimals: comma inside tagged numbers, {,} elsewhere."""
+    tex = _re.sub(r"(\\mmlToken\{mn\}\[[^\]]*\]\{)([^}]*)(\})",
+                  lambda m: m.group(1) + m.group(2).replace(".", ",") + m.group(3), tex)
+    out, i = [], 0
+    for m in _re.finditer(r"\\mmlToken\{mn\}\[[^\]]*\]\{[^}]*\}", tex):
+        out.append(tex[i:m.start()].replace(".", "{,}"))
+        out.append(m.group(0))
+        i = m.end()
+    out.append(tex[i:].replace(".", "{,}"))
+    return "".join(out)
+
+
+_EQ = {
+    "trajectory": dict(
+        equations=[fill(r"$$⟨y⟩(⟨tau⟩)=\dfrac{⟨K⟩}{1+⟨A⟩\,e^{-(⟨r⟩⟨tau⟩+⟨b⟩⟨tau⟩^{2})}}\qquad ⟨reff⟩(⟨tau⟩)=⟨r⟩+2⟨b⟩⟨tau⟩\qquad ⟨y⟩(⟨tau⟩\pm ⟨#band:3⟩)$$")],
+        numeric=(fill(r"$$⟨y⟩(⟨tau⟩)=\dfrac{⟨#K:100⟩}{1+⟨#A:7.333⟩\,e^{-(⟨#r:0.0705⟩\,⟨tau⟩+⟨#b:0.000305⟩\,⟨tau⟩^{2})}}\qquad y_{\mathrm{ref}}(⟨tau⟩)=\dfrac{⟨#K:100⟩}{1+⟨#A:7.333⟩\,e^{-⟨#ref:0.0811⟩\,⟨tau⟩}}$$"),)),
+    "validation": dict(
+        equations=[fill(r"$$⟨r2⟩\,\tau_i+⟨b2⟩\,\tau_i^{2}=\ln\!\left(\dfrac{A}{K/⟨vi⟩-1}\right),\qquad i\in\{2010,\,2015\}$$"),
+                   fill(r"$$⟨mae⟩=\dfrac{1}{n}\sum_{j}\left|⟨yj⟩-⟨yhatj⟩\right|$$")],
+        numeric=(fill(r"$$⟨r2⟩=⟨#r2:0.0567⟩,\qquad ⟨b2⟩=⟨#r2:0.0006⟩,\qquad ⟨mae⟩=⟨#mae:3.8⟩$$"),)),
+    "scenario": dict(
+        equations=[fill(r"$$⟨y⟩(⟨tau⟩)=\dfrac{⟨K⟩}{1+⟨A⟩\,e^{-g(⟨tau⟩)}}$$"),
+                   fill(r"$$g(⟨tau⟩)=\begin{cases} ⟨r⟩⟨tau⟩+⟨b⟩⟨tau⟩^{2} & ⟨tau⟩<⟨ts⟩\\ g(⟨ts⟩)+⟨r⟩(1-⟨s⟩)(⟨tau⟩-⟨ts⟩)+⟨b⟩(1-⟨p⟩)(⟨tau⟩^{2}-⟨ts⟩^{2}) & ⟨tau⟩\ge⟨ts⟩\end{cases}$$"),
+                   fill(r"$$⟨gstar⟩=\ln\!\dfrac{95\,⟨A⟩}{⟨K⟩-95}\qquad g(⟨tau⟩)=⟨gstar⟩\;\Rightarrow\;⟨t95⟩$$")]),
+    "rate": dict(
+        equations=[fill(r"$$⟨reff⟩(\tau)=\begin{cases} ⟨r⟩+2⟨b⟩\tau & \tau<\tau_s\\ ⟨r⟩(1-⟨s⟩)+2⟨b⟩(1-⟨p⟩)\,\tau & \tau\ge\tau_s\end{cases}$$")]),
+    "heatmap": dict(
+        equations=[fill(r"$$⟨vp⟩=\min\!\left(100,\;\max\!\left(0,\;\mathrm{round}\big(⟨v⟩\,(1+⟨d⟩)\big)\right)\right)$$")]),
+    "sarima": dict(
+        equations=[fill(r"$$(1-⟨phi⟩⟨B⟩)(1-⟨Phi⟩⟨B⟩^{12})(1-⟨B⟩)(1-⟨B⟩^{12})\,⟨yt⟩=(1+⟨theta⟩⟨B⟩)\,⟨eps⟩$$"),
+                   fill(r"$$⟨yt⟩=⟨T⟩(t)+a_1\sin\dfrac{2\pi t}{12}+a_2\sin\dfrac{4\pi t}{12}+⟨eps⟩,\qquad ⟨eps⟩\sim\mathcal{N}(0,\sigma^{2})$$")]),
+    "ts_scenario": dict(
+        equations=[fill(r"$$⟨m⟩=\dfrac{1}{12}\cdot\overline{\left(⟨yhat⟩-y_{t-12}\right)}$$"),
+                   fill(r"$$⟨yprime⟩=⟨yhat⟩-⟨s⟩\cdot\max(⟨m⟩,0)\cdot\max(t-⟨t0⟩+1,\,0)$$")]),
+    "diagnostics": dict(
+        equations=[fill(r"$$⟨e⟩=y_t-\hat y_t\qquad \mathrm{AIC}=2⟨k⟩-2\ln ⟨L⟩\qquad \mathrm{BIC}=⟨k⟩\ln ⟨n⟩-2\ln ⟨L⟩$$")]),
+    "correlogram": dict(
+        equations=[fill(r"$$⟨rho⟩=\dfrac{\sum_t (y_t-\bar y)(y_{t-⟨lag⟩}-\bar y)}{\sum_t (y_t-\bar y)^{2}}$$")],
+        numeric=(fill(r"$$\pm\dfrac{⟨#band:1.96⟩}{\sqrt{n}}$$"),)),
+    "pubmed": dict(
+        equations=[fill(r"$$⟨N⟩(y)=⟨N0⟩\,e^{⟨g⟩\,(y-1990)}$$")],
+        numeric=(fill(r"$$⟨N⟩(y)=⟨#N0:500⟩\,e^{⟨#g:0.115⟩\,(y-1990)}$$"),)),
+    "market": dict(
+        equations=[fill(r"$$⟨M⟩(y)=⟨M0⟩\,(1+⟨c⟩)^{\,y-2023}$$")],
+        numeric=(fill(r"$$⟨M⟩(y)=⟨#M0:5.5⟩\,(1+⟨#c:0.054⟩)^{\,y-2023}$$"),)),
+    "classes": dict(
+        equations=[fill(r"$$⟨Mc⟩(y)=⟨sc⟩(y)\cdot ⟨M⟩(y)$$")]),
+    "divergence": dict(
+        equations=[fill(r"$$⟨C⟩(y)=\dfrac{\sum_{x\le y}N(x)}{N(1990)}\qquad ⟨E⟩(y)=\dfrac{100-y(\tau)}{100-y(0)}$$")]),
+}
+for _k, _v in _EQ.items():
+    CARDS[_k].update(_v)
+
+
 KIND_LABEL = {"model": "Model", "stat": "Statistical model", "data": "Data"}
 
 
@@ -301,7 +416,7 @@ def _md(tex):
 
 def _numeric_block(tex_en):
     """Same equation with numbers, in both decimal styles; CSS shows one."""
-    tex_es = tex_en.replace(".", "{,}")
+    tex_es = to_es(tex_en)
     return html.Div([
         html.Div(_md(tex_en), className="only-en"),
         html.Div(_md(tex_es), className="only-es"),
@@ -315,7 +430,7 @@ def _terms_table(terms):
         html.Tbody([html.Tr([
             html.Td(t["sym"], className="mc-sym"), html.Td(t["what"]), html.Td(t["value"], className="mc-num"),
             html.Td(t["source"]), html.Td(t["control"]),
-        ]) for t in terms]),
+        ], className="t-" + t["key"]) for t in terms]),
     ], className="mc-table"), className="mc-table-box")
 
 
@@ -383,7 +498,7 @@ def model_card(key, open=True):
 def live_equation(tex_en, lang):
     """Live equation (scenario pages) in the visitor's decimal style."""
     tex = tex_en.replace("$$$$", "$$\n\n$$")
-    return _md(tex.replace(".", "{,}") if lang == "es" else tex)
+    return _md(to_es(tex) if lang == "es" else tex)
 
 
 @callback(Output({"type": "mc-help", "card": MATCH}, "children"),
