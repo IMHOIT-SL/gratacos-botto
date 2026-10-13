@@ -127,6 +127,8 @@ def gather():
     # Shell (header, footer, nav)
     shell = set()
     collect(app._app_body, shell)
+    collect(app._share_dialog("en"), shell)
+    shell.add("Link copied")
     for label, _ in app.NAV_ITEMS:
         shell.add(label)
     shell.update({"English", "Español"})

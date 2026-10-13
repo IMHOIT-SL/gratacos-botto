@@ -62,6 +62,13 @@ _app_body = html.Div(
                             title=PAPER_CITATION,
                             className="paper-pill",
                         ),
+                        # Share: QR + link to the phone page (/live), dialog below (assets/share.js)
+                        html.Button(
+                            [html.Span("▦", className="share-icon", **{"aria-hidden": "true"}),
+                             html.Span("Share", className="share-label")],
+                            id="share-open", className="share-btn", type="button",
+                            title="QR code and link to the phone version",
+                        ),
                         # Global switch: open / close every chart's equation-and-data card
                         # (assets/model_cards_toggle.js; remembered per browser)
                         html.Button(
@@ -121,10 +128,31 @@ def _lang_buttons(lang):
     ]
 
 
+LIVE_URL = "https://resistome.imhoit.com/live"
+
+
+def _share_dialog(lang):
+    """QR and link to /live in the visitor's language (opened by assets/share.js)."""
+    url = f"{LIVE_URL}?lang={lang}"
+    return html.Dialog([
+        html.H3("Share the app"),
+        html.P("Scan it with the phone camera to open the phone version: figures, the resistance target and the scenarios."),
+        html.Img(src=f"/assets/live/qr-live-{lang}.svg", alt="QR code to the phone version", className="share-qr"),
+        html.Code(url, className="share-url"),
+        html.Div([
+            html.Button("Copy link", id="share-copy", type="button", className="share-action",
+                        **{"data-url": url, "data-done": T("Link copied", lang)}),
+            html.A("Download QR (PNG)", href=f"/assets/live/qr-live-{lang}.png",
+                   download=f"resistome-live-qr-{lang}.png", className="share-action"),
+            html.Button("Close", id="share-close", type="button", className="share-action ghost"),
+        ], className="share-actions"),
+    ], id="share-dialog", className="share-dialog")
+
+
 def serve_layout():
     # Called per page load, so the shell is rendered in the visitor's language
     lang = current_lang()
-    body = translate(_app_body, lang)
+    body = translate(html.Div([_app_body, _share_dialog(lang)]), lang)
     return dmc.MantineProvider(
         forceColorScheme="dark",
         theme={

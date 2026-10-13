@@ -23,5 +23,14 @@
  "Tutorial": "Tutorial",
  "📄 Read the paper": "📄 Leer el paper",
  "Chart details": "Detalles de los gráficos",
- "Show or hide the equation and data cards under every chart": "Mostrar u ocultar las fichas de ecuaciones y datos debajo de cada gráfico"
+ "Show or hide the equation and data cards under every chart": "Mostrar u ocultar las fichas de ecuaciones y datos debajo de cada gráfico",
+ "Share": "Compartir",
+ "QR code and link to the phone version": "Código QR y enlace a la versión para celular",
+ "Share the app": "Compartir la app",
+ "Scan it with the phone camera to open the phone version: figures, the resistance target and the scenarios.": "Escanéalo con la cámara del celular para abrir la versión para teléfono: cifras, la diana de la resistencia y los escenarios.",
+ "QR code to the phone version": "Código QR a la versión para celular",
+ "Copy link": "Copiar enlace",
+ "Link copied": "Enlace copiado",
+ "Download QR (PNG)": "Descargar QR (PNG)",
+ "Close": "Cerrar"
 }
