@@ -2,7 +2,7 @@
 // Each node is one pathogen x antibiotic-class cell of the surveillance
 // matrix, lit by its % resistant. 2025 = published data; other years shift
 // every cell on the odds scale by the same factor as the paper's index
-// (illustrative, see the "network" model card). Layers: WHO AWaRe 2023.
+// (illustrative, see the "network" model card). Rings: WHO AWaRe 2023.
 // Deterministic: no randomness, only the year chosen by the viewer.
 (function () {
     "use strict";
@@ -46,14 +46,14 @@
             '<button type="button" class="inet-play">' + T.play + '</button>' +
             '<button type="button" class="inet-reset">' + T.reset + '</button>' +
             '</div>' +
-            '<div class="inet-box"><canvas width="1440" height="760" role="img" aria-label="' + T.aria + '"></canvas></div>' +
+            '<div class="inet-box"><canvas width="1200" height="880" role="img" aria-label="' + T.aria + '"></canvas><div class="inet-tip" hidden></div></div>' +
             '<div class="inet-layers">' + [0, 1, 2].map(function (i) {
                 return '<div class="inet-lstat" style="border-color:' + LAYER_COL[i] + '"><b>-</b><span>' + T.lit[i] + '</span></div>';
             }).join("") + '</div>';
 
         var yrEl = host.querySelector(".inet-year"), chip = host.querySelector(".inet-chip"),
             slider = host.querySelector("input"), playBtn = host.querySelector(".inet-play"),
-            resetBtn = host.querySelector(".inet-reset"), cv = host.querySelector("canvas"),
+            resetBtn = host.querySelector(".inet-reset"), cv = host.querySelector("canvas"), tip = host.querySelector(".inet-tip"),
             stats = host.querySelectorAll(".inet-lstat b"), cx = cv.getContext("2d");
 
         var y = function (t) { return P.K / (1 + P.A * Math.exp(-(P.r * t + P.b * t * t))); };
@@ -67,20 +67,33 @@
             return 100 * o / (1 + o);
         }
 
-        var W = cv.width, H = cv.height, left = 240, top = 96, bottom = 40, right = 170;
-        var cols = [];
-        D.layers.forEach(function (L, li) { L.forEach(function (c) { cols.push({ c: c, li: li }); }); });
-        var gapL = 60, usable = W - left - right - gapL * 2 - 120, step = usable / (cols.length - 1);
-        var x = left + 120, colX = [];
-        cols.forEach(function (o, i) { if (i > 0 && cols[i - 1].li !== o.li) x += gapL; colX.push(x); x += step; });
-        var nP = D.pathogens.length;
-        var rowY = D.pathogens.map(function (_, i) { return top + i * ((H - top - bottom) / (nP - 1)); });
-        var inX = left + 42, inY = (top + H - bottom) / 2;
-        var year = 2025, phase = 0, playing = false, last = 0, acc = 0;
+        // Target layout: one sector per pathogen, AWaRe rings from the outside in
+        // (Access, Watch, Reserve), the paper's index at the core.
+        var W = 1200, H = 880, C0 = 600, C1 = 440, GAP = 0.62, nP = D.pathogens.length;
+        var SEC = (2 * Math.PI - GAP) / nP, RING = [354, 244, 128];
+        var RAD = [[372, 336], [262, 226], [128, 128]], SPREAD = [0.105, 0.092, 0];
+        var dpr = Math.min(2, window.devicePixelRatio || 1);
+        cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        var theta = function (p) { return -Math.PI / 2 + GAP / 2 + SEC * (p + 0.5); };
+        var nodes = [];
+        for (var p = 0; p < nP; p++) {
+            D.layers.forEach(function (cls, li) {
+                cls.forEach(function (c, k) {
+                    if (D.matrix[p][c] === null) return;
+                    var a = theta(p) + (k - (cls.length - 1) / 2) * SPREAD[li], rr = RAD[li][k % 2];
+                    nodes.push({ p: p, c: c, li: li, x: C0 + rr * Math.cos(a), y: C1 + rr * Math.sin(a) });
+                });
+            });
+        }
+        var links = [];                                  // escalation paths inside each pathogen
+        nodes.forEach(function (a, i) {
+            nodes.forEach(function (b, j) { if (a.p === b.p && b.li === a.li + 1) links.push([i, j]); });
+        });
+        var year = 2025, phase = 0, playing = false, last = 0, acc = 0, hover = -1;
         var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
         function heat(v) {
-            var t = v / 100, a = [34, 48, 70], b = [255, 154, 60], c = [255, 72, 48], m;
+            var t = v / 100, a = [40, 52, 74], b = [255, 154, 60], c = [255, 72, 48], m;
             m = t < 0.6 ? a.map(function (q, i) { return q + (b[i] - q) * (t / 0.6); })
                         : b.map(function (q, i) { return q + (c[i] - q) * ((t - 0.6) / 0.4); });
             return "rgb(" + m.map(Math.round).join(",") + ")";
@@ -88,67 +101,67 @@
 
         function draw() {
             var g = P.r + 2 * P.b * (year - 1990), pv = y(year - 1990);
-            cx.clearRect(0, 0, W, H);
-            cx.fillStyle = "#1a1c24"; cx.fillRect(0, 0, W, H);
-            D.layers.forEach(function (_, li) {
-                var xs = colX.filter(function (_, i) { return cols[i].li === li; });
-                var x0 = xs[0] - 34, x1 = xs[xs.length - 1] + 34;
-                cx.fillStyle = "rgba(255,255,255,0.03)"; cx.fillRect(x0, top - 60, x1 - x0, H - top - bottom + 80);
-                cx.fillStyle = LAYER_COL[li]; cx.font = "600 18px Inter, Arial, sans-serif"; cx.textAlign = "center";
-                cx.fillText(T.layers[li], (x0 + x1) / 2, 30);
+            cx.fillStyle = "#0e1018"; cx.fillRect(0, 0, W, H);
+            RING.forEach(function (rr, li) {
+                cx.strokeStyle = LAYER_COL[li]; cx.globalAlpha = 0.09; cx.lineWidth = li === 2 ? 54 : 58;
+                cx.beginPath(); cx.arc(C0, C1, rr, 0, 7); cx.stroke(); cx.globalAlpha = 1;
+                cx.fillStyle = LAYER_COL[li]; cx.textAlign = "center"; cx.font = "600 15px Arial, Helvetica, sans-serif";
+                cx.fillText(T.layers[li], C0, C1 - rr + 5);   // ring names sit in the empty top gap
             });
-            cx.font = "15px Inter, Arial, sans-serif"; cx.fillStyle = "#9aa3b5";
-            cols.forEach(function (o, i) {
-                cx.save(); cx.translate(colX[i], top - 22); cx.rotate(-0.5); cx.textAlign = "left";
-                cx.fillText(T.classes[o.c], 0, 0); cx.restore();
+            cx.font = "italic 16px Arial, Helvetica, sans-serif"; cx.fillStyle = "#c9ced9";
+            D.pathogens.forEach(function (name, i) {
+                var th = theta(i), co = Math.cos(th);
+                cx.textAlign = Math.abs(co) < 0.2 ? "center" : (co > 0 ? "left" : "right");
+                cx.fillText(name, C0 + 412 * co, C1 + 412 * Math.sin(th) + 5);
             });
-            cx.textAlign = "right"; cx.font = "italic 16px Inter, Arial, sans-serif"; cx.fillStyle = "#c9ced9";
-            D.pathogens.forEach(function (p, r) { cx.fillText(p, left - 30, rowY[r] + 5); });
-
-            for (var r = 0; r < nP; r++) {
-                var px = inX, py = inY, pval = pv;
-                for (var i = 0; i < cols.length; i++) {
-                    var v = cell(D.matrix[r][cols[i].c], year);
-                    if (v === null) continue;
-                    var w = Math.min(pval, v) / 100;
-                    cx.strokeStyle = "rgba(255,154,60," + (0.05 + 0.45 * w * w) + ")";
-                    cx.lineWidth = 1 + 2.5 * w * w;
-                    cx.beginPath(); cx.moveTo(px, py); cx.lineTo(colX[i], rowY[r]); cx.stroke();
-                    if (!reduce && w > 0.25) {
-                        var f = ((phase * g * 14) + r * 0.13 + i * 0.07) % 1;
-                        cx.fillStyle = "rgba(255,220,170," + (0.8 * w) + ")";
-                        cx.beginPath(); cx.arc(px + (colX[i] - px) * f, py + (rowY[r] - py) * f, 2.2 + 2 * w, 0, 7); cx.fill();
-                    }
-                    px = colX[i]; py = rowY[r]; pval = v;
+            nodes.forEach(function (n) { n.v = cell(D.matrix[n.p][n.c], year); });
+            links.forEach(function (e, ei) {
+                var a = nodes[e[0]], b = nodes[e[1]], w = Math.min(a.v, b.v) / 100;
+                cx.strokeStyle = "rgba(255,154,60," + (0.04 + 0.5 * w * w) + ")"; cx.lineWidth = 0.6 + 2.2 * w * w;
+                cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke();
+                if (!reduce && w > 0.35) {
+                    var f = (phase * g * 12 + ei * 0.137) % 1;
+                    cx.fillStyle = "rgba(255,225,180," + (0.85 * w) + ")";
+                    cx.beginPath(); cx.arc(a.x + (b.x - a.x) * f, a.y + (b.y - a.y) * f, 1.6 + 1.8 * w, 0, 7); cx.fill();
                 }
-            }
+            });
             var lit = [0, 0, 0], tot = [0, 0, 0];
-            for (r = 0; r < nP; r++) {
-                cols.forEach(function (o, i) {
-                    var v = cell(D.matrix[r][o.c], year), X = colX[i], Y = rowY[r];
-                    if (v === null) { cx.strokeStyle = "#2f3446"; cx.lineWidth = 1; cx.beginPath(); cx.arc(X, Y, 4, 0, 7); cx.stroke(); return; }
-                    tot[o.li]++; if (v >= 50) lit[o.li]++;
-                    var rad = 9 + 9 * (v / 100), gl = v / 100;
-                    var gr = cx.createRadialGradient(X, Y, 0, X, Y, rad * 3.2);
-                    gr.addColorStop(0, "rgba(255,170,90," + (0.55 * gl * gl) + ")"); gr.addColorStop(1, "rgba(255,120,60,0)");
-                    cx.fillStyle = gr; cx.beginPath(); cx.arc(X, Y, rad * 3.2, 0, 7); cx.fill();
-                    cx.fillStyle = heat(v); cx.beginPath(); cx.arc(X, Y, rad, 0, 7); cx.fill();
-                    if (v >= 50) {
-                        cx.fillStyle = "#0d1119"; cx.font = "600 12px Inter, Arial, sans-serif"; cx.textAlign = "center";
-                        cx.fillText(Math.round(v), X, Y + 4);
-                    }
-                });
-            }
-            var gi = cx.createRadialGradient(inX, inY, 0, inX, inY, 70);
-            gi.addColorStop(0, "rgba(255,120,60," + (0.25 + 0.6 * pv / 100) + ")"); gi.addColorStop(1, "rgba(255,120,60,0)");
-            cx.fillStyle = gi; cx.beginPath(); cx.arc(inX, inY, 70, 0, 7); cx.fill();
-            cx.fillStyle = heat(pv); cx.beginPath(); cx.arc(inX, inY, 26, 0, 7); cx.fill();
-            cx.fillStyle = "#0d1119"; cx.font = "600 16px Inter, Arial, sans-serif"; cx.textAlign = "center";
-            cx.fillText(Math.round(pv), inX, inY + 6);
-            cx.fillStyle = "#e8eaed"; cx.font = "13px Inter, Arial, sans-serif";
-            cx.fillText(T.pressure, inX, inY + 48); cx.fillText(T.index, inX, inY + 64);
+            nodes.forEach(function (n, i) {
+                var v = n.v, rad = 4 + 8 * v / 100, gl = v / 100;
+                tot[n.li]++; if (v >= 50) lit[n.li]++;
+                var gr = cx.createRadialGradient(n.x, n.y, 0, n.x, n.y, rad * 3.4);
+                gr.addColorStop(0, "rgba(255,170,90," + (0.6 * gl * gl) + ")"); gr.addColorStop(1, "rgba(255,120,60,0)");
+                cx.fillStyle = gr; cx.beginPath(); cx.arc(n.x, n.y, rad * 3.4, 0, 7); cx.fill();
+                cx.fillStyle = heat(v); cx.beginPath(); cx.arc(n.x, n.y, rad, 0, 7); cx.fill();
+                if (i === hover) { cx.strokeStyle = "#fff"; cx.lineWidth = 2; cx.stroke(); }
+            });
+            var gi = cx.createRadialGradient(C0, C1, 0, C0, C1, 90);
+            gi.addColorStop(0, "rgba(255,110,60," + (0.2 + 0.7 * pv / 100) + ")"); gi.addColorStop(1, "rgba(255,110,60,0)");
+            cx.fillStyle = gi; cx.beginPath(); cx.arc(C0, C1, 90, 0, 7); cx.fill();
+            cx.fillStyle = heat(pv); cx.beginPath(); cx.arc(C0, C1, 44, 0, 7); cx.fill();
+            cx.fillStyle = "#10121a"; cx.textAlign = "center"; cx.font = "600 28px Georgia, 'Times New Roman', serif";
+            cx.fillText(Math.round(pv), C0, C1 + 10);
+            cx.fillStyle = "#9aa1b2"; cx.font = "13px Arial, Helvetica, sans-serif";
+            cx.fillText(T.pressure, C0, C1 + 64); cx.fillText(T.index, C0, C1 + 80);
             for (var k = 0; k < 3; k++) stats[k].textContent = lit[k] + " / " + tot[k];
         }
+
+        cv.addEventListener("mousemove", function (ev) {
+            var r = cv.getBoundingClientRect(), s = W / r.width, mx = (ev.clientX - r.left) * s, my = (ev.clientY - r.top) * s;
+            var best = -1, bd = 22;
+            nodes.forEach(function (n, i) { var d = Math.hypot(n.x - mx, n.y - my); if (d < bd) { bd = d; best = i; } });
+            hover = best;
+            if (best < 0) tip.hidden = true;
+            else {
+                var n = nodes[best];
+                tip.innerHTML = "<i>" + D.pathogens[n.p] + "</i> × " + T.classes[n.c] + " · <b>" + Math.round(n.v) + " %</b>";
+                tip.hidden = false;
+                tip.style.left = Math.min(ev.clientX - r.left + 14, r.width - 260) + "px";
+                tip.style.top = (ev.clientY - r.top + 14) + "px";
+            }
+            draw();
+        });
+        cv.addEventListener("mouseleave", function () { hover = -1; tip.hidden = true; draw(); });
 
         function setYear(v) {
             year = +v; yrEl.textContent = year; slider.value = year;

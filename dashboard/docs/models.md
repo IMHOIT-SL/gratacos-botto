@@ -400,4 +400,4 @@ Speed in index points per year (dy/dτ = (r + 2bτ)·y·(1 − y/K)) peaks in 20
 
     o_ij(τ) = v_ij / (100 − v_ij) · o_y(τ) / o_y(τ₂₀₂₅),   o_y = y / (K − y),   v'_ij = 100·o_ij / (1 + o_ij)
 
-(values clamped to 0.5-99.5 before taking odds). A node counts as lit at ≥ 50 %. Drawn client-side by `assets/impact_network.js`; no randomness.
+(values clamped to 0.5-99.5 before taking odds). A node counts as lit at ≥ 50 %. Drawn client-side by `assets/impact_network.js` as a target: one sector per pathogen, the AWaRe groups as rings from the outside in (Access, Watch, Reserve) and the paper's index at the core; links join each pathogen's nodes from one ring to the next. Cells without a published value are left out. No randomness. A second card explains the three AWaRe groups (role, classes in the network, examples).

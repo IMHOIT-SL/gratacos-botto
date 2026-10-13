@@ -399,7 +399,7 @@ CARDS.update({
     ),
     "network": dict(
         kind="model", title="Resistance network",
-        intro="In 2025 every point shows the published % of resistant isolates. The paper does not project pathogens one by one, so for any other year each cell is moved on the odds scale by the same factor as the paper's index, the assumption of a logistic model with a single shift in time. A point counts as lit at 50 % or more. Empty rings are intrinsic resistance or combinations that do not apply.",
+        intro="In 2025 every point shows the published % of resistant isolates. The paper does not project pathogens one by one, so for any other year each cell is moved on the odds scale by the same factor as the paper's index, the assumption of a logistic model with a single shift in time. A point counts as lit at 50 % or more. Rings follow the WHO AWaRe groups; combinations without a published value (intrinsic resistance or not applicable) are left out.",
         equations=[fill(r"$$⟨oy⟩(⟨tau⟩)=\dfrac{⟨y⟩(⟨tau⟩)}{⟨K⟩-⟨y⟩(⟨tau⟩)}\qquad ⟨oij⟩(⟨tau⟩)=\dfrac{⟨vij⟩}{100-⟨vij⟩}\cdot\dfrac{⟨oy⟩(⟨tau⟩)}{⟨oy⟩(⟨t25⟩)}\qquad ⟨vt⟩=\dfrac{100\,⟨oij⟩}{1+⟨oij⟩}$$")],
         terms=[dict(key="vij", sym="vᵢⱼ", name="Published value",
                     what="% of resistant isolates of pathogen i to antibiotic class j, as published (approximate global medians). It is what the network shows in 2025.",

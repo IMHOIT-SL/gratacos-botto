@@ -126,12 +126,39 @@ def _network():
     return html.Div(id="impact-net", className="impact-net", **{"data-model": json.dumps(data)})
 
 
+AWARE_GROUPS = [
+    ("Access", "#6c8fb3", "First choice. Narrower spectrum and lower risk of selecting resistance.",
+     "Penicillins, tetracyclines, SMX/TMP, aminoglycosides",
+     "amoxicillin, doxycycline, cotrimoxazole, gentamicin"),
+    ("Watch", "#ff9a3c", "Second line. Broader spectrum and higher risk of selecting resistance: the priority of stewardship programmes.",
+     "Macrolides, 3rd-generation cephalosporins, fluoroquinolones, vancomycin, carbapenems",
+     "azithromycin, ceftriaxone, ciprofloxacin, vancomycin, meropenem"),
+    ("Reserve", "#ff5a3c", "Last resort, kept for confirmed or suspected multidrug-resistant infections.",
+     "Polymyxins", "colistin, polymyxin B"),
+]
+
+
+def _aware():
+    target = html.Div([
+        html.Div(html.Div(className="aw-r"), className="aw-w"),
+        html.Span("Access", className="l0"), html.Span("Watch", className="l1"), html.Span("Reserve", className="l2"),
+    ], className="aw-target", role="img",
+        **{"aria-label": "Three nested rings: Access outside, Watch in the middle, Reserve at the core"})
+    rows = [html.Div([
+        html.H4(name, style={"color": col}),
+        html.P(role),
+        html.P([html.B("In this network: "), classes]),
+        html.P([html.B("Examples: "), examples]),
+    ], className="aw-row", style={"borderColor": col}) for name, col, role, classes, examples in AWARE_GROUPS]
+    return html.Div([target, html.Div(rows, className="aw-rows")], className="aware")
+
+
 def _layout(lang):
     return html.Div([
         help_section("Impact", [
             "PURPOSE: This page translates the paper's model into figures anyone can read, and shows how resistance pressure reaches deeper into the antibiotic arsenal.",
             "THE FIGURES: Each one is arithmetic on the paper's coefficients or on its published anchor points. The card under them shows how each number is obtained.",
-            "THE NETWORK: Each point is one pathogen and one antibiotic class of the surveillance matrix. Brightness is the published % of resistant isolates. Layers follow the WHO AWaRe classification: Access (first choice), Watch and Reserve (last resort).",
+            "THE NETWORK: Each point is one pathogen and one antibiotic class of the surveillance matrix. Brightness is the published % of resistant isolates. The rings follow the WHO AWaRe classification: Access outside (first choice), Watch, and Reserve around the core (last resort). The core shows the paper's index.",
             "WHAT IS ILLUSTRATIVE: The 2025 network is published data. The paper does not project pathogens one by one, so for other years every cell is shifted on the odds scale by the same factor as the paper's index. Read it as an illustration of the model, not as a per-pathogen forecast.",
             "DETERMINISM: Closed-form only. The countdown and today's margin depend on today's date; everything else is fixed.",
         ]),
@@ -150,9 +177,9 @@ def _layout(lang):
         html.Div([
             chart_title_with_info(
                 "Resistance network: from first-choice to last-resort antibiotics",
-                "Each point is a pathogen × antibiotic class. The brighter, the higher the % of "
-                "resistant isolates. Press the button to raise the pressure from 1990 to 2060 and "
-                "watch the light reach the last-resort layer.",
+                "Each point is a pathogen × antibiotic class, one sector per pathogen. The brighter, "
+                "the higher the % of resistant isolates. Press the button to raise the pressure from "
+                "1990 to 2060 and watch the light reach the core, where the last resort sits.",
                 subtitle="2025: published data. Other years: illustrative shift with the paper's index.",
             ),
             _network(),
@@ -166,6 +193,21 @@ def _layout(lang):
                 html.A("Index: Prieto Gratacós & Botto 2026", href=PAPER_URL, target="_blank"),
             ], className="chart-sources"),
             model_card("network", open=True),
+        ], className="card"),
+
+        html.Div([
+            chart_title_with_info(
+                "The three rings: WHO AWaRe classification",
+                "The WHO groups antibiotics by their place in the arsenal. The network draws each group "
+                "as a ring, so resistance that reaches the core has reached the last resort.",
+                subtitle="The network groups by class: a class can hold drugs from more than one group "
+                         "(piperacillin-tazobactam is a penicillin listed in Watch).",
+            ),
+            _aware(),
+            html.Div([
+                html.Span("Source: ", className="source-label"),
+                html.A("WHO AWaRe classification of antibiotics, 2023", href=AWARE, target="_blank"),
+            ], className="chart-sources"),
         ], className="card"),
 
         html.Div([
