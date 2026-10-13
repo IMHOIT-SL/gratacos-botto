@@ -25,10 +25,6 @@
  "No scenario avoids the threshold; each one only postpones it.": "Ningún escenario evita el umbral; cada uno solo lo posterga.",
  "If…": "Si…",
  "The threshold arrives in": "El umbral llega en",
- "Nothing changes": "No cambia nada",
- "Stewardship 15 % and new antibiotics 30 %, from 2027": "Uso responsable 15 % y nuevos antibióticos 30 %, desde 2027",
- "Stewardship 30 % and new antibiotics 60 %, from 2027": "Uso responsable 30 % y nuevos antibióticos 60 %, desde 2027",
- "The same, but starting in 2035": "Lo mismo, pero empezando en 2035",
  "How each impact figure is obtained": "Cómo se obtiene cada cifra de impacto",
  "Four figures computed from the paper's model and its published anchors. The model, solved for the odds of resistance, is a logistic regression on time with a quadratic term: its slope r + 2bτ rises every year, so each doubling of the odds arrives sooner than the last.": "Cuatro cifras calculadas con el modelo del paper y sus anclajes publicados. El modelo, despejado para las odds de resistencia, es una regresión logística sobre el tiempo con un término cuadrático: su pendiente r + 2bτ aumenta cada año, así que cada duplicación de las odds llega antes que la anterior.",
  "Margin left": "Margen restante",
@@ -79,5 +75,8 @@
  "In this network:": "En esta red:",
  "Examples:": "Ejemplos:",
  "Source:": "Fuente:",
- "WHO AWaRe classification of antibiotics, 2023": "WHO AWaRe classification of antibiotics, 2023"
+ "WHO AWaRe classification of antibiotics, 2023": "WHO AWaRe classification of antibiotics, 2023",
+ "Moderate: stewardship 15 % and new antibiotics 30 %, from 2027": "Moderado: uso responsable 15 % y nuevos antibióticos 30 %, desde 2027",
+ "Ambitious: stewardship 30 % and new antibiotics 60 %, from 2027": "Ambicioso: uso responsable 30 % y nuevos antibióticos 60 %, desde 2027",
+ "Ambitious, late (2035): the same, starting in 2035": "Ambicioso, tardío (2035): lo mismo, pero empezando en 2035"
 }

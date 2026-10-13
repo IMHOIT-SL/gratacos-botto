@@ -163,8 +163,22 @@ body {
 
 .chart-grid-2 {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr));
     gap: 1.5rem;
+}
+/* grid children may shrink below their content (charts, equations) on phones */
+.chart-grid > *, .chart-grid-2 > * { min-width: 0; }
+.docs-content { min-width: 0; }
+
+/* Phones: nothing may widen the page; wide content scrolls inside its own box */
+@media (max-width: 640px) {
+    .data-table { display: block; overflow-x: auto; }
+    /* segmented choices (presets, scope) scroll sideways */
+    .mantine-SegmentedControl-root { max-width: calc(100vw - 80px); overflow-x: auto; }
+    /* control groups laid out with an inline "flex: 0 0 auto" may shrink and wrap */
+    [style*="flex: 0 0 auto"] { flex-shrink: 1 !important; min-width: 0; max-width: 100%; }
+    .docs-content pre { max-width: calc(100vw - 48px); }
+    .docs-content table { display: block; overflow-x: auto; }
 }
 
 /* Data table */

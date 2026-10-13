@@ -119,6 +119,35 @@
         return cfg;
     }
 
+    // Phones: the legend goes under the plot, the in-plot title is dropped,
+    // margins and type shrink and the toolbar is hidden, so the plot keeps the full width. Copies, never
+    // mutates, the layout Dash passes in. Full screen is left as it is.
+    function narrow(gd) {
+        var w = (gd && gd.clientWidth) || window.innerWidth;
+        return w > 0 && w < 640 && !document.fullscreenElement;
+    }
+    function patchLayout(layout) {
+        var L = Object.assign({}, layout || {});
+        var m = L.margin || {};
+        L.margin = Object.assign({}, m, { l: Math.min(m.l == null ? 60 : m.l, 48), r: Math.min(m.r == null ? 30 : m.r, 12),
+                                          t: Math.min(m.t == null ? 60 : m.t, 30) });
+        if (L.showlegend !== false) {
+            L.legend = Object.assign({}, L.legend, { orientation: "h", x: 0, xanchor: "left", y: -0.22, yanchor: "top",
+                                                    bgcolor: "rgba(0,0,0,0)", font: Object.assign({}, (L.legend || {}).font, { size: 10 }) });
+        }
+        L.font = Object.assign({}, L.font, { size: Math.min((L.font && L.font.size) || 12, 11) });
+        if (Array.isArray(L.annotations)) {
+            L.annotations = L.annotations.map(function (a) {
+                var f = a.font || {};
+                return Object.assign({}, a, { font: Object.assign({}, f, { size: Math.round((f.size || 12) * 0.8) }) });
+            });
+        }
+        // the card heading above the chart already names it; a long in-plot title would overflow
+        L.title = { text: "" };
+        return L;
+    }
+    function phoneConfig(cfg) { return Object.assign({}, cfg, { displayModeBar: false }); }
+
     function wrap(P) {
         if (!P || P.__amrToolbar) return P;
         // Locales queued by assets/plotly-locale-*.js before Plotly existed
@@ -127,11 +156,15 @@
             var orig = P[fn];
             if (typeof orig !== "function") return;
             P[fn] = function (gd, a, b, c) {
+                var small = narrow(gd);
                 // Object form used by dcc.Graph: Plotly.react(gd, {data, layout, config, frames})
                 if (a && !Array.isArray(a) && typeof a === "object" && ("data" in a || "layout" in a || "config" in a)) {
-                    return orig.call(this, gd, Object.assign({}, a, { config: patchConfig(a.config) }));
+                    var cfg = patchConfig(a.config);
+                    return orig.call(this, gd, Object.assign({}, a, small ? { config: phoneConfig(cfg), layout: patchLayout(a.layout) }
+                                                                          : { config: cfg }));
                 }
-                return orig.call(this, gd, a, b, patchConfig(c));
+                return small ? orig.call(this, gd, a, patchLayout(b), phoneConfig(patchConfig(c)))
+                             : orig.call(this, gd, a, b, patchConfig(c));
             };
         });
         P.__amrToolbar = true;

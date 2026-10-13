@@ -45,10 +45,10 @@ AWARE_LAYERS = [[0, 8, 9, 4], [7, 1, 3, 5, 2], [6]]
 
 # Same illustrative presets as the Scenario Lab
 PRESETS = [
-    ("Nothing changes", 0, 0, 2027),
-    ("Stewardship 15 % and new antibiotics 30 %, from 2027", 15, 30, 2027),
-    ("Stewardship 30 % and new antibiotics 60 %, from 2027", 30, 60, 2027),
-    ("The same, but starting in 2035", 30, 60, 2035),
+    ("No intervention", 0, 0, 2027),
+    ("Moderate: stewardship 15 % and new antibiotics 30 %, from 2027", 15, 30, 2027),
+    ("Ambitious: stewardship 30 % and new antibiotics 60 %, from 2027", 30, 60, 2027),
+    ("Ambitious, late (2035): the same, starting in 2035", 30, 60, 2035),
 ]
 
 
@@ -94,7 +94,7 @@ def _figures(lang):
     v_old = (_anchor(2000) - _anchor(1990)) / 10
     v_new = (_anchor(2025) - _anchor(2015)) / 10
     return html.Div([
-        _stat([str(yrs), html.Small("years"), str(mos), html.Small("months"), str(days), html.Small("days")],
+        _stat([str(yrs), html.Small("years"), " ", str(mos), html.Small("months"), " ", str(days), html.Small("days")],
               "Until the critical window (2040)", "danger"),
         _stat([_fmt(margin_now, lang, 0), html.Small("of 100")],
               "Margin of the index left today (88 in 1990)", "warning"),

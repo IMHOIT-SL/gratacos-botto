@@ -39,12 +39,13 @@ STRINGS = [
     "Move the levers. The percentages are illustrative assumptions: the paper does not quantify any intervention.",
     "Stewardship (slows the base rate r)",
     "New antibiotics (slows the acceleration b)",
-    "Starting in",
-    "The threshold (95) arrives in",
+    "Intervention starts in",
+    "Threshold year, your scenario",
+    "Threshold year, no intervention",
     "years gained",
     "never, under this extreme assumption",
     "No scenario avoids the threshold; each one only postpones it.",
-    "Nothing changes", "Moderate", "Ambitious", "Late (2035)",
+    "No intervention", "Moderate", "Ambitious", "Ambitious, late (2035)",
     "Open the full app", "Read the paper",
     "Add it to your home screen from the browser menu to open it like an app.",
     "Sources",
@@ -59,7 +60,7 @@ def _figures(lang):
     speed = ((impact._anchor(2025) - impact._anchor(2015)) / 10) / ((impact._anchor(2000) - impact._anchor(1990)) / 10)
     t = lambda s: _h.escape(T(s, lang))
     return [
-        ("danger", f'{yrs}<small>{t("years")}</small>{mos}<small>{t("months")}</small>{days}<small>{t("days")}</small>',
+        ("danger", f'{yrs}<small>{t("years")}</small> {mos}<small>{t("months")}</small> {days}<small>{t("days")}</small>',
          t("Until the critical window (2040)")),
         ("warning", f'{impact._fmt(margin, lang, 0)}<small>{t("of 100")}</small>',
          t("Margin of the index left today (88 in 1990)")),
@@ -86,7 +87,7 @@ body.live{background:var(--bg-primary);color:var(--text-primary);font-size:16px}
 .lv .stat-card:first-child,.lv .stat-card:last-child{grid-column:1/-1}
 .lv .stat-value{font-size:clamp(1.5rem,6vw,2.2rem)}
 .lv .stat-label{font-size:.75rem}
-@media(min-width:760px){.lv .stats-row{grid-template-columns:repeat(4,minmax(0,1fr))}.lv .stat-card:first-child,.lv .stat-card:last-child{grid-column:auto}}
+@media(min-width:760px){.lv .stats-row{grid-template-columns:2fr 1fr 1fr 1fr}.lv .stat-card:first-child,.lv .stat-card:last-child{grid-column:auto}}
 .lv-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
 .lv-note{font-size:.85rem;color:var(--text-secondary)}
 .lv-note a,.lv-cost a{color:var(--accent)}
@@ -120,6 +121,7 @@ _JS = """
     return null;
   }
   var base=Math.ceil(cross(0,0,2027)-1e-9);
+  document.getElementById('lv-b').textContent=base;
   function upd(){
     document.getElementById('lv-so').textContent=s.value+' %%';
     document.getElementById('lv-po').textContent=p.value+' %%';
@@ -144,8 +146,8 @@ def _page(lang):
     q = f"?lang={lang}"
     stats = "".join(f'<div class="stat-card"><div class="stat-value {c}">{v}</div><div class="stat-label">{l}</div></div>'
                     for c, v, l in _figures(lang))
-    presets = [("Nothing changes", "0,0,2027"), ("Moderate", "15,30,2027"),
-               ("Ambitious", "30,60,2027"), ("Late (2035)", "30,60,2035")]
+    presets = [("No intervention", "0,0,2027"), ("Moderate", "15,30,2027"),
+               ("Ambitious", "30,60,2027"), ("Ambitious, late (2035)", "30,60,2035")]
     pbtn = "".join(f'<button type="button" data-v="{v}">{t(n)}</button>' for n, v in presets)
     model = _h.escape(json.dumps(impact.network_data()), quote=True)
     js = _JS % {"params": json.dumps({k: P[k] for k in ("K", "A", "r", "b")}), "th": CRITICAL_THRESHOLD}
@@ -191,9 +193,10 @@ def _page(lang):
       <input id="lv-s" type="range" min="0" max="100" step="5" value="15"></div>
     <div class="lv-ctl"><label for="lv-p">{t("New antibiotics (slows the acceleration b)")}<output id="lv-po"></output></label>
       <input id="lv-p" type="range" min="0" max="100" step="5" value="30"></div>
-    <div class="lv-ctl"><label for="lv-t">{t("Starting in")}<output id="lv-to"></output></label>
+    <div class="lv-ctl"><label for="lv-t">{t("Intervention starts in")}<output id="lv-to"></output></label>
       <input id="lv-t" type="range" min="2026" max="2045" step="1" value="2027"></div>
-    <div class="lv-res" aria-live="polite"><span>{t("The threshold (95) arrives in")}</span><b id="lv-y">-</b><span class="gain" id="lv-g"></span></div>
+    <div class="lv-res" aria-live="polite"><span>{t("Threshold year, your scenario")}</span><b id="lv-y">-</b><span class="gain" id="lv-g"></span></div>
+    <p class="lv-note">{t("Threshold year, no intervention")}: <b id="lv-b">-</b></p>
     <p class="lv-note">{t("No scenario avoids the threshold; each one only postpones it.")}</p>
   </section>
 
