@@ -120,8 +120,9 @@
     }
 
     // Phones: the legend goes under the plot, the in-plot title is dropped,
-    // margins and type shrink and the toolbar is hidden, so the plot keeps the full width. Copies, never
-    // mutates, the layout Dash passes in. Full screen is left as it is.
+    // margins and type shrink and the toolbar keeps only the reset button, so
+    // the plot keeps the full width. Copies, never mutates, the layout Dash
+    // passes in. Full screen is left as it is.
     function narrow(gd) {
         var w = (gd && gd.clientWidth) || window.innerWidth;
         return w > 0 && w < 640 && !document.fullscreenElement;
@@ -146,7 +147,11 @@
         L.title = { text: "" };
         return L;
     }
-    function phoneConfig(cfg) { return Object.assign({}, cfg, { displayModeBar: false }); }
+    // Phones keep a single, always visible button: back to the original view
+    // after a tap or drag has zoomed in.
+    function phoneConfig(cfg) {
+        return Object.assign({}, cfg, { displayModeBar: true, modeBarButtons: [["resetScale2d"]] });
+    }
 
     function wrap(P) {
         if (!P || P.__amrToolbar) return P;

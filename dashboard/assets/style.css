@@ -179,6 +179,9 @@ body {
     [style*="flex: 0 0 auto"] { flex-shrink: 1 !important; min-width: 0; max-width: 100%; }
     .docs-content pre { max-width: calc(100vw - 48px); }
     .docs-content table { display: block; overflow-x: auto; }
+    /* the phone toolbar is a single reset button: make it an easy tap target */
+    .js-plotly-plot .plotly .modebar-btn svg { width: 24px; height: 24px; }
+    .js-plotly-plot .plotly .modebar-btn { padding: 4px 6px; }
 }
 
 /* Data table */
