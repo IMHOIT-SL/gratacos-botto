@@ -31,7 +31,8 @@ MAGIORAKOS = "https://www.clinicalmicrobiologyandinfection.com/article/S1198-743
 PUBMED = "https://pubmed.ncbi.nlm.nih.gov/?term=antibiotic+resistance"
 UNIVDATOS = "https://univdatos.com/reports/antibiotic-resistance-market"
 KIM2023 = "https://pubmed.ncbi.nlm.nih.gov/37250043/"
-BOX_JENKINS = "https://otexts.com/fpp3/seasonal-arima.html"
+AWARE = "https://www.who.int/publications/i/item/WHO-MHP-HPS-EML-2023.04"
+BOX_JENKINS ="https://otexts.com/fpp3/seasonal-arima.html"
 
 # Shared terms of the paper's super-exponential model
 _T_Y = dict(key="y", sym="y(τ)", name="Resistance pressure index",
@@ -364,6 +365,59 @@ def to_es(tex):
     out.append(tex[i:].replace(".", "{,}"))
     return "".join(out)
 
+
+# ------------------------------------------------------------------- Impact
+SYMS.update({
+    "mg": _sym("mg", "m"), "T2": _sym("T2", "T", "2"), "nu": _sym("nu", "ν"), "va": _sym("va", "a"),
+    "vij": _sym("vij", "v", "ij"), "oij": _sym("oij", "o", "ij"), "oy": _sym("oy", "o", "y"),
+    "vt": _sym("vt", "v", "ij", prime=True), "t25": _sym("tau", "τ", "2025"),
+})
+
+CARDS.update({
+    "impact": dict(
+        kind="model", title="How each impact figure is obtained",
+        intro="Four figures computed from the paper's model and its published anchors. The model, solved for the odds of resistance, is a logistic regression on time with a quadratic term: its slope r + 2bτ rises every year, so each doubling of the odds arrives sooner than the last.",
+        equations=[fill(r"$$⟨mg⟩(⟨tau⟩)=⟨K⟩-⟨y⟩(⟨tau⟩)$$"),
+                   fill(r"$$\ln\dfrac{⟨y⟩}{⟨K⟩-⟨y⟩}=-\ln ⟨A⟩+⟨r⟩⟨tau⟩+⟨b⟩⟨tau⟩^{2}\qquad ⟨T2⟩(⟨tau⟩)=\dfrac{\ln 2}{⟨r⟩+2⟨b⟩⟨tau⟩}$$"),
+                   fill(r"$$⟨nu⟩=\dfrac{\left(⟨va⟩_{2025}-⟨va⟩_{2015}\right)/10}{\left(⟨va⟩_{2000}-⟨va⟩_{1990}\right)/10}$$")],
+        numeric=(fill(r"$$⟨T2⟩(⟨#tau:0⟩)=⟨#T2:9.8⟩\qquad ⟨T2⟩(⟨#tau:36⟩)=⟨#T2:7.5⟩\qquad ⟨T2⟩(⟨#tau:50⟩)=⟨#T2:6.9⟩\qquad ⟨nu⟩=\dfrac{(⟨#va:70⟩-⟨#va:45⟩)/10}{(⟨#va:23⟩-⟨#va:12⟩)/10}=⟨#nu:2.3⟩$$"),),
+        terms=[_T_Y, _T_TAU, _T_K, _T_A, _T_R, _T_B,
+               dict(key="mg", sym="m(τ)", name="Margin left",
+                    what="How much of the index is still left before the ceiling: 88 in 1990, the figure shown above for today, and 9 in 2040.",
+                    value="0-100", source="Derived from the paper's model", control="-"),
+               dict(key="T2", sym="T₂(τ)", name="Doubling time of the odds",
+                    what="Years the odds of resistance, y / (K − y), take to double at year τ. It is ln 2 divided by the slope r + 2bτ: 9.8 years in 1990, 7.5 today (2026) and 6.9 in 2040.",
+                    value="9.8 → 6.9 years", source="Derived from r and b", control="-"),
+               dict(key="nu", sym="ν", name="Observed speed-up",
+                    what="How many times faster the published anchors rose in 2015-2025 than in 1990-2000: 2.5 points per year against 1.1. No model is involved.",
+                    value="2.3", source="Published anchor points (1990, 2000, 2015, 2025)", control="-"),
+               dict(key="va", sym="a", name="Anchor value",
+                    what="Published value of the index in a given year: 12 (1990), 23 (2000), 45 (2015), 70 (2025).",
+                    value="12-70", source="Oxford VG, Lancet GBD, CIDRAP/GRAM", control="-")],
+        sources=[("Prieto Gratacós & Botto, Br J Med Health Res 2026", PAPER),
+                 ("Murray et al., Lancet 2022", MURRAY), ("GRAM / CIDRAP", GRAM)],
+    ),
+    "network": dict(
+        kind="model", title="Resistance network",
+        intro="In 2025 every point shows the published % of resistant isolates. The paper does not project pathogens one by one, so for any other year each cell is moved on the odds scale by the same factor as the paper's index, the assumption of a logistic model with a single shift in time. A point counts as lit at 50 % or more. Empty rings are intrinsic resistance or combinations that do not apply.",
+        equations=[fill(r"$$⟨oy⟩(⟨tau⟩)=\dfrac{⟨y⟩(⟨tau⟩)}{⟨K⟩-⟨y⟩(⟨tau⟩)}\qquad ⟨oij⟩(⟨tau⟩)=\dfrac{⟨vij⟩}{100-⟨vij⟩}\cdot\dfrac{⟨oy⟩(⟨tau⟩)}{⟨oy⟩(⟨t25⟩)}\qquad ⟨vt⟩=\dfrac{100\,⟨oij⟩}{1+⟨oij⟩}$$")],
+        terms=[dict(key="vij", sym="vᵢⱼ", name="Published value",
+                    what="% of resistant isolates of pathogen i to antibiotic class j, as published (approximate global medians). It is what the network shows in 2025.",
+                    value="0-100 %", source="WHO GLASS, EARS-Net, CDC", control="-"),
+               dict(key="oy", sym="o_y(τ)", name="Odds of the index",
+                    what="The paper's index written as odds: y / (K − y). It is 2.3 in 2025 and grows every year.",
+                    value="0.14 (1990) → 20 (2047)", source="Paper's model", control="Year slider"),
+               dict(key="oij", sym="oᵢⱼ(τ)", name="Odds of the cell",
+                    what="The cell's own odds, multiplied by how much the index odds changed since 2025. Each cell keeps its rank relative to the others.",
+                    value="-", source="Illustrative assumption", control="Year slider"),
+               dict(key="vt", sym="v'ᵢⱼ", name="Value drawn",
+                    what="The odds turned back into a percentage, so no cell can pass 100 %. Equal to the published value in 2025.",
+                    value="0-100 %", source="-", control="-"),
+               _T_Y, _T_TAU, _T_K],
+        sources=[("WHO GLASS Report 2022", GLASS), ("ECDC EARS-Net", EARS), ("CDC AR Threats Report", CDC),
+                 ("WHO AWaRe classification 2023", AWARE), ("Prieto Gratacós & Botto, Br J Med Health Res 2026", PAPER)],
+    ),
+})
 
 _EQ = {
     "trajectory": dict(

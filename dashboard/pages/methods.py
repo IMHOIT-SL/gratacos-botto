@@ -214,9 +214,10 @@ _layout = html.Div([
     ]),
 
     # 3 — What's inside
-    _section("layers", "What's inside: 13 pages", [
+    _section("layers", "What's inside: 14 pages", [
         _point("trending", "Overview", "the super-exponential curve vs. the constant-rate reference, with the 2040–2047 critical-point window."),
         _point("refresh", "Scenario Lab", "what-if interventions on the paper's model: how many years before the critical threshold are gained by acting, and by acting early."),
+        _point("trending", "Impact", "the model in plain units (countdown, remaining margin, odds doubling time) and a resistance network lit from first-choice to last-resort antibiotics (WHO AWaRe layers)."),
         _point("activity", "Pathogens", "the ESKAPEE (the 7 priority superbugs) × antibiotic map, with WHO priority and Magiorakos MDR/XDR/PDR (Multidrug- / Extensively drug- / Pandrug-Resistant) badges."),
         _point("clock", "Time Series", "SARIMA forecasts with ACF/PACF (Auto- / Partial Autocorrelation) diagnostics and AIC/BIC (Akaike / Bayesian Information Criterion)."),
         _point("briefcase", "Industry", "publications (PubMed 1990–2025), the market (CAGR — Compound Annual Growth Rate — 5.4%), and awareness-vs-effectiveness."),

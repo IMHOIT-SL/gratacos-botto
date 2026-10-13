@@ -19,8 +19,8 @@ antimicrobial-resistance (AMR) dynamics. It is deployed live at
 
 Everything runs from `dashboard/`:
 
-- `dashboard/app.py` — Dash app (`use_pages=True`), shell layout, `NAV_ITEMS` (13 pages). WSGI target `app:server`.
-- `dashboard/pages/` — one module per page (13): `overview`, `scenarios` (`/scenarios`, Scenario Lab), `pathogens`, `timeseries`, `bibliometrics` (`/industry`), `antimetabolic` (`/metabolic`), `methods`, `datasources`, `references`, `press` (`/press`, paper/poster/posts), `export`, `documentation` (`/docs`), `tutorial`. Each exposes `layout(lang=None, **query)` returning `translate(_layout, current_lang(lang))`.
+- `dashboard/app.py` — Dash app (`use_pages=True`), shell layout, `NAV_ITEMS` (14 pages). WSGI target `app:server`.
+- `dashboard/pages/` — one module per page (14): `overview`, `scenarios` (`/scenarios`, Scenario Lab), `impact` (`/impact`, plain-unit figures + AWaRe resistance network, drawn by `assets/impact_network.js`), `pathogens`, `timeseries`, `bibliometrics` (`/industry`), `antimetabolic` (`/metabolic`), `methods`, `datasources`, `references`, `press` (`/press`, paper/poster/posts), `export`, `documentation` (`/docs`), `tutorial`. Each exposes `layout(lang=None, **query)` returning `translate(_layout, current_lang(lang))`.
 - `dashboard/data/` — the data/model layer: `amr_data.py` (super-exponential curve), `pathogen_data.py`, `timeseries_data.py`, `bibliometrics_data.py`, `references_data.py` (55 refs, numbered as in the published paper).
 - `dashboard/docs/` — in-app markdown documentation (`architecture`, `setup`, `charts_guide`, `models`, `data_sources`), rendered by the Documentation page.
 - `dashboard/i18n/` — English/Spanish. `translate()` swaps any rendered string found in `i18n/es/*.json` ({English: Spanish}; `__patterns__` for run-time strings). Language = `?lang=` > `amr_lang` cookie > browser. Callbacks that return text/figures use `@translated`.

@@ -46,6 +46,7 @@ Gratacos-Botto/
     │   ├── overview.py          # "/" — Super-exp curve + reference logistic +
     │   │                        #   mortality (3-methodology) + Carbapenem 2035 spotlight
     │   ├── scenarios.py         # "/scenarios" — Scenario Lab: what-if interventions
+    │   ├── impact.py            # "/impact" — plain-unit figures + resistance network
     │   │                        #   on the super-exp model (closed-form)
     │   ├── pathogens.py         # "/pathogens" — ESKAPEE heatmap + Sensitivity Analysis
     │   │                        #   panel (transient overrides) + regional + temporal
@@ -90,6 +91,7 @@ The dashboard uses **Dash Pages**, the built-in multi-page routing system. The m
 |--------------------------|-----------------|--------------|
 | `pages/overview.py`      | `/`             | Overview     |
 | `pages/scenarios.py`     | `/scenarios`    | Scenario Lab |
+| `pages/impact.py`        | `/impact`       | Impact (plain-unit figures, resistance network) |
 | `pages/pathogens.py`     | `/pathogens`    | Pathogens    |
 | `pages/timeseries.py`    | `/timeseries`   | Time Series  |
 | `pages/bibliometrics.py` | `/industry`     | Industry     |

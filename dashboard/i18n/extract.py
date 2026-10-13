@@ -112,7 +112,8 @@ def gather():
     import dash
     import app  # noqa: F401  (registers pages)
     from pages import (overview, scenarios, pathogens, timeseries, bibliometrics, antimetabolic,
-                       methods, datasources, references, press, export, documentation, tutorial)
+                       methods, datasources, references, press, export, documentation, tutorial,
+                       impact)
 
     pages = {}
 
@@ -153,6 +154,9 @@ def gather():
         ts_out.append(ts.update_scenario.__wrapped__(p, "12", 30, "0", True))
     ts_out.append(ts.update_scenario.__wrapped__("MRSA", "6", 30, "12", False))
     page("timeseries", ts, ts_out)
+    imp = set()
+    collect(impact._layout("en"), imp)
+    pages["impact"] = imp
     page("bibliometrics", bibliometrics)
     page("antimetabolic", antimetabolic)
     page("methods", methods)

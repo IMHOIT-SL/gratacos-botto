@@ -143,6 +143,7 @@ app.layout = serve_layout
 NAV_ITEMS = [
     ("Overview", "/"),
     ("Scenario Lab", "/scenarios"),
+    ("Impact", "/impact"),
     ("Pathogens", "/pathogens"),
     ("Time Series", "/timeseries"),
     ("Industry", "/industry"),

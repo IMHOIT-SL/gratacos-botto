@@ -376,3 +376,28 @@ g(τ) = g(τs) + r(1-s)(τ - τs) + b(1-p)(τ² - τs²)          τ ≥ τs
 - Implemented in `data/amr_data.py` (`compute_scenario_curve`, `scenario_crossing_year`). Closed-form, no fitting, no randomness.
 
 Illustrative presets (hypothetical): Moderate (s = 15%, p = 30%, from 2027) gives 2051 (+4 years); Ambitious (30%, 60%, from 2027) gives 2058 (+11); the same Ambitious levers started in 2035 give 2054 (+7).
+
+## Impact page (plain-unit figures and resistance network)
+
+The **Impact** page (`/impact`) adds no new model. It rewrites the paper's curve in units a clinical audience reads at a glance, and every figure is closed-form arithmetic on the published coefficients or anchors.
+
+**The model as a logistic regression.** With K = 100, solving y(τ) = K / (1 + A·e^−(rτ + bτ²)) for the odds gives
+
+    ln[ y / (K − y) ] = −ln A + r·τ + b·τ²
+
+so the paper's curve is a logistic regression on time with a quadratic term. The slope of the log-odds is r + 2bτ, which rises every year (the paper's thesis).
+
+| Figure | Formula | Values |
+|---|---|---|
+| Time to the critical window | calendar difference to 1 Jan 2040 | depends on today's date |
+| Margin left | m(τ) = K − y(τ) | 88 (1990), 9 (2040) |
+| Doubling time of the odds | T₂(τ) = ln 2 / (r + 2bτ) | 9.8 y (1990), 7.5 y (2026), 6.9 y (2040) |
+| Observed speed-up | [(a₂₀₂₅ − a₂₀₁₅)/10] / [(a₂₀₀₀ − a₁₉₉₀)/10] | (70 − 45)/(23 − 12) = 2.3, anchors only |
+
+Speed in index points per year (dy/dτ = (r + 2bτ)·y·(1 − y/K)) peaks in 2017 because the curve approaches its ceiling, which is why the page reports the odds doubling time instead.
+
+**Resistance network.** Nodes are the cells of `RESISTANCE_MATRIX` (pathogen × antibiotic class), grouped into WHO AWaRe 2023 layers: Access (penicillins, tetracyclines, SMX/TMP, aminoglycosides), Watch (macrolides, 3rd-gen cephalosporins, fluoroquinolones, vancomycin, carbapenems) and Reserve (polymyxins). In 2025 each node shows the published value. The paper does not project pathogens one by one, so other years are illustrative: each cell keeps its rank and moves on the odds scale by the index's factor,
+
+    o_ij(τ) = v_ij / (100 − v_ij) · o_y(τ) / o_y(τ₂₀₂₅),   o_y = y / (K − y),   v'_ij = 100·o_ij / (1 + o_ij)
+
+(values clamped to 0.5-99.5 before taking odds). A node counts as lit at ≥ 50 %. Drawn client-side by `assets/impact_network.js`; no randomness.
