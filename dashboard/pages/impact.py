@@ -115,15 +115,19 @@ def _scenario_rows():
     return rows
 
 
-def _network():
-    data = {
+def network_data():
+    """Model for assets/impact_network.js (also used by the /live page)."""
+    return {
         "pathogens": PATHOGENS,
         "matrix": [[None if (isinstance(v, float) and math.isnan(v)) else float(v) for v in row]
                    for row in RESISTANCE_MATRIX.tolist()],
         "layers": AWARE_LAYERS,
         "params": {k: P[k] for k in ("K", "A", "r", "b")},
     }
-    return html.Div(id="impact-net", className="impact-net", **{"data-model": json.dumps(data)})
+
+
+def _network():
+    return html.Div(id="impact-net", className="impact-net", **{"data-model": json.dumps(network_data())})
 
 
 AWARE_GROUPS = [

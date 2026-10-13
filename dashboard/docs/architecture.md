@@ -103,6 +103,8 @@ The dashboard uses **Dash Pages**, the built-in multi-page routing system. The m
 | `pages/documentation.py` | `/docs`         | Docs         |
 | `pages/tutorial.py`      | `/tutorial`     | Tutorial     |
 
+`live.py` adds one route outside the Dash shell: **`/live`**, a phone-first page for audiences arriving from a QR code (impact figures, the resistance target, a scenario slider computed in the browser with the closed form of `scenario_crossing_year`). It has no callbacks, so a full room can open it at once, and it is installable from `/live/manifest.webmanifest`.
+
 ## Data Flow
 
 The application follows a clear pipeline from raw data through to rendered charts:

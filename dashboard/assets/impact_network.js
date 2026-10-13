@@ -30,6 +30,11 @@
         }
     };
     var LAYER_COL = ["#6c8fb3", "#ff9a3c", "#ff5a3c"];
+    // short pathogen names for the phone layout
+    var SHORT = { "S. aureus (MRSA)": "MRSA", "E. faecium (VRE)": "VRE", "K. pneumoniae": "K. pneumo",
+                  "A. baumannii": "A. bauman", "P. aeruginosa": "P. aerug", "Enterobacter spp.": "Enterob.",
+                  "S. maltophilia": "S. malto", "N. gonorrhoeae": "N. gonorr", "S. pneumoniae": "S. pneumo",
+                  "M. tuberculosis": "M. tb" };
 
     function init(host) {
         host.setAttribute("data-init", "1");
@@ -68,27 +73,42 @@
         }
 
         // Target layout: one sector per pathogen, AWaRe rings from the outside in
-        // (Access, Watch, Reserve), the paper's index at the core.
-        var W = 1200, H = 880, C0 = 600, C1 = 440, GAP = 0.62, nP = D.pathogens.length;
-        var SEC = (2 * Math.PI - GAP) / nP, RING = [354, 244, 128];
-        var RAD = [[372, 336], [262, 226], [128, 128]], SPREAD = [0.105, 0.092, 0];
-        var dpr = Math.min(2, window.devicePixelRatio || 1);
-        cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        // (Access, Watch, Reserve), the paper's index at the core. Narrow hosts
+        // (phones) get a square, larger-type variant with short pathogen names.
+        var nP = D.pathogens.length, dpr = Math.min(2, window.devicePixelRatio || 1);
+        var W, H, C0, C1, GAP, SEC, RING, RAD, SPREAD, LBL, Z, compact = null, nodes = [], links = [];
         var theta = function (p) { return -Math.PI / 2 + GAP / 2 + SEC * (p + 0.5); };
-        var nodes = [];
-        for (var p = 0; p < nP; p++) {
-            D.layers.forEach(function (cls, li) {
-                cls.forEach(function (c, k) {
-                    if (D.matrix[p][c] === null) return;
-                    var a = theta(p) + (k - (cls.length - 1) / 2) * SPREAD[li], rr = RAD[li][k % 2];
-                    nodes.push({ p: p, c: c, li: li, x: C0 + rr * Math.cos(a), y: C1 + rr * Math.sin(a) });
+        function layout() {
+            var c = host.clientWidth > 0 && host.clientWidth < 640;
+            if (c === compact) return false;
+            compact = c;
+            var k = c ? 0.62 : 1;
+            W = c ? 760 : 1200; H = c ? 720 : 880; C0 = W / 2; C1 = c ? 362 : 440; GAP = c ? 0.95 : 0.62;
+            SEC = (2 * Math.PI - GAP) / nP; LBL = 412 * k;
+            RING = [354, 244, 128].map(function (v) { return v * k; });
+            RAD = [[372, 336], [262, 226], [128, 128]].map(function (r) { return r.map(function (v) { return v * k; }); });
+            SPREAD = c ? [0.12, 0.1, 0] : [0.105, 0.092, 0];
+            // type and mark sizes, in canvas units
+            Z = c ? { ring: 24, name: 26, core: 50, num: 40, glow: 72, node: [5, 9], lw: 1.4, tipD: 40 }
+                  : { ring: 15, name: 16, core: 44, num: 28, glow: 90, node: [4, 8], lw: 1, tipD: 22 };
+            cv.width = W * dpr; cv.height = H * dpr; cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            nodes = [];
+            for (var p = 0; p < nP; p++) {
+                D.layers.forEach(function (cls, li) {
+                    cls.forEach(function (cc, j) {
+                        if (D.matrix[p][cc] === null) return;
+                        var a = theta(p) + (j - (cls.length - 1) / 2) * SPREAD[li], rr = RAD[li][j % 2];
+                        nodes.push({ p: p, c: cc, li: li, x: C0 + rr * Math.cos(a), y: C1 + rr * Math.sin(a) });
+                    });
                 });
+            }
+            links = [];                                  // escalation paths inside each pathogen
+            nodes.forEach(function (a, i) {
+                nodes.forEach(function (b, j) { if (a.p === b.p && b.li === a.li + 1) links.push([i, j]); });
             });
+            return true;
         }
-        var links = [];                                  // escalation paths inside each pathogen
-        nodes.forEach(function (a, i) {
-            nodes.forEach(function (b, j) { if (a.p === b.p && b.li === a.li + 1) links.push([i, j]); });
-        });
+        layout();
         var year = 2025, phase = 0, playing = false, last = 0, acc = 0, hover = -1;
         var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -103,31 +123,31 @@
             var g = P.r + 2 * P.b * (year - 1990), pv = y(year - 1990);
             cx.fillStyle = "#0e1018"; cx.fillRect(0, 0, W, H);
             RING.forEach(function (rr, li) {
-                cx.strokeStyle = LAYER_COL[li]; cx.globalAlpha = 0.09; cx.lineWidth = li === 2 ? 54 : 58;
+                cx.strokeStyle = LAYER_COL[li]; cx.globalAlpha = 0.09; cx.lineWidth = (li === 2 ? 54 : 58) * (compact ? 0.62 : 1);
                 cx.beginPath(); cx.arc(C0, C1, rr, 0, 7); cx.stroke(); cx.globalAlpha = 1;
-                cx.fillStyle = LAYER_COL[li]; cx.textAlign = "center"; cx.font = "600 15px Arial, Helvetica, sans-serif";
-                cx.fillText(T.layers[li], C0, C1 - rr + 5);   // ring names sit in the empty top gap
+                cx.fillStyle = LAYER_COL[li]; cx.textAlign = "center"; cx.font = "600 " + Z.ring + "px Arial, Helvetica, sans-serif";
+                cx.fillText(T.layers[li], C0, C1 - rr + Z.ring / 3);   // ring names sit in the empty top gap
             });
-            cx.font = "italic 16px Arial, Helvetica, sans-serif"; cx.fillStyle = "#c9ced9";
+            cx.font = "italic " + Z.name + "px Arial, Helvetica, sans-serif"; cx.fillStyle = "#c9ced9";
             D.pathogens.forEach(function (name, i) {
                 var th = theta(i), co = Math.cos(th);
                 cx.textAlign = Math.abs(co) < 0.2 ? "center" : (co > 0 ? "left" : "right");
-                cx.fillText(name, C0 + 412 * co, C1 + 412 * Math.sin(th) + 5);
+                cx.fillText(compact ? (SHORT[name] || name) : name, C0 + LBL * co, C1 + LBL * Math.sin(th) + Z.name / 3);
             });
             nodes.forEach(function (n) { n.v = cell(D.matrix[n.p][n.c], year); });
             links.forEach(function (e, ei) {
                 var a = nodes[e[0]], b = nodes[e[1]], w = Math.min(a.v, b.v) / 100;
-                cx.strokeStyle = "rgba(255,154,60," + (0.04 + 0.5 * w * w) + ")"; cx.lineWidth = 0.6 + 2.2 * w * w;
+                cx.strokeStyle = "rgba(255,154,60," + (0.04 + 0.5 * w * w) + ")"; cx.lineWidth = (0.6 + 2.2 * w * w) * Z.lw;
                 cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke();
                 if (!reduce && w > 0.35) {
                     var f = (phase * g * 12 + ei * 0.137) % 1;
                     cx.fillStyle = "rgba(255,225,180," + (0.85 * w) + ")";
-                    cx.beginPath(); cx.arc(a.x + (b.x - a.x) * f, a.y + (b.y - a.y) * f, 1.6 + 1.8 * w, 0, 7); cx.fill();
+                    cx.beginPath(); cx.arc(a.x + (b.x - a.x) * f, a.y + (b.y - a.y) * f, (1.6 + 1.8 * w) * Z.lw, 0, 7); cx.fill();
                 }
             });
             var lit = [0, 0, 0], tot = [0, 0, 0];
             nodes.forEach(function (n, i) {
-                var v = n.v, rad = 4 + 8 * v / 100, gl = v / 100;
+                var v = n.v, rad = Z.node[0] + Z.node[1] * v / 100, gl = v / 100;
                 tot[n.li]++; if (v >= 50) lit[n.li]++;
                 var gr = cx.createRadialGradient(n.x, n.y, 0, n.x, n.y, rad * 3.4);
                 gr.addColorStop(0, "rgba(255,170,90," + (0.6 * gl * gl) + ")"); gr.addColorStop(1, "rgba(255,120,60,0)");
@@ -135,20 +155,26 @@
                 cx.fillStyle = heat(v); cx.beginPath(); cx.arc(n.x, n.y, rad, 0, 7); cx.fill();
                 if (i === hover) { cx.strokeStyle = "#fff"; cx.lineWidth = 2; cx.stroke(); }
             });
-            var gi = cx.createRadialGradient(C0, C1, 0, C0, C1, 90);
+            var gi = cx.createRadialGradient(C0, C1, 0, C0, C1, Z.glow);
             gi.addColorStop(0, "rgba(255,110,60," + (0.2 + 0.7 * pv / 100) + ")"); gi.addColorStop(1, "rgba(255,110,60,0)");
-            cx.fillStyle = gi; cx.beginPath(); cx.arc(C0, C1, 90, 0, 7); cx.fill();
-            cx.fillStyle = heat(pv); cx.beginPath(); cx.arc(C0, C1, 44, 0, 7); cx.fill();
-            cx.fillStyle = "#10121a"; cx.textAlign = "center"; cx.font = "600 28px Georgia, 'Times New Roman', serif";
-            cx.fillText(Math.round(pv), C0, C1 + 10);
-            cx.fillStyle = "#9aa1b2"; cx.font = "13px Arial, Helvetica, sans-serif";
-            cx.fillText(T.pressure, C0, C1 + 64); cx.fillText(T.index, C0, C1 + 80);
+            cx.fillStyle = gi; cx.beginPath(); cx.arc(C0, C1, Z.glow, 0, 7); cx.fill();
+            cx.fillStyle = heat(pv); cx.beginPath(); cx.arc(C0, C1, Z.core, 0, 7); cx.fill();
+            cx.fillStyle = "#10121a"; cx.textAlign = "center"; cx.font = "600 " + Z.num + "px Georgia, 'Times New Roman', serif";
+            if (compact) {                                   // no room under the core: caption goes inside
+                cx.fillText(Math.round(pv), C0, C1 + 8);
+                cx.font = "600 15px Arial, Helvetica, sans-serif"; cx.fillText(T.index.replace(/[()]/g, ""), C0, C1 + 30);
+            } else {
+                cx.fillText(Math.round(pv), C0, C1 + 10);
+                cx.fillStyle = "#9aa1b2"; cx.font = "13px Arial, Helvetica, sans-serif";
+                cx.fillText(T.pressure, C0, C1 + 64); cx.fillText(T.index, C0, C1 + 80);
+            }
             for (var k = 0; k < 3; k++) stats[k].textContent = lit[k] + " / " + tot[k];
         }
 
-        cv.addEventListener("mousemove", function (ev) {
+        // pointer events cover mouse hover and a finger tap on phones
+        function pick(ev) {
             var r = cv.getBoundingClientRect(), s = W / r.width, mx = (ev.clientX - r.left) * s, my = (ev.clientY - r.top) * s;
-            var best = -1, bd = 22;
+            var best = -1, bd = Z.tipD;
             nodes.forEach(function (n, i) { var d = Math.hypot(n.x - mx, n.y - my); if (d < bd) { bd = d; best = i; } });
             hover = best;
             if (best < 0) tip.hidden = true;
@@ -156,12 +182,15 @@
                 var n = nodes[best];
                 tip.innerHTML = "<i>" + D.pathogens[n.p] + "</i> × " + T.classes[n.c] + " · <b>" + Math.round(n.v) + " %</b>";
                 tip.hidden = false;
-                tip.style.left = Math.min(ev.clientX - r.left + 14, r.width - 260) + "px";
+                tip.style.left = Math.max(4, Math.min(ev.clientX - r.left + 14, r.width - tip.offsetWidth - 4)) + "px";
                 tip.style.top = (ev.clientY - r.top + 14) + "px";
             }
             draw();
-        });
+        }
+        cv.addEventListener("pointermove", function (ev) { if (ev.pointerType === "mouse") pick(ev); });
+        cv.addEventListener("pointerdown", pick);
         cv.addEventListener("mouseleave", function () { hover = -1; tip.hidden = true; draw(); });
+        window.addEventListener("resize", function () { if (layout()) { hover = -1; tip.hidden = true; draw(); } });
 
         function setYear(v) {
             year = +v; yrEl.textContent = year; slider.value = year;

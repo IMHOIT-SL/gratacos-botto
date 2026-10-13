@@ -157,6 +157,8 @@ def gather():
     imp = set()
     collect(impact._layout("en"), imp)
     pages["impact"] = imp
+    import live
+    pages["live"] = set(live.STRINGS)
     page("bibliometrics", bibliometrics)
     page("antimetabolic", antimetabolic)
     page("methods", methods)

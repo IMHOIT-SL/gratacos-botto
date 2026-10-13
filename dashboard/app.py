@@ -170,6 +170,11 @@ def update_nav(pathname):
     return links, _lang_buttons(lang)
 
 
+# /live: phone-first audience page (plain Flask route, outside the Dash shell)
+import live  # noqa: E402
+live.register(server)
+
+
 if __name__ == "__main__":
     app.run(
         debug=os.environ.get("DEBUG", "true").lower() == "true",
